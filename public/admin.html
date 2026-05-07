@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard - UniConnect</title>
+
+  <!-- Materialize -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+  <!-- Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    body {
+      background: #f5f7fb;
+    }
+
+    .sidebar {
+      height: 100vh;
+      background: #1e2a38;
+      padding-top: 20px;
+    }
+
+    .sidebar a {
+      color: #fff;
+      display: block;
+      padding: 12px 20px;
+    }
+
+    .sidebar a:hover {
+      background: #2c3e50;
+    }
+
+    .content {
+      padding: 20px;
+    }
+
+    .card {
+      border-radius: 12px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="row" style="margin:0">
+
+  <!-- SIDEBAR -->
+  <div class="col s12 m3 l2 sidebar">
+    <h5 class="white-text center">Admin</h5>
+
+    <a href="#events">Events</a>
+    <a href="#resources">Reported Resources</a>
+    <a href="#users">Users</a>
+    <a href="#threads">Threads</a>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="col s12 m9 l10 content">
+
+    <h4>Dashboard</h4>
+
+    <!-- EVENTS -->
+    <div id="events" class="section">
+      <h5>Manage Events</h5>
+
+      <table class="highlight">
+        <thead>
+          <tr>
+            <th>Event</th>
+            <th>Location</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>Career Fair</td>
+            <td>RMIT</td>
+            <td>12 May</td>
+            <td>
+              <a class="btn-small blue">Edit</a>
+              <a class="btn-small red">Delete</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- REPORTED RESOURCES -->
+    <div id="resources" class="section">
+      <h5>Reported Resources</h5>
+
+      <table class="highlight">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>University</th>
+            <th>Reason</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>Math Notes</td>
+            <td>Monash</td>
+            <td>Spam</td>
+            <td>
+              <a class="btn-small green">Keep</a>
+              <a class="btn-small red">Delete</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- USERS -->
+    <div id="users" class="section">
+      <h5>User Management</h5>
+
+      <table class="highlight">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>John Doe</td>
+            <td>john@email.com</td>
+            <td>Active</td>
+            <td>
+              <a class="btn-small orange">Block</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- THREADS -->
+    <div id="threads" class="section">
+      <h5>Thread Moderation</h5>
+
+      <table class="highlight">
+        <thead>
+          <tr>
+            <th>Thread</th>
+            <th>Replies</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>Exam Discussion</td>
+            <td>14</td>
+            <td>Active</td>
+            <td>
+              <a class="btn-small red">Delete</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+</body>
+</html>
