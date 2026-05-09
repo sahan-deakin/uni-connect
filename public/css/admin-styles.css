@@ -1,1 +1,26 @@
 /* Admin Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+.admin-container {
+    display: flex;
+    min-height: 100vh;
+}
+.admin-sidebar {
+    width: 250px;
+    background-color: #333;
+    color: white;
+    padding: 20px;
+}
+.admin-sidebar h2 {
+    margin-top: 0;
+}
+.admin-sidebar a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    margin: 10px 0;
+}
