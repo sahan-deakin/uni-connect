@@ -24,9 +24,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // 3) Routes
-const sampleRoute = require('./routes/sampleRoute');
+const sampleRoute    = require('./routes/sampleRoute');
+const dashboardRoute = require('./routes/dashboardRoute');
 
-app.use('/api/samples', sampleRoute);
+app.use('/api/samples',   sampleRoute);
+app.use('/api/dashboard', dashboardRoute);
 
 // Health check
 app.get('/health', (req, res) => {
