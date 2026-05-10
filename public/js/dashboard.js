@@ -50,6 +50,7 @@ function updateNotifBadge(count) {
 // Renderers 
 
 function renderWelcome(student) {
+  console.log('Rendering welcome for student:', student.name);
   document.getElementById('student-name').textContent = student.name.split(' ')[0];
   document.getElementById('nav-student-name').textContent = student.name;
   document.getElementById('student-course').textContent = student.course;
@@ -200,7 +201,7 @@ function renderTracker(data) {
 
 }
 
-// ── Actions ───────────────────────────────────────────────────────────────────
+//Actions
 
 async function markRead(notifId, el) {
   if (!el.classList.contains('unread')) return;
@@ -221,7 +222,7 @@ async function markAllRead() {
   updateNotifBadge(0);
 }
 
-// ── Real-time socket ──────────────────────────────────────────────────────────
+//Real-time socket
 
 function connectSocket() {
   const socket = io();
