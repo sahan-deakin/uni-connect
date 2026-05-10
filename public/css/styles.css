@@ -58,6 +58,39 @@ body {
   color: var(--text);
 }
 
+/* ── Navbar (identical to index) ───────────────────────────────────── */
+.nav-custom {
+  background: var(--navy) !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+  height: 64px;
+  line-height: 64px;
+}
+.nav-custom .brand-logo {
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: var(--white);
+  letter-spacing: -0.5px;
+}
+.nav-custom ul a {
+  color: rgba(255,255,255,0.85);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color .2s;
+}
+.nav-custom ul a:hover { color: var(--accent); background: transparent !important; }
+.nav-custom ul li.active > a { color: var(--accent); }
+.btn-primary {
+  background: var(--teal) !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  letter-spacing: .3px !important;
+  padding: 0 22px !important;
+  box-shadow: none !important;
+  transition: background .2s, transform .15s !important;
+}
+.btn-primary:hover { background: var(--teal-lt) !important; transform: translateY(-1px); }
+
+
 /* HERO */
 .hero {
   padding: 80px 0;
