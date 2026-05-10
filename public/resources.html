@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Resources | UniConnect Victoria</title>
+
+  <!-- Materialize -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+
+</head>
+
+<body>
+
+<!-- ── NAVBAR ────────────────────────────────────────────────────────────── -->
+<nav class="nav-custom">
+  <div class="container nav-wrapper">
+    <a href="./index.html" class="brand-logo">UniConnect</a>
+    <a href="#" data-target="mobile-menu" class="sidenav-trigger">
+      <i class="material-icons">menu</i>
+    </a>
+    <ul class="right hide-on-med-and-down">
+      <li><a href="./index.html#features">Features</a></li>
+      <li><a href="./index.html#how">How it works</a></li>
+      <li class="active"><a href="./resources.html">Resources</a></li>
+      <li><a href="./index.html#cta">Get Started</a></li>
+      <li><a class="btn btn-primary modal-trigger" href="#upload-modal">Upload</a></li>
+    </ul>
+  </div>
+</nav>
+
+<ul class="sidenav" id="mobile-menu">
+  <li><a href="./index.html#features">Features</a></li>
+  <li><a href="./index.html#how">How it works</a></li>
+  <li><a href="./resources.html">Resources</a></li>
+  <li><a href="./index.html#cta">Get Started</a></li>
+</ul>
+
+<!-- ── PAGE HERO ─────────────────────────────────────────────────────────── -->
+<section class="page-hero">
+  <div class="container hero-inner">
+    <div class="row" style="margin-bottom:0;">
+      <div class="col s12 l7">
+        <span class="tag">Academic Library</span>
+        <h1>Find the resources<br>you need to <span>succeed.</span></h1>
+        <p>Curriculum-mapped study materials shared by students across Victoria. Filtered, rated, and peer-validated.</p>
+        <div class="hero-stats">
+          <div class="stat"><strong>2,400+</strong><span>Resources shared</span></div>
+          <div class="stat"><strong>38</strong><span>Unit codes</span></div>
+          <div class="stat"><strong>6</strong><span>Universities</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SEARCH BAR (overlaps hero) ───────────────────────────────────────── -->
+<div class="container" style="position:relative; z-index:10;">
+  <div class="search-bar-wrap">
+    <div class="search-input-wrap" style="flex:2;">
+      <i class="material-icons">search</i>
+      <input id="search-input" type="text" placeholder="Search resources, topics, unit codes…" autocomplete="off">
+    </div>
+    <select class="filter-select" id="filter-type" onchange="applyFilters()">
+      <option value="">All types</option>
+      <option value="Notes">Notes</option>
+      <option value="Past Exam">Past Exam</option>
+      <option value="Slides">Slides</option>
+      <option value="Video Link">Video Link</option>
+      <option value="Textbook">Textbook</option>
+      <option value="Other">Other</option>
+    </select>
+    <select class="filter-select" id="filter-uni" onchange="applyFilters()">
+      <option value="">All universities</option>
+      <option value="Deakin">Deakin</option>
+      <option value="Monash">Monash</option>
+      <option value="RMIT">RMIT</option>
+      <option value="Melbourne">Melbourne</option>
+      <option value="Swinburne">Swinburne</option>
+      <option value="La Trobe">La Trobe</option>
+    </select>
+    <button class="search-btn" onclick="applyFilters()">
+      <i class="material-icons" style="font-size:1.1rem;">search</i>
+      Search
+    </button>
+  </div>
+</div>
+
+<!--Body to show list of resources, search bar and others-->
+<div class="resources-body">
+  <div class="container">
+    <div class="row">
+
+      <!-- Sidebar -->
+      <div class="col s12 l3">
+        <div class="sidebar">
+
+          <!-- Filter by unit code -->
+          <div class="filter-panel">
+            <h6>Unit Code</h6>
+            <div class="filter-chip-group" id="unit-chips">
+              <span class="filter-chip active" data-unit="" onclick="setUnit(this, '')">All</span>
+              <span class="filter-chip" data-unit="SIT221" onclick="setUnit(this,'SIT221')">SIT221</span>
+              <span class="filter-chip" data-unit="SIT232" onclick="setUnit(this,'SIT232')">SIT232</span>
+              <span class="filter-chip" data-unit="SIT202" onclick="setUnit(this,'SIT202')">SIT242</span>
+              <span class="filter-chip" data-unit="SIT374" onclick="setUnit(this,'SIT374')">SIT523</span>
+              <span class="filter-chip" data-unit="SIT715" onclick="setUnit(this,'SIT715')">SIT725</span>
+              <span class="filter-chip" data-unit="SIT225" onclick="setUnit(this,'SIT225')">SIT225</span>
+            </div>
+
+            <hr class="filter-divider">
+            <h6>Resource type</h6>
+            <div class="filter-chip-group">
+              <span class="filter-chip" onclick="setType(this,'')"><i class="material-icons" style="font-size:.9rem;">apps</i>All</span>
+              <span class="filter-chip" onclick="setType(this,'Notes')"><i class="material-icons" style="font-size:.9rem;">description</i>Notes</span>
+              <span class="filter-chip" onclick="setType(this,'Past Exam')"><i class="material-icons" style="font-size:.9rem;">quiz</i>Past Exam</span>
+              <span class="filter-chip" onclick="setType(this,'Slides')"><i class="material-icons" style="font-size:.9rem;">slideshow</i>Slides</span>
+              <span class="filter-chip" onclick="setType(this,'Video Link')"><i class="material-icons" style="font-size:.9rem;">play_circle</i>Video</span>
+              <span class="filter-chip" onclick="setType(this,'Textbook')"><i class="material-icons" style="font-size:.9rem;">menu_book</i>Textbook</span>
+            </div>
+
+            <hr class="filter-divider">
+            <h6>Sort by</h6>
+            <div class="filter-chip-group">
+              <span class="filter-chip active" onclick="setSort(this,'score')">Top rated</span>
+              <span class="filter-chip" onclick="setSort(this,'newest')">Newest</span>
+              <span class="filter-chip" onclick="setSort(this,'upvotes')">Most upvoted</span>
+            </div>
+          </div>
+
+          <!-- Upload CTA -->
+          <div class="upload-cta-card">
+            <h6>Share your notes</h6>
+            <p>Help fellow students by uploading your study materials, past papers, or helpful links.</p>
+            <a href="#upload-modal" class="btn-upload modal-trigger">
+              <i class="material-icons" style="font-size:1.1rem;">cloud_upload</i>
+              Upload a Resource
+            </a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Resource list -->
+      <div class="col s12 l9">
+
+        <div class="results-header">
+          <p class="results-count">Showing <strong id="result-count">12</strong> resources</p>
+          <select class="sort-select" id="sort-inline" onchange="setSort(null, this.value)">
+            <option value="score">Top rated</option>
+            <option value="newest">Newest first</option>
+            <option value="upvotes">Most upvoted</option>
+          </select>
+        </div>
+
+        <!-- Resource cards -->
+        <div id="resource-list"></div>
+
+        <div class="empty-state" id="empty-state">
+          <i class="material-icons">search_off</i>
+          <h5>No resources found</h5>
+          <p>Try adjusting your search or filters, or be the first to upload one!</p>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-wrap" id="pagination"></div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--UPLOAD MODAL-->
+<div id="upload-modal" class="modal">
+  <div class="modal-content">
+    <h4>Upload a Resource</h4>
+    <p class="modal-sub">Share study materials with students across Victoria.</p>
+
+    <!-- Upload method toggle -->
+    <div class="method-toggle">
+      <button class="method-tab active" id="tab-file" onclick="switchMethod('file')">
+        <i class="material-icons">upload_file</i> Upload file
+      </button>
+      <button class="method-tab" id="tab-url" onclick="switchMethod('url')">
+        <i class="material-icons">link</i> Paste URL
+      </button>
+    </div>
+
+    <div class="row" style="margin-bottom:0;">
+
+      <div class="input-field col s12">
+        <input id="m-title" type="text" class="validate" required>
+        <label for="m-title">Resource title *</label>
+      </div>
+
+      <div class="input-field col s12 m6">
+        <input id="m-unit" type="text" placeholder="e.g. SIT221" class="validate" required
+               oninput="this.value=this.value.toUpperCase()">
+        <label for="m-unit" class="active">Unit code *</label>
+      </div>
+
+      <div class="input-field col s12 m6">
+        <select id="m-type">
+          <option value="" disabled selected>Choose type</option>
+          <option>Notes</option>
+          <option>Past Exam</option>
+          <option>Slides</option>
+          <option>Video Link</option>
+          <option>Textbook</option>
+          <option>Other</option>
+        </select>
+        <label>Resource type *</label>
+      </div>
+
+      <div class="input-field col s12">
+        <textarea id="m-desc" class="materialize-textarea" style="min-height:72px;"></textarea>
+        <label for="m-desc">Description (min 20 characters) *</label>
+      </div>
+
+      <div class="input-field col s12" id="panel-file">
+        <div class="file-field">
+          <div class="btn" style="background:var(--teal);">
+            <span>Browse</span>
+            <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.zip">
+          </div>
+          <div class="file-path-wrapper">
+            <input class="file-path" type="text" placeholder="PDF, DOCX, PPTX, ZIP — max 10 MB">
+          </div>
+        </div>
+      </div>
+
+      <div class="input-field col s12" id="panel-url" style="display:none;">
+        <input id="m-url" type="url" placeholder="https://…">
+        <label for="m-url" class="active">Resource URL *</label>
+      </div>
+
+    </div>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="btn btn-cancel modal-close waves-effect">Cancel</a>
+    <a href="#!" class="btn btn-submit waves-effect waves-light" onclick="submitResource()">
+      <i class="material-icons left">cloud_upload</i>Upload
+    </a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container center">
+    <p>© 2026 UniConnect Victoria &nbsp;·&nbsp; <a href="#">Privacy</a> &nbsp;·&nbsp; <a href="#">Terms</a></p>
+  </div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+<script>
+//applyfilters()
+//submitResource()
+
+</script>
+
+</body>
+</html>
