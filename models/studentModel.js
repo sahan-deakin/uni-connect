@@ -9,8 +9,7 @@ const studentSchema = new mongoose.Schema({
   unitCodes: [String],
   skills: [String],
   interests: [String],
-  bio: String,
-  connections: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Student' }]
+  bio: String
 }, { timestamps: true });
 
 module.exports = mongoose.model('Student', studentSchema);

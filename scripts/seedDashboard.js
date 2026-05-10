@@ -7,9 +7,6 @@ const Notification = require('../models/notificationModel');
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/uni-connect';
 
-// Dates relative to seed baseline 2026-05-10
-const d = (iso) => new Date(iso);
-
 async function seed() {
   await mongoose.connect(MONGO_URI);
   console.log('Connected. Clearing existing data...');
@@ -22,7 +19,6 @@ async function seed() {
     Notification.deleteMany({})
   ]);
 
-  // ── Students ────────────────────────────────────────────────────────────────
   const studentDocs = await Student.insertMany([
     {
       name: 'Alex Johnson',
@@ -30,55 +26,10 @@ async function seed() {
       university: 'Deakin University',
       course: 'Bachelor of Computer Science',
       year: 2,
-      unitCodes: ['SIT374', 'SIT315', 'SIT764'],
-      skills: ['JavaScript', 'Python', 'Machine Learning'],
-      interests: ['AI', 'Web Development', 'Data Science'],
-      bio: 'Second year CS student passionate about AI and web development.',
-      connections: []
-    },
-    {
-      name: 'Sarah Chen',
-      email: 'sarah.chen@deakin.edu.au',
-      university: 'Deakin University',
-      course: 'Bachelor of Computer Science',
-      year: 2,
-      unitCodes: ['SIT374', 'SIT764'],
-      skills: ['Python', 'Data Analysis', 'Machine Learning'],
-      interests: ['AI', 'Data Science', 'Research'],
-      bio: 'Aspiring data scientist with a love for Python and ML.'
-    },
-    {
-      name: 'Marcus Williams',
-      email: 'marcus.williams@deakin.edu.au',
-      university: 'Deakin University',
-      course: 'Bachelor of Information Technology',
-      year: 3,
-      unitCodes: ['SIT315', 'SIT782'],
-      skills: ['Java', 'Cloud Computing', 'Cybersecurity'],
-      interests: ['Cloud', 'Security', 'Networking'],
-      bio: 'IT professional-in-training focused on cloud and security.'
-    },
-    {
-      name: 'Priya Sharma',
-      email: 'priya.sharma@deakin.edu.au',
-      university: 'Deakin University',
-      course: 'Bachelor of Computer Science',
-      year: 2,
-      unitCodes: ['SIT764', 'SIT313'],
-      skills: ['React', 'Node.js', 'JavaScript'],
-      interests: ['Web Development', 'UI/UX', 'Startups'],
-      bio: 'Full-stack developer building the web of tomorrow.'
-    },
-    {
-      name: "James O'Brien",
-      email: 'james.obrien@deakin.edu.au',
-      university: 'Deakin University',
-      course: 'Bachelor of Data Science',
-      year: 3,
-      unitCodes: ['SIT374', 'SIT313'],
-      skills: ['R', 'Statistics', 'Machine Learning'],
-      interests: ['Data Science', 'AI', 'Research'],
-      bio: "Data science enthusiast with a strong statistics background."
+      unitCodes: ['SIT123', 'SIT234', 'SIT764'],
+      skills: ['JavaScript', 'Python'],
+      interests: ['AI', 'Web Development'],
+      bio: 'Second year CS student. Into AI stuff and building web apps on the side.'
     },
     {
       name: 'Emma Wilson',
@@ -86,260 +37,208 @@ async function seed() {
       university: 'Deakin University',
       course: 'Bachelor of Computer Science',
       year: 2,
-      unitCodes: ['SIT315', 'SIT764'],
-      skills: ['Python', 'DevOps', 'Cloud Computing'],
-      interests: ['Cloud', 'AI', 'Open Source'],
-      bio: 'DevOps enthusiast interested in cloud infrastructure and AI.'
+      unitCodes: ['SIT234', 'SIT764'],
+      skills: ['Python', 'Docker'],
+      interests: ['Cloud', 'Open Source'],
+      bio: 'Mostly interested in DevOps and cloud stuff. Love automating things.'
+    },
+    {
+      name: 'Sarah Chen',
+      email: 'sarah.chen@deakin.edu.au',
+      university: 'Deakin University',
+      course: 'Bachelor of Computer Science',
+      year: 3,
+      unitCodes: ['SIT123', 'SIT234'],
+      skills: ['Java', 'SQL'],
+      interests: ['Databases', 'Backend'],
+      bio: 'Final year, trying to survive SIT123. Looking for internships.'
+    },
+    {
+      name: 'Marcus Williams',
+      email: 'marcus.williams@deakin.edu.au',
+      university: 'Deakin University',
+      course: 'Bachelor of Software Engineering',
+      year: 2,
+      unitCodes: ['SIT234', 'SIT764'],
+      skills: ['C++', 'Python'],
+      interests: ['Systems', 'HPC'],
+      bio: 'Big fan of low-level programming. Currently obsessed with parallel computing.'
+    },
+    {
+      name: 'Sahan Rathnayake',
+      email: 'sahan.r@deakin.edu.au',
+      university: 'Deakin University',
+      course: 'Bachelor of Computer Science',
+      year: 1,
+      unitCodes: ['SIT123'],
+      skills: ['Python'],
+      interests: ['Machine Learning', 'Data Science'],
+      bio: 'First year, still figuring things out. Really want to get into ML.'
     }
   ]);
 
-  const byName = (name) => studentDocs.find(s => s.name === name);
-  const alex   = byName('Alex Johnson');
-  const sarah  = byName('Sarah Chen');
-  const marcus = byName('Marcus Williams');
-  const priya  = byName('Priya Sharma');
-  const james  = byName("James O'Brien");
-  const emma   = byName('Emma Wilson');
+  const alex   = studentDocs.find(s => s.name === 'Alex Johnson');
+  const emma   = studentDocs.find(s => s.name === 'Emma Wilson');
+  const sarah  = studentDocs.find(s => s.name === 'Sarah Chen');
+  const marcus = studentDocs.find(s => s.name === 'Marcus Williams');
+  const sahan  = studentDocs.find(s => s.name === "Sahan Rathnayake");
 
-  // Set Alex's existing connections
-  await Student.findByIdAndUpdate(alex._id, { connections: [emma._id, priya._id] });
-
-  // ── Resources ───────────────────────────────────────────────────────────────
   await Resource.insertMany([
     {
-      title: 'SIT374 Week 3 Project Management Notes',
-      description: 'Comprehensive notes covering agile planning and sprint reviews.',
-      type: 'notes', unitCode: 'SIT374',
+      title: 'SIT123 Week 3 Notes - Agile & Sprints',
+      description: 'My notes from week 3 lectures. Covers sprint planning and reviews. Might have a few gaps but should be useful.',
+      type: 'notes', unitCode: 'SIT123',
       uploadedBy: sarah._id, tags: ['agile', 'planning'],
-      downloadCount: 47, createdAt: d('2026-05-07')
+      downloadCount: 47, createdAt: new Date('2026-05-07')
     },
     {
-      title: 'Introduction to Parallel Computing — SIT315 Guide',
-      description: 'Overview of threading models, OpenMP, and MPI patterns.',
-      type: 'guide', unitCode: 'SIT315',
+      title: 'SIT234 Parallel Computing Quick Guide',
+      description: 'Put this together when studying for the mid-sem. Covers OpenMP basics and a bit of MPI.',
+      type: 'guide', unitCode: 'SIT234',
       uploadedBy: marcus._id, tags: ['parallel', 'OpenMP'],
-      downloadCount: 31, createdAt: d('2026-05-05')
+      downloadCount: 31, createdAt: new Date('2026-05-05')
     },
     {
-      title: 'SIT764 Capstone Project Guidelines 2026',
-      description: 'Official requirements and marking rubric for the capstone project.',
+      title: 'SIT764 Capstone Requirements 2026',
+      description: 'Official rubric from the unit guide. Pasted it here so its easier to find.',
       type: 'guide', unitCode: 'SIT764',
-      uploadedBy: alex._id, tags: ['capstone', 'guidelines'],
-      downloadCount: 28, createdAt: d('2026-05-03')
+      uploadedBy: alex._id, tags: ['capstone', 'rubric'],
+      downloadCount: 28, createdAt: new Date('2026-05-03')
     },
     {
-      title: 'Machine Learning Algorithms Summary',
-      description: 'Quick-reference cheat sheet for common ML algorithms with pros/cons.',
-      type: 'notes', unitCode: 'SIT374',
-      uploadedBy: james._id, tags: ['ML', 'algorithms'],
-      downloadCount: 62, createdAt: d('2026-05-08')
+      title: 'ML Algorithms Cheat Sheet',
+      description: 'Quick summary of common algorithms - when to use what, pros/cons. Mostly from lecture slides and YouTube.',
+      type: 'notes', unitCode: 'SIT123',
+      uploadedBy: sahan._id, tags: ['ML', 'algorithms'],
+      downloadCount: 62, createdAt: new Date('2026-05-08')
     },
     {
-      title: 'JavaScript Async/Await Patterns',
-      description: 'Practical guide to async programming patterns in modern JavaScript.',
-      type: 'notes', unitCode: 'SIT313',
-      uploadedBy: priya._id, tags: ['JavaScript', 'async'],
-      downloadCount: 19, createdAt: d('2026-05-09')
-    },
-    {
-      title: 'Cloud Architecture Fundamentals',
-      description: 'AWS and Azure patterns for scalable cloud system design.',
-      type: 'guide', unitCode: 'SIT315',
-      uploadedBy: emma._id, tags: ['cloud', 'AWS', 'Azure'],
-      downloadCount: 25, createdAt: d('2026-05-06')
-    },
-    {
-      title: 'SIT374 Data Structures Past Exam 2025',
-      description: 'Full past exam with worked solutions — great for revision.',
-      type: 'past-exam', unitCode: 'SIT374',
+      title: 'SIT123 Past Exam 2025',
+      description: 'Found this on the library portal. Has worked answers for most questions.',
+      type: 'past-exam', unitCode: 'SIT123',
       uploadedBy: sarah._id, tags: ['exam', 'revision'],
-      downloadCount: 89, createdAt: d('2026-05-04')
-    },
-    {
-      title: 'Python for Data Science Cheat Sheet',
-      description: 'Essential pandas, numpy, and matplotlib snippets for data work.',
-      type: 'notes', unitCode: 'SIT374',
-      uploadedBy: alex._id, tags: ['Python', 'pandas', 'data'],
-      downloadCount: 43, createdAt: d('2026-05-09')
+      downloadCount: 89, createdAt: new Date('2026-05-04')
     }
   ]);
 
-  // ── Events ──────────────────────────────────────────────────────────────────
   const events = await Event.insertMany([
     {
       title: 'Deakin Tech Networking Night',
-      description: 'Connect with industry professionals and fellow students over canapés.',
+      description: 'Meet people from industry and other students. Free food apparently.',
       type: 'networking', organizer: 'Deakin IT Society',
-      date: d('2026-05-15'), location: 'Geelong Waterfront Campus',
-      tags: ['networking', 'industry'], unitCodes: ['SIT764'],
-      registeredStudents: [alex._id, sarah._id, priya._id]
+      date: new Date('2026-05-15'), location: 'Geelong Waterfront Campus',
+      tags: ['networking'], unitCodes: ['SIT764'],
+      registeredStudents: [alex._id, sarah._id]
     },
     {
-      title: 'Machine Learning Workshop',
-      description: 'Hands-on session covering supervised learning and model evaluation.',
+      title: 'ML Workshop - Supervised Learning',
+      description: 'Hands-on session, bring your laptop. Going through model training and evaluation.',
       type: 'workshop', organizer: 'Deakin AI Club',
-      date: d('2026-05-12'), location: 'Online', isOnline: true,
-      tags: ['Machine Learning', 'AI', 'Data Science'], unitCodes: ['SIT374'],
-      registeredStudents: [alex._id, james._id, emma._id]
-    },
-    {
-      title: 'Cloud Computing Seminar — SIT315',
-      description: 'Guest lecture on modern cloud-native architecture patterns.',
-      type: 'academic', organizer: 'School of IT',
-      date: d('2026-05-20'), location: 'Melbourne Burwood Campus',
-      tags: ['Cloud', 'AWS'], unitCodes: ['SIT315'],
-      registeredStudents: [marcus._id, emma._id]
+      date: new Date('2026-05-12'), location: 'Online', isOnline: true,
+      tags: ['Machine Learning', 'AI'], unitCodes: ['SIT123'],
+      registeredStudents: [alex._id, sahan._id, emma._id]
     },
     {
       title: 'Student Hackathon 2026',
-      description: '48-hour hackathon open to all Deakin students. Build something amazing!',
+      description: '48 hours to build something. Open to all students. Teams of 2-4.',
       type: 'competition', organizer: 'Deakin Innovation Hub',
-      date: d('2026-06-01'), location: 'Melbourne Burwood Campus',
-      tags: ['hackathon', 'innovation'],
-      registeredStudents: [priya._id, sarah._id]
+      date: new Date('2026-06-01'), location: 'Melbourne Burwood Campus',
+      tags: ['hackathon'],
+      registeredStudents: [alex._id, sarah._id]
     },
     {
       title: 'IT & Engineering Career Fair',
-      description: 'Meet 40+ employers actively hiring graduates and interns.',
+      description: 'Heaps of companies coming. Good chance to drop your resume and chat to people.',
       type: 'career', organizer: 'Deakin Careers',
-      date: d('2026-05-25'), location: 'Melbourne Burwood Campus',
-      tags: ['careers', 'internship', 'graduate'],
-      registeredStudents: [alex._id, sarah._id, marcus._id, priya._id]
+      date: new Date('2026-05-25'), location: 'Melbourne Burwood Campus',
+      tags: ['careers', 'internship'],
+      registeredStudents: [alex._id, sarah._id, marcus._id]
     },
     {
-      title: 'Python Study Group — SIT374',
-      description: 'Weekly study group to work through SIT374 assignments together.',
+      title: 'SIT123 Study Group',
+      description: 'Weekly meetup to work through assignments. Jump in if you want.',
       type: 'study', organizer: 'Student-led',
-      date: d('2026-05-11'), location: 'Online', isOnline: true,
-      tags: ['Python', 'Data Science'], unitCodes: ['SIT374'],
-      registeredStudents: [alex._id, james._id, sarah._id]
+      date: new Date('2026-05-11'), location: 'Online', isOnline: true,
+      tags: ['SIT123'], unitCodes: ['SIT123'],
+      registeredStudents: [alex._id, sahan._id, sarah._id]
     }
   ]);
 
-  const mlWorkshop = events.find(e => e.title === 'Machine Learning Workshop');
+  const mlWorkshop = events.find(e => e.title === 'ML Workshop - Supervised Learning');
 
-  // ── Forum Posts ─────────────────────────────────────────────────────────────
   await ForumPost.insertMany([
     {
-      title: 'Struggling with SIT374 project scope — any tips?',
-      content: 'Our team keeps gold-plating features. How do you keep scope under control?',
-      author: alex._id, unitCode: 'SIT374', tags: ['project', 'agile'],
-      replies: 12, likes: 8, views: 94, createdAt: d('2026-05-06')
+      title: 'Anyone else struggling with the SIT123 project scope?',
+      content: 'Our team keeps adding stuff we don\'t need. How do you stop that from happening? We\'re already behind.',
+      author: alex._id, unitCode: 'SIT123', tags: ['project', 'agile'],
+      replies: 12, likes: 8, views: 94, createdAt: new Date('2026-05-06')
     },
     {
-      title: 'Best resources for parallel computing (SIT315)?',
-      content: 'Looking for good references beyond the lecture slides for OpenMP.',
-      author: marcus._id, unitCode: 'SIT315', tags: ['parallel', 'OpenMP'],
-      replies: 8, likes: 5, views: 61, createdAt: d('2026-05-07')
+      title: 'Good SIT234 resources beyond the slides?',
+      content: 'The lecture slides aren\'t enough for OpenMP. Anyone found anything actually helpful?',
+      author: marcus._id, unitCode: 'SIT234', tags: ['parallel', 'OpenMP'],
+      replies: 8, likes: 5, views: 61, createdAt: new Date('2026-05-07')
     },
     {
-      title: 'Capstone team formation — looking for ML enthusiasts',
-      content: 'Forming a SIT764 capstone team. Want to build an AI-powered study assistant.',
-      author: emma._id, unitCode: 'SIT764', tags: ['capstone', 'Machine Learning', 'AI'],
-      replies: 15, likes: 11, views: 132, createdAt: d('2026-05-05')
+      title: 'Looking for SIT764 capstone team members',
+      content: 'Want to build something ML related. If you\'re interested flick me a message. Need 1-2 more people.',
+      author: emma._id, unitCode: 'SIT764', tags: ['capstone', 'team'],
+      replies: 15, likes: 11, views: 132, createdAt: new Date('2026-05-05')
     },
     {
-      title: 'Help with gradient descent implementation in Python',
-      content: 'My loss curve keeps exploding after a few epochs. Learning rate issue?',
-      author: james._id, unitCode: 'SIT374', tags: ['Python', 'Machine Learning'],
-      replies: 6, likes: 9, views: 48, createdAt: d('2026-05-08')
+      title: 'My loss curve keeps exploding - help?',
+      content: 'Trying to implement gradient descent from scratch for SIT123. Loss goes to NaN after like 10 epochs. Is it the learning rate?',
+      author: sahan._id, unitCode: 'SIT123', tags: ['Python', 'ML'],
+      replies: 6, likes: 9, views: 48, createdAt: new Date('2026-05-08')
     },
     {
-      title: 'React vs Vue.js for the capstone project?',
-      content: 'Weighing up the two for our SIT764 project. What would you choose and why?',
-      author: priya._id, unitCode: 'SIT764', tags: ['React', 'Web Development'],
-      replies: 20, likes: 14, views: 187, createdAt: d('2026-05-04')
-    },
-    {
-      title: 'SIT315 Assignment 2 — task clarification thread',
-      content: 'Posting the tutor\'s email clarification here so everyone has it.',
-      author: sarah._id, unitCode: 'SIT315', tags: ['assignment'],
-      replies: 11, likes: 7, views: 73, createdAt: d('2026-05-09')
-    },
-    {
-      title: 'Internship opportunities for CS students at Deakin',
-      content: 'Compiling a list of companies currently hiring Deakin CS interns.',
-      author: alex._id, unitCode: null, tags: ['internship', 'careers'],
-      replies: 9, likes: 16, views: 210, createdAt: d('2026-05-03')
-    },
-    {
-      title: 'Scikit-learn vs TensorFlow — which to learn first?',
-      content: 'If you\'re new to ML, should you start with sklearn or go straight to TF?',
-      author: james._id, unitCode: 'SIT374', tags: ['Machine Learning', 'Python'],
-      replies: 7, likes: 5, views: 55, createdAt: d('2026-05-07')
+      title: 'React or Vue for the capstone?',
+      content: 'Can\'t decide between the two for our SIT764 frontend. What would you go with?',
+      author: sarah._id, unitCode: 'SIT764', tags: ['React', 'frontend'],
+      replies: 20, likes: 14, views: 187, createdAt: new Date('2026-05-04')
     }
   ]);
 
-  // ── Notifications for Alex ───────────────────────────────────────────────────
   await Notification.insertMany([
     {
       studentId: alex._id, type: 'forum_reply', read: false,
       title: 'New reply on your post',
-      message: 'Sarah Chen replied: "Try timeboxing each feature to 2 hours max..."',
-      createdAt: d('2026-05-10T08:00:00')
-    },
-    {
-      studentId: alex._id, type: 'connection_request', read: false,
-      title: 'Connection request',
-      message: 'Marcus Williams wants to connect with you!',
-      createdAt: d('2026-05-10T05:00:00')
+      message: 'Sarah Chen replied to "Anyone else struggling with the SIT123 project scope?"',
+      createdAt: new Date('2026-05-10T08:00:00')
     },
     {
       studentId: alex._id, type: 'event', read: false,
-      title: 'Event tomorrow',
-      message: `Machine Learning Workshop starts tomorrow — don't forget to join!`,
-      createdAt: d('2026-05-10T02:00:00')
+      title: 'ML Workshop is tomorrow',
+      message: 'Don\'t forget - ML Workshop starts tomorrow at 6pm.',
+      createdAt: new Date('2026-05-10T02:00:00')
     },
     {
       studentId: alex._id, type: 'resource', read: false,
-      title: 'New resource for SIT374',
-      message: 'James O\'Brien uploaded: "Machine Learning Algorithms Summary"',
-      createdAt: d('2026-05-09T20:00:00')
-    },
-    {
-      studentId: alex._id, type: 'forum_reply', read: false,
-      title: 'Reply on gradient descent post',
-      message: "James O'Brien replied: \"Check out scikit-learn's SGD first — much easier...\"",
-      createdAt: d('2026-05-09T10:00:00')
+      title: 'New resource for SIT123',
+      message: 'Sahan Rathnayake uploaded: ML Algorithms Cheat Sheet',
+      createdAt: new Date('2026-05-09T20:00:00')
     },
     {
       studentId: alex._id, type: 'forum_reply', read: true,
-      title: 'Priya liked your post',
-      message: 'Priya Sharma liked your internship opportunities post.',
-      createdAt: d('2026-05-09T09:00:00')
+      title: 'Reply on your gradient descent post',
+      message: 'Sahan Rathnayake replied to your post about the loss curve.',
+      createdAt: new Date('2026-05-09T10:00:00')
     },
     {
       studentId: alex._id, type: 'event', read: true,
-      title: 'Upcoming career fair',
-      message: 'IT & Engineering Career Fair is in 15 days — registration is open!',
-      createdAt: d('2026-05-08T12:00:00')
-    },
-    {
-      studentId: alex._id, type: 'connection_request', read: true,
-      title: 'Connection accepted',
-      message: 'Emma Wilson accepted your connection request. You are now connected!',
-      createdAt: d('2026-05-07T14:00:00')
-    },
-    {
-      studentId: alex._id, type: 'forum_reply', read: true,
-      title: 'Hot discussion in SIT764',
-      message: 'New post: "React vs Vue.js for the capstone?" has 20 replies.',
-      createdAt: d('2026-05-07T08:00:00')
-    },
-    {
-      studentId: alex._id, type: 'resource', read: true,
-      title: 'New SIT315 study materials',
-      message: '2 new resources have been uploaded for your SIT315 unit.',
-      createdAt: d('2026-05-06T16:00:00')
+      title: 'Career fair coming up',
+      message: 'IT & Engineering Career Fair is in 2 weeks. Registrations are open.',
+      createdAt: new Date('2026-05-08T12:00:00')
     }
   ]);
 
-  console.log('✓ Students:      6');
-  console.log('✓ Resources:     8');
-  console.log('✓ Events:        6');
-  console.log('✓ Forum posts:   8');
-  console.log('✓ Notifications: 10');
-  console.log('\nDashboard seed complete! Demo student: alex.johnson@deakin.edu.au');
+  console.log('Seeded:');
+  console.log('  Students:      5');
+  console.log('  Resources:     5');
+  console.log('  Events:        5');
+  console.log('  Forum posts:   5');
+  console.log('  Notifications: 5');
+  console.log('\nDone. Login as: alex.johnson@deakin.edu.au');
 
   await mongoose.connection.close();
 }

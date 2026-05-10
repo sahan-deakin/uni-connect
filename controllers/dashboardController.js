@@ -60,48 +60,6 @@ const getPersonalizedFeed = async (req, res) => {
   }
 };
 
-// Feature 2: Smart Networking Suggestions
-const getNetworkingSuggestions = async (req, res) => {
-  try {
-    const student = await getDemoStudent();
-    if (!student) {
-      return res.status(404).json({ error: 'Demo student not found. Run: npm run seed:dashboard' });
-    }
-
-    const excludeIds = [student._id, ...student.connections];
-    const candidates = await Student.find({ _id: { $nin: excludeIds } });
-
-    const suggestions = candidates
-      .map(s => {
-        const commonUnits = s.unitCodes.filter(u => student.unitCodes.includes(u));
-        const commonSkills = s.skills.filter(sk => student.skills.includes(sk));
-        const commonInterests = s.interests.filter(i => student.interests.includes(i));
-        const score = commonUnits.length * 3 + commonSkills.length * 2 + commonInterests.length;
-        return {
-          _id: s._id,
-          name: s.name,
-          university: s.university,
-          course: s.course,
-          year: s.year,
-          skills: s.skills,
-          interests: s.interests,
-          bio: s.bio,
-          commonUnits,
-          commonSkills,
-          commonInterests,
-          score
-        };
-      })
-      .filter(s => s.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 6);
-
-    res.json({ suggestions });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
 // Feature 3: Real-Time Notifications
 const getNotifications = async (req, res) => {
   try {
@@ -175,7 +133,6 @@ const getTrackerData = async (req, res) => {
         resourcesUploaded: myResources.length,
         eventsRegistered: myEvents.length,
         forumPosts: myPosts.length,
-        connections: student.connections.length,
         totalDownloads
       },
       myResources,
@@ -187,37 +144,11 @@ const getTrackerData = async (req, res) => {
   }
 };
 
-const connectWithStudent = async (req, res) => {
-  try {
-    const { targetId } = req.params;
-    const student = await getDemoStudent();
-    if (!student) return res.status(404).json({ error: 'Demo student not found.' });
-
-    const alreadyConnected = student.connections.map(String).includes(String(targetId));
-    if (!alreadyConnected) {
-      await Student.findByIdAndUpdate(student._id, { $addToSet: { connections: targetId } });
-
-      await Notification.create({
-        studentId: targetId,
-        type: 'connection_request',
-        title: 'New Connection Request',
-        message: `${student.name} wants to connect with you!`
-      });
-    }
-
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
 module.exports = {
   getPersonalizedFeed,
-  getNetworkingSuggestions,
   getNotifications,
   getUnreadCount,
   markNotificationRead,
   markAllRead,
-  getTrackerData,
-  connectWithStudent
+  getTrackerData
 };

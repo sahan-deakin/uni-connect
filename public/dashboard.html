@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dashboard — UniConnect</title>
+  <title>Dashboard - UniConnect</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -70,13 +70,14 @@
   <!-- ── Row 1: Academic Feed + Notifications ─────────────────────────────── -->
   <div class="row">
 
-    <!-- Feature 1: Personalized Academic Feed -->
     <div class="col s12 l8">
+  
+    <!-- Feature 1: Personalized Academic Feed -->
+    <div class="col s12">
       <div class="card dashboard-card">
         <div class="card-content">
           <div class="card-section-header">
             <p class="section-title">
-              <i class="material-icons tiny accent-icon">auto_awesome</i>
               Personalized Academic Feed
             </p>
           </div>
@@ -112,59 +113,11 @@
         </div>
       </div>
     </div>
-
-    <!-- Feature 3: Real-Time Notifications -->
-    <div class="col s12 l4">
-      <div class="card dashboard-card" id="notifications-list-card">
-        <div class="card-content">
-          <div class="card-section-header">
-            <p class="section-title" style="margin:0">
-              <i class="material-icons tiny accent-icon">notifications</i>
-              Notifications
-              <span class="notif-count-chip" id="notif-count-chip" style="display:none">0</span>
-              <span class="polling-indicator" title="Checking for new notifications every 15 s">
-                <span class="polling-dot"></span>
-              </span>
-            </p>
-            <button id="mark-all-read-btn" class="btn-flat btn-small dash-text-btn">Mark all read</button>
-          </div>
-          <div id="notifications-list">
-            <div class="loading-placeholder"><div class="preloader-wrapper small active"><div class="spinner-layer spinner-blue-only"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /row 1 -->
-
-  <!-- ── Row 2: Networking Suggestions ────────────────────────────────────── -->
-  <div class="row">
     <div class="col s12">
       <div class="card dashboard-card">
         <div class="card-content">
           <p class="section-title">
-            <i class="material-icons tiny accent-icon">people</i>
-            Smart Networking Suggestions
-          </p>
-          <p class="section-subtitle">Students who share your units, skills, or interests</p>
-          <div class="row" id="networking-grid" style="margin-bottom:0">
-            <div class="col s12 loading-placeholder">
-              <div class="preloader-wrapper small active"><div class="spinner-layer spinner-blue-only"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div><!-- /row 2 -->
-
-  <!-- ── Row 3: Study & Event Tracker ─────────────────────────────────────── -->
-  <div class="row">
-    <div class="col s12">
-      <div class="card dashboard-card">
-        <div class="card-content">
-          <p class="section-title">
-            <i class="material-icons tiny accent-icon">track_changes</i>
-            Study &amp; Event Tracker
+            My Academic Activity
           </p>
           <p class="section-subtitle">Your academic activity at a glance</p>
 
@@ -172,55 +125,44 @@
           <div class="stats-grid">
             <div class="stat-card">
               <i class="material-icons">description</i>
-              <div class="stat-number" id="stat-resources">—</div>
+              <div class="stat-number" id="stat-resources">-</div>
               <div class="stat-label">Resources Uploaded</div>
             </div>
             <div class="stat-card">
               <i class="material-icons">event</i>
-              <div class="stat-number" id="stat-events">—</div>
+              <div class="stat-number" id="stat-events">-</div>
               <div class="stat-label">Events Registered</div>
             </div>
             <div class="stat-card">
               <i class="material-icons">forum</i>
-              <div class="stat-number" id="stat-posts">—</div>
+              <div class="stat-number" id="stat-posts">-</div>
               <div class="stat-label">Forum Posts</div>
             </div>
             <div class="stat-card">
-              <i class="material-icons">people</i>
-              <div class="stat-number" id="stat-connections">—</div>
-              <div class="stat-label">Connections</div>
-            </div>
-            <div class="stat-card">
               <i class="material-icons">cloud_download</i>
-              <div class="stat-number" id="stat-downloads">—</div>
+              <div class="stat-number" id="stat-downloads">-</div>
               <div class="stat-label">Total Downloads</div>
             </div>
           </div>
 
           <!-- Tracker tabs -->
           <ul class="tabs tracker-tabs" id="tracker-tabs-el">
-            <li class="tab col s3">
+            <li class="tab col s4">
               <a class="active" href="#tracker-resources">
                 <i class="material-icons tiny">description</i>
                 <span class="hide-on-small-only"> My Resources</span>
               </a>
             </li>
-            <li class="tab col s3">
+            <li class="tab col s4">
               <a href="#tracker-events">
                 <i class="material-icons tiny">event</i>
                 <span class="hide-on-small-only"> My Events</span>
               </a>
             </li>
-            <li class="tab col s3">
+            <li class="tab col s4">
               <a href="#tracker-forums">
                 <i class="material-icons tiny">forum</i>
                 <span class="hide-on-small-only"> Forum Activity</span>
-              </a>
-            </li>
-            <li class="tab col s3">
-              <a href="#tracker-network">
-                <i class="material-icons tiny">people</i>
-                <span class="hide-on-small-only"> My Network</span>
               </a>
             </li>
           </ul>
@@ -234,13 +176,37 @@
           <div id="tracker-forums" class="tab-panel">
             <div class="loading-placeholder">Loading your posts...</div>
           </div>
-          <div id="tracker-network" class="tab-panel">
-            <div class="loading-placeholder">Loading your network...</div>
-          </div>
-
         </div>
       </div>
     </div>
+    </div><!-- /col 1 -->
+    <!-- Feature 3: Real-Time Notifications -->
+    <div class="col s12 l4">
+      <div class="card dashboard-card" id="notifications-list-card">
+        <div class="card-content">
+          <div class="card-section-header">
+            <p class="section-title" style="margin:0">
+              Notifications
+              <span class="notif-count-chip" id="notif-count-chip" style="display:none">0</span>
+              <span class="socket-indicator" id="socket-indicator" title="Real-time connection status">
+                <span class="socket-dot disconnected"></span>
+              </span>
+            </p>
+            <button id="mark-all-read-btn" class="btn-flat btn-small dash-text-btn">Mark all read</button>
+          </div>
+          <div id="notifications-list">
+            <div class="loading-placeholder"><div class="preloader-wrapper small active"><div class="spinner-layer spinner-blue-only"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /row 1 -->
+
+
+  <!-- ── Row 3: Study & Event Tracker ─────────────────────────────────────── -->
+  <div class="row">
+
   </div><!-- /row 3 -->
 
 </div><!-- /dashboard-container -->
@@ -253,6 +219,7 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
 <script src="js/dashboard.js"></script>
 
 </body>

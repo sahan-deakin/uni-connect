@@ -1,9 +1,11 @@
-/* UniConnect — Student Dashboard */
+
+// Hardcoded for demo
+const HARDCODED_SESSION_ID = 'sess_demo_001';
+const HARDCODED_USER_ID    = 'alex-johnson-demo';
 
 let currentUnreadCount = 0;
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
+//Helpers
 function timeAgo(dateStr) {
   const secs = Math.floor((Date.now() - new Date(dateStr)) / 1000);
   if (secs < 60) return 'just now';
@@ -45,7 +47,7 @@ function updateNotifBadge(count) {
   }
 }
 
-// ── Renderers ─────────────────────────────────────────────────────────────────
+// Renderers 
 
 function renderWelcome(student) {
   document.getElementById('student-name').textContent = student.name.split(' ')[0];
@@ -111,44 +113,9 @@ function renderFeed({ resources, events, forums }) {
     : '<p class="empty-state">No forum discussions found for your units.</p>';
 }
 
-function renderSuggestions(suggestions) {
-  const container = document.getElementById('networking-grid');
-  if (!suggestions.length) {
-    container.innerHTML = '<p class="col s12 empty-state">No suggestions right now — try expanding your interests!</p>';
-    return;
-  }
-
-  container.innerHTML = suggestions.map(s => `
-    <div class="col s12 m6 l4">
-      <div class="student-card">
-        <div class="student-card-avatar">${s.name.charAt(0)}</div>
-        <div class="student-card-name">${s.name}</div>
-        <div class="student-card-course">${s.course} · Year ${s.year}</div>
-        ${s.commonUnits.length ? `
-          <div class="student-card-chips">
-            ${s.commonUnits.map(u => `<span class="unit-chip accent">${u}</span>`).join('')}
-          </div>` : ''}
-        <div class="student-card-chips">
-          ${s.skills.slice(0, 3).map(sk => `<span class="skill-chip">${sk}</span>`).join('')}
-        </div>
-        <div class="student-card-score">
-          <i class="material-icons tiny">star</i>
-          ${s.commonUnits.length} shared unit${s.commonUnits.length !== 1 ? 's' : ''}
-          ${s.commonSkills.length ? ` · ${s.commonSkills.length} shared skill${s.commonSkills.length !== 1 ? 's' : ''}` : ''}
-        </div>
-        <button class="btn btn-small connect-btn waves-effect waves-light"
-                data-id="${s._id}"
-                onclick="connectWith('${s._id}', this)">
-          <i class="material-icons left tiny">person_add</i>Connect
-        </button>
-      </div>
-    </div>`).join('');
-}
-
 const NOTIF_META = {
   message:            { icon: 'email',          color: 'blue'   },
   forum_reply:        { icon: 'forum',           color: 'green'  },
-  connection_request: { icon: 'person_add',      color: 'purple' },
   event:              { icon: 'event',           color: 'orange' },
   resource:           { icon: 'description',     color: 'teal'   }
 };
@@ -184,7 +151,6 @@ function renderTracker(data) {
   document.getElementById('stat-resources').textContent   = data.stats.resourcesUploaded;
   document.getElementById('stat-events').textContent      = data.stats.eventsRegistered;
   document.getElementById('stat-posts').textContent       = data.stats.forumPosts;
-  document.getElementById('stat-connections').textContent = data.stats.connections;
   document.getElementById('stat-downloads').textContent   = data.stats.totalDownloads;
 
   // My Resources
@@ -232,32 +198,9 @@ function renderTracker(data) {
         </div>`).join('')
     : '<p class="empty-state">You haven\'t posted in any forums yet.</p>';
 
-  // Network
-  document.getElementById('tracker-network').innerHTML = `
-    <div class="network-empty-state">
-      <i class="material-icons" style="font-size:3rem;color:var(--accent)">groups</i>
-      <div class="stat-number" style="font-size:2rem">${data.stats.connections}</div>
-      <p style="color:var(--muted)">Connections on UniConnect</p>
-      <p style="font-size:.85rem;color:var(--muted)">Use Smart Networking Suggestions above to grow your academic network.</p>
-    </div>`;
 }
 
 // ── Actions ───────────────────────────────────────────────────────────────────
-
-async function connectWith(targetId, btn) {
-  btn.disabled = true;
-  btn.innerHTML = '<i class="material-icons left tiny">hourglass_empty</i>Connecting...';
-  try {
-    await fetch(`/api/dashboard/connect/${targetId}`, { method: 'POST' });
-    btn.innerHTML = '<i class="material-icons left tiny">check</i>Connected';
-    btn.classList.replace('connect-btn', 'connected-btn');
-    M.toast({ html: 'Connection request sent!', classes: 'green darken-1' });
-  } catch {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="material-icons left tiny">person_add</i>Connect';
-    M.toast({ html: 'Could not connect. Try again.', classes: 'red darken-1' });
-  }
-}
 
 async function markRead(notifId, el) {
   if (!el.classList.contains('unread')) return;
@@ -278,25 +221,30 @@ async function markAllRead() {
   updateNotifBadge(0);
 }
 
-// ── Polling ───────────────────────────────────────────────────────────────────
+// ── Real-time socket ──────────────────────────────────────────────────────────
 
-function startPolling() {
-  setInterval(async () => {
+function connectSocket() {
+  const socket = io();
+  const dot = document.querySelector('.socket-dot');
+
+  socket.on('connect', () => {
+    socket.emit('join', HARDCODED_SESSION_ID);
+    dot.classList.replace('disconnected', 'connected');
+    document.querySelector('.socket-indicator').title = 'Notification socket connected';
+  });
+
+  socket.on('new-notification', async (notif) => {
+    M.toast({ html: `<i class="material-icons left tiny">notifications</i>${notif.title}`, classes: 'blue darken-1' });
     try {
-      const { count } = await fetchJSON('/api/dashboard/notifications/unread-count');
-      if (count > currentUnreadCount) {
-        const diff = count - currentUnreadCount;
-        M.toast({ html: `${diff} new notification${diff > 1 ? 's' : ''}!`, classes: 'blue darken-1' });
-        const data = await fetchJSON('/api/dashboard/notifications');
-        renderNotifications(data.notifications, data.unreadCount);
-      } else {
-        updateNotifBadge(count);
-        currentUnreadCount = count;
-      }
-    } catch {
-      // silent — network hiccup, retry next tick
-    }
-  }, 15000);
+      const data = await fetchJSON('/api/dashboard/notifications');
+      renderNotifications(data.notifications, data.unreadCount);
+    } catch { /* silent */ }
+  });
+
+  socket.on('disconnect', () => {
+    dot.classList.replace('connected', 'disconnected');
+    document.querySelector('.socket-indicator').title = 'Disconnected - reconnecting...';
+  });
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
@@ -309,20 +257,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('mark-all-read-btn').addEventListener('click', markAllRead);
 
   try {
-    const [feedData, suggestionsData, notifData, trackerData] = await Promise.all([
+    const [feedData, notifData, trackerData] = await Promise.all([
       fetchJSON('/api/dashboard/feed'),
-      fetchJSON('/api/dashboard/suggestions'),
       fetchJSON('/api/dashboard/notifications'),
       fetchJSON('/api/dashboard/tracker')
     ]);
 
     renderWelcome(feedData.student);
     renderFeed(feedData.feed);
-    renderSuggestions(suggestionsData.suggestions);
     renderNotifications(notifData.notifications, notifData.unreadCount);
     renderTracker(trackerData);
 
-    startPolling();
+    connectSocket();
   } catch (err) {
     const banner = document.getElementById('error-banner');
     banner.style.display = 'flex';
