@@ -1,182 +1,732 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard - UniConnect</title>
 
-  <!-- Materialize -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-
-  <!-- Icons -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-  <style>
-    body {
-      background: #f5f7fb;
-    }
-
-    .sidebar {
-      height: 100vh;
-      background: #1e2a38;
-      padding-top: 20px;
-    }
-
-    .sidebar a {
-      color: #fff;
-      display: block;
-      padding: 12px 20px;
-    }
-
-    .sidebar a:hover {
-      background: #2c3e50;
-    }
-
-    .content {
-      padding: 20px;
-    }
-
-    .card {
-      border-radius: 12px;
-    }
-  </style>
+  <link rel="stylesheet" href="css/admin-styles.css" />
 </head>
 
 <body>
 
-<div class="row" style="margin:0">
+  <!-- ── Sidebar ── -->
+  <aside class="sidenav-custom">
+    <div class="logo-block">
+      <div class="logo-eye">UniConnect</div>
+      <h1>Admin Console</h1>
+    </div>
 
-  <!-- SIDEBAR -->
-  <div class="col s12 m3 l2 sidebar">
-    <h5 class="white-text center">Admin</h5>
+    <div style="flex:1;overflow-y:auto;padding:8px 0">
+      <div class="nav-section-label">Overview</div>
+      <button class="nav-item active" onclick="showPanel('dashboard',this)">
+        <i class="material-icons">dashboard</i> Dashboard
+      </button>
 
-    <a href="#events">Events</a>
-    <a href="#resources">Reported Resources</a>
-    <a href="#users">Users</a>
-    <a href="#threads">Threads</a>
+      <div class="nav-section-label">Moderation</div>
+      <button class="nav-item" onclick="showPanel('reported',this)">
+        <i class="material-icons">flag</i> Reported Reviews
+        <span class="nav-badge" id="navBadge">0</span>
+      </button>
+      <button class="nav-item" onclick="showPanel('blocked',this)">
+        <i class="material-icons">block</i> Blocked Users
+      </button>
+
+      <div class="nav-section-label">Content</div>
+      <button class="nav-item" onclick="showPanel('resources',this)">
+        <i class="material-icons">menu_book</i> Academic Resources
+      </button>
+      <button class="nav-item" onclick="showPanel('events',this)">
+        <i class="material-icons">event</i> Events
+        <span class="nav-badge ylw" id="navEventBadge">0</span>
+      </button>
+      <button class="nav-item" onclick="showPanel('users',this)">
+        <i class="material-icons">group</i> All Users
+      </button>
+
+      <div class="nav-section-label">System</div>
+      <button class="nav-item" onclick="showPanel('settings',this)">
+        <i class="material-icons">settings</i> Settings
+      </button>
+    </div>
+
+    <div class="side-foot">v1.0.0 · SIT725</div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main>
+    <div class="top-bar">
+      <div>
+        <div class="page-title" id="pageTitle">Dashboard</div>
+        <div class="page-sub" id="pageSub">Overview &amp; analytics</div>
+      </div>
+      <div class="admin-chip">
+        <div class="admin-av">SA</div> superadmin
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ══ DASHBOARD ══ -->
+      <div class="panel active" id="panel-dashboard">
+
+        <!-- Stat cards -->
+        <div class="row" style="margin-bottom:0">
+          <div class="col s12 m6 l4 xl2" style="padding:0 6px 14px">
+            <div class="stat-card" style="--c:var(--teal)">
+              <div class="stat-lbl">Total Users</div>
+              <div class="stat-val" id="statUsers">—</div>
+              <div class="stat-hint">registered</div>
+            </div>
+          </div>
+          <div class="col s12 m6 l4 xl2" style="padding:0 6px 14px">
+            <div class="stat-card" style="--c:var(--red)">
+              <div class="stat-lbl">Reported</div>
+              <div class="stat-val" id="statReported">—</div>
+              <div class="stat-hint">awaiting action</div>
+            </div>
+          </div>
+          <div class="col s12 m6 l4 xl2" style="padding:0 6px 14px">
+            <div class="stat-card" style="--c:var(--ylw)">
+              <div class="stat-lbl">Blocked</div>
+              <div class="stat-val" id="statBlocked">—</div>
+              <div class="stat-hint">active blocks</div>
+            </div>
+          </div>
+          <div class="col s12 m6 l4 xl2" style="padding:0 6px 14px">
+            <div class="stat-card" style="--c:#0D7377">
+              <div class="stat-lbl">Resources</div>
+              <div class="stat-val" id="statResources">—</div>
+              <div class="stat-hint">published</div>
+            </div>
+          </div>
+          <div class="col s12 m6 l4 xl2" style="padding:0 6px 14px">
+            <div class="stat-card" style="--c:var(--acc)">
+              <div class="stat-lbl">Events</div>
+              <div class="stat-val" id="statEvents">—</div>
+              <div class="stat-hint">pending approval</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Breakdown bar chart -->
+        <div class="breakdown-card" style="margin-bottom:22px">
+          <h3>Reports by Category</h3>
+          <div id="breakdownBars"><span style="color:var(--mut);font-size:.82rem">Loading…</span></div>
+        </div>
+
+        <!-- Two-column tables -->
+        <div class="row" style="margin-bottom:0">
+          <div class="col s12 l6" style="padding:0 6px 22px">
+            <div class="tbl-card">
+              <div class="tbl-hd">
+                <h3>Recent Reported Reviews</h3>
+                <span class="tcount" id="dashCount">0</span>
+                <button class="tlink" onclick="showPanel('reported',document.querySelectorAll('.nav-item')[1])">View all →</button>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Excerpt</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="dashTable">
+                  <tr><td colspan="4" style="text-align:center;color:var(--mut);padding:22px">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="col s12 l6" style="padding:0 6px 22px">
+            <div class="tbl-card">
+              <div class="tbl-hd">
+                <h3>Pending Events</h3>
+                <span class="tcount" id="dashEventCount">0</span>
+                <button class="tlink" onclick="showPanel('events', document.querySelectorAll('.nav-item')[4])">View all →</button>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Event</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="dashEventTable">
+                  <tr><td colspan="4" style="text-align:center;color:var(--mut);padding:22px">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ REPORTED REVIEWS ══ -->
+      <div class="panel" id="panel-reported">
+        <div class="sec-head">
+          <h2>Reported Reviews</h2>
+          <small id="reportedCount">loading…</small>
+        </div>
+        <div class="rev-list" id="reviewList">
+          <div class="empty">
+            <div class="ico">⏳</div>
+            <p>Loading…</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ BLOCKED USERS ══ -->
+      <div class="panel" id="panel-blocked">
+        <div class="sec-head">
+          <h2>Blocked Users</h2>
+          <small id="blockedCount">loading…</small>
+        </div>
+        <div class="tbl-card">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Blocked at</th>
+                <th>Expires</th>
+                <th>Reason</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="blockedTable">
+              <tr><td colspan="5" style="text-align:center;color:var(--mut);padding:28px">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ EVENTS ══ -->
+      <div class="panel" id="panel-events">
+        <div class="sec-head">
+          <h2>Events</h2>
+          <small id="eventsCount">loading…</small>
+        </div>
+
+        <div class="filter-bar">
+          <button class="filter-btn active" onclick="filterEvents('pending', this)">Pending</button>
+          <button class="filter-btn" onclick="filterEvents('approved', this)">Approved</button>
+          <button class="filter-btn" onclick="filterEvents('rejected', this)">Rejected</button>
+          <button class="filter-btn" onclick="filterEvents('all', this)">All</button>
+        </div>
+
+        <div class="event-list" id="eventList">
+          <div class="empty">
+            <div class="ico">⏳</div>
+            <p>Loading…</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PLACEHOLDERS ══ -->
+      <div class="panel" id="panel-resources">
+        <div class="sec-head"><h2>Academic Resources</h2></div>
+        <div class="placeholder">
+          <div><i class="material-icons" style="font-size:2.8rem;color:var(--bdr)">menu_book</i></div>
+          <h3>Coming Soon</h3>
+          <p>Resource management and approval workflows.</p>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-users">
+        <div class="sec-head"><h2>All Users</h2></div>
+        <div class="placeholder">
+          <div><i class="material-icons" style="font-size:2.8rem;color:var(--bdr)">group</i></div>
+          <h3>Coming Soon</h3>
+          <p>Full user directory with roles and activity.</p>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-settings">
+        <div class="sec-head"><h2>Settings</h2></div>
+        <div class="placeholder">
+          <div><i class="material-icons" style="font-size:2.8rem;color:var(--bdr)">settings</i></div>
+          <h3>Coming Soon</h3>
+          <p>System config, notifications, and audit logs.</p>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+
+  <div id="toast"></div>
+
+  <!-- ── Rejection modal ── -->
+  <div id="rejectModal">
+    <div class="modal-box">
+      <h3>Reject Event</h3>
+      <p>Optionally provide a reason so the organiser knows what to fix.</p>
+      <textarea id="rejectReason" placeholder="e.g. Missing location details, date conflict…"></textarea>
+      <div class="modal-foot">
+        <button class="btn-act btn-ghost" onclick="closeRejectModal()">Cancel</button>
+        <button class="btn-act btn-danger" onclick="confirmReject()">
+          <i class="material-icons" style="font-size:.9rem">cancel</i> Reject
+        </button>
+      </div>
+    </div>
   </div>
 
-  <!-- MAIN CONTENT -->
-  <div class="col s12 m9 l10 content">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
 
-    <h4>Dashboard</h4>
+    const META = {
+      dashboard:  ['Dashboard',           'Overview & analytics'],
+      reported:   ['Reported Reviews',    'User-flagged content awaiting moderation'],
+      blocked:    ['Blocked Users',        'Accounts currently suspended'],
+      resources:  ['Academic Resources',  'Manage resource content'],
+      events:     ['Events',              'Approve or reject submitted events'],
+      users:      ['All Users',           'User directory'],
+      settings:   ['Settings',            'System configuration'],
+    };
 
-    <!-- EVENTS -->
-    <div id="events" class="section">
-      <h5>Manage Events</h5>
+    function showPanel(name, btn) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      $('panel-' + name).classList.add('active');
+      if (btn) btn.classList.add('active');
+      const [t, s] = META[name] || [name, ''];
+      $('pageTitle').textContent = t;
+      $('pageSub').textContent = s;
+      if (name === 'reported') loadReported();
+      if (name === 'blocked')  loadBlocked();
+      if (name === 'events')   loadEvents();
+    }
 
-      <table class="highlight">
-        <thead>
-          <tr>
-            <th>Event</th>
-            <th>Location</th>
-            <th>Date</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
+    function toast(msg, ok = true) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.className = ok ? 'ok' : 'err';
+      t.style.display = 'block';
+      clearTimeout(t._t);
+      t._t = setTimeout(() => t.style.display = 'none', 2800);
+    }
 
-        <tbody>
-          <tr>
-            <td>Career Fair</td>
-            <td>RMIT</td>
-            <td>12 May</td>
-            <td>
-              <a class="btn-small blue">Edit</a>
-              <a class="btn-small red">Delete</a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    const initials  = (n = '') => n.split(/[_\s@]/).map(w => w[0]).join('').toUpperCase().slice(0, 2) || '??';
+    const fmtDate   = d => d ? new Date(d).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+    const fmtDateSh = d => d ? new Date(d).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }) : '—';
 
-    <!-- REPORTED RESOURCES -->
-    <div id="resources" class="section">
-      <h5>Reported Resources</h5>
+    function fmtExpiry(until) {
+      if (!until) return '<span class="pill p-red">Permanent</span>';
+      const d = new Date(until);
+      return d < new Date()
+        ? `<span class="pill p-gray">Expired ${fmtDate(d)}</span>`
+        : `<span class="pill p-ylw">${fmtDate(d)}</span>`;
+    }
 
-      <table class="highlight">
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>University</th>
-            <th>Reason</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
+    function avatarBg(name = '') {
+      const cs = ['#0D7377', '#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
+      let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) % cs.length;
+      return cs[h];
+    }
 
-        <tbody>
-          <tr>
-            <td>Math Notes</td>
-            <td>Monash</td>
-            <td>Spam</td>
-            <td>
-              <a class="btn-small green">Keep</a>
-              <a class="btn-small red">Delete</a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    function fadeRemove(id) {
+      const el = $(id); if (!el) return;
+      Object.assign(el.style, { transition: 'opacity .3s,transform .3s', opacity: '0', transform: 'translateX(-8px)' });
+      setTimeout(() => el.remove(), 320);
+    }
 
-    <!-- USERS -->
-    <div id="users" class="section">
-      <h5>User Management</h5>
+    const EVENT_ICONS = {
+      academic:    'school',
+      networking:  'people',
+      workshop:    'build',
+      competition: 'emoji_events',
+      career:      'work',
+      study:       'menu_book',
+      social:      'celebration',
+    };
 
-      <table class="highlight">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
+    function statusPill(status) {
+      switch (status) {
+        case 'approved': return '<span class="pill p-grn">Approved</span>';
+        case 'rejected': return '<span class="pill p-red">Rejected</span>';
+        default:         return '<span class="pill p-ylw">Pending</span>';
+      }
+    }
 
-        <tbody>
-          <tr>
-            <td>John Doe</td>
-            <td>john@email.com</td>
-            <td>Active</td>
-            <td>
-              <a class="btn-small orange">Block</a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    // ── DASHBOARD ──
+    async function loadDashboard() {
+      try {
+        const [rR, bR, sR, eR] = await Promise.all([
+          fetch('/api/reviews/reported/list'),
+          fetch('/api/admin/blocked-users'),
+          fetch('/api/samples'),
+          fetch('/api/events/pending'),
+        ]);
+        const reported      = await rR.json();
+        const blocked       = await bR.json();
+        const samples       = await sR.json();
+        const pendingEvents = await eR.json();
 
-    <!-- THREADS -->
-    <div id="threads" class="section">
-      <h5>Thread Moderation</h5>
+        $('statReported').textContent  = reported.length;
+        $('statBlocked').textContent   = blocked.length;
+        $('statResources').textContent = Array.isArray(samples) ? samples.length : '—';
+        $('statUsers').textContent     = '6';
+        $('statEvents').textContent    = pendingEvents.length;
 
-      <table class="highlight">
-        <thead>
-          <tr>
-            <th>Thread</th>
-            <th>Replies</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
+        const badge = $('navBadge');
+        badge.textContent   = reported.length;
+        badge.style.display = reported.length ? 'inline' : 'none';
 
-        <tbody>
-          <tr>
-            <td>Exam Discussion</td>
-            <td>14</td>
-            <td>Active</td>
-            <td>
-              <a class="btn-small red">Delete</a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+        const evtBadge = $('navEventBadge');
+        evtBadge.textContent   = pendingEvents.length;
+        evtBadge.style.display = pendingEvents.length ? 'inline' : 'none';
 
-  </div>
+        $('dashCount').textContent      = reported.length;
+        $('dashEventCount').textContent = pendingEvents.length;
 
-</div>
+        renderBreakdown(reported);
+        renderDashReviews(reported);
+        renderDashEvents(pendingEvents);
+      } catch (e) { console.error(e); }
+    }
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    function renderBreakdown(reported) {
+      const counts = {};
+      reported.forEach(r => { const k = r.reportReason || 'Other'; counts[k] = (counts[k] || 0) + 1; });
+      const entries = Object.entries(counts);
+      const max = Math.max(...entries.map(e => e[1]), 1);
+      const colors = ['#0D7377', '#4F46E5', '#F59E0B', '#10B981', '#EF4444'];
+      $('breakdownBars').innerHTML = entries.length
+        ? entries.map(([lbl, n], i) => `
+            <div class="bar-row">
+              <span class="bar-lbl">${lbl}</span>
+              <div class="bar-track"><div class="bar-fill" style="width:${(n / max * 100).toFixed(1)}%;background:${colors[i % colors.length]}"></div></div>
+              <span class="bar-n">${n}</span>
+            </div>`).join('')
+        : `<span style="color:var(--mut);font-size:.82rem">No reports yet.</span>`;
+    }
 
+    function renderDashReviews(reported) {
+      const tbody = $('dashTable');
+      tbody.innerHTML = !reported.length
+        ? `<tr><td colspan="4" style="text-align:center;color:var(--mut);padding:22px">✅ No pending reports</td></tr>`
+        : reported.slice(0, 5).map(r => `
+            <tr>
+              <td><div class="ucell">
+                <div class="uav" style="background:${avatarBg(r.user?.username)}20;color:${avatarBg(r.user?.username)}">${initials(r.user?.username)}</div>
+                <span class="uname">${r.user?.username || '?'}</span>
+              </div></td>
+              <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mut)">${(r.reviewText || '').slice(0, 45)}…</td>
+              <td><span class="pill p-ylw">${r.reportReason || '—'}</span></td>
+              <td><span class="pill p-red">Pending</span></td>
+            </tr>`).join('');
+    }
+
+    function renderDashEvents(events) {
+      const tbody = $('dashEventTable');
+      tbody.innerHTML = !events.length
+        ? `<tr><td colspan="4" style="text-align:center;color:var(--mut);padding:22px">✅ No pending events</td></tr>`
+        : events.slice(0, 5).map(e => `
+            <tr>
+              <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600">${e.title}</td>
+              <td><span class="pill p-blue">${e.type || '—'}</span></td>
+              <td style="color:var(--mut);font-size:.8rem">${fmtDateSh(e.date)}</td>
+              <td>${statusPill(e.status)}</td>
+            </tr>`).join('');
+    }
+
+    // ── REPORTED REVIEWS ──
+    async function loadReported() {
+      const list = $('reviewList');
+      try {
+        const reviews = await fetch('/api/reviews/reported/list').then(r => r.json());
+        $('reportedCount').textContent = reviews.length ? `${reviews.length} pending` : 'none pending';
+        const badge = $('navBadge');
+        badge.textContent   = reviews.length;
+        badge.style.display = reviews.length ? 'inline' : 'none';
+
+        if (!reviews.length) {
+          list.innerHTML = `<div class="empty"><div class="ico">✅</div><p>Inbox is clear.</p></div>`;
+          return;
+        }
+
+        list.innerHTML = '';
+        reviews.forEach(r => {
+          const card = document.createElement('div');
+          card.className = 'rev-card'; card.id = 'rc-' + r._id;
+          const blocked = r.user?.blocked?.isBlocked;
+          const bg = avatarBg(r.user?.username);
+          card.innerHTML = `
+            <div class="rc-top">
+              <div class="rc-av" style="background:${bg}18;color:${bg}">${initials(r.user?.username)}</div>
+              <div class="rc-meta">
+                <h4>${r.user?.username || 'Unknown'}</h4>
+                <span>${r.user?.email || ''}</span>
+              </div>
+              <div class="rc-act">${blocked ? '<span class="pill p-gray">Already blocked</span>' : ''}</div>
+            </div>
+            <div class="rev-txt">"${r.reviewText}"</div>
+            <div class="rc-foot">
+              <span class="reason"><i class="material-icons" style="font-size:.8rem;vertical-align:middle">warning</i> ${r.reportReason || 'No reason'}</span>
+              <select class="dur-sel" id="dur-${r.user?._id}">
+                <option value="3months">3 Months</option>
+                <option value="6months">6 Months</option>
+                <option value="1year">1 Year</option>
+                <option value="permanent">Permanent</option>
+              </select>
+              <button class="btn-act btn-danger" onclick="blockUser('${r.user?._id}','${r._id}',this)" ${blocked ? 'disabled' : ''}>
+                <i class="material-icons" style="font-size:.9rem">block</i> Block
+              </button>
+              <button class="btn-act btn-ghost" onclick="dismiss('${r._id}',this)">Dismiss</button>
+            </div>`;
+          list.appendChild(card);
+        });
+      } catch {
+        list.innerHTML = `<div class="empty"><div class="ico">❌</div><p>Failed to load.</p></div>`;
+        toast('Error loading reviews', false);
+      }
+    }
+
+    async function blockUser(userId, reviewId, btn) {
+      btn.disabled = true; btn.textContent = 'Blocking…';
+      try {
+        const res = await fetch(`/api/admin/block-user/${userId}`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ duration: $('dur-' + userId)?.value || '3months', reason: 'Violation of review policy', reviewId })
+        });
+        if (!res.ok) throw new Error();
+        toast('✅ User blocked');
+        fadeRemove('rc-' + reviewId);
+        setTimeout(loadReported, 400); setTimeout(loadDashboard, 450);
+      } catch {
+        toast('Failed to block user', false);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="material-icons" style="font-size:.9rem">block</i> Block';
+      }
+    }
+
+    function dismiss(reviewId, btn) {
+      btn.disabled = true; fadeRemove('rc-' + reviewId); toast('Review dismissed');
+      setTimeout(loadReported, 400);
+    }
+
+    // ── BLOCKED USERS ──
+    async function loadBlocked() {
+      const tbody = $('blockedTable');
+      try {
+        const users = await fetch('/api/admin/blocked-users').then(r => r.json());
+        $('blockedCount').textContent = users.length ? `${users.length} active` : 'none';
+        tbody.innerHTML = !users.length
+          ? `<tr><td colspan="5" style="text-align:center;color:var(--mut);padding:32px">🔓 No users blocked</td></tr>`
+          : users.map(u => `
+              <tr id="br-${u._id}">
+                <td><div class="ucell">
+                  <div class="uav">${initials(u.username)}</div>
+                  <div><div class="uname">${u.username}</div><div class="uemail">${u.email}</div></div>
+                </div></td>
+                <td style="color:var(--mut);font-size:.8rem">${fmtDate(u.blocked?.blockedAt)}</td>
+                <td>${fmtExpiry(u.blocked?.blockedUntil)}</td>
+                <td style="color:var(--mut);font-size:.8rem">${u.blocked?.reason || '—'}</td>
+                <td><button class="btn-act btn-success" onclick="unblock('${u._id}',this)">
+                  <i class="material-icons" style="font-size:.9rem">lock_open</i> Unblock
+                </button></td>
+              </tr>`).join('');
+      } catch {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--red);padding:22px">Failed to load</td></tr>`;
+      }
+    }
+
+    async function unblock(userId, btn) {
+      btn.disabled = true; btn.textContent = '…';
+      try {
+        if (!(await fetch(`/api/admin/unblock-user/${userId}`, { method: 'PUT' })).ok) throw new Error();
+        toast('✅ User unblocked'); fadeRemove('br-' + userId);
+        setTimeout(loadBlocked, 400); setTimeout(loadDashboard, 450);
+      } catch {
+        toast('Failed to unblock', false);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="material-icons" style="font-size:.9rem">lock_open</i> Unblock';
+      }
+    }
+
+    // ── EVENTS ──
+    let _allEvents     = [];
+    let _activeFilter  = 'pending';
+    let _pendingReject = null;
+
+    async function loadEvents() {
+      const list = $('eventList');
+      list.innerHTML = `<div class="empty"><div class="ico">⏳</div><p>Loading…</p></div>`;
+      try {
+        const events = await fetch('/api/events/admin/all').then(r => r.json());
+        _allEvents = events;
+        renderEvents();
+        refreshEventBadge();
+      } catch {
+        list.innerHTML = `<div class="empty"><div class="ico">❌</div><p>Failed to load events.</p></div>`;
+        toast('Error loading events', false);
+      }
+    }
+
+    function refreshEventBadge() {
+      const pending = _allEvents.filter(e => !e.status || e.status === 'pending');
+      const evtBadge = $('navEventBadge');
+      evtBadge.textContent   = pending.length;
+      evtBadge.style.display = pending.length ? 'inline' : 'none';
+      $('statEvents').textContent     = pending.length;
+      $('dashEventCount').textContent = pending.length;
+    }
+
+    function filterEvents(filter, btn) {
+      _activeFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderEvents();
+    }
+
+    function renderEvents() {
+      const list = $('eventList');
+      let filtered = _allEvents;
+      if (_activeFilter !== 'all') {
+        filtered = _allEvents.filter(e => (e.status || 'pending') === _activeFilter);
+      }
+
+      $('eventsCount').textContent = filtered.length
+        ? `${filtered.length} ${_activeFilter === 'all' ? 'total' : _activeFilter}`
+        : 'none';
+
+      if (!filtered.length) {
+        list.innerHTML = `<div class="empty"><div class="ico">📅</div><p>No ${_activeFilter} events.</p></div>`;
+        return;
+      }
+
+      list.innerHTML = '';
+      filtered.forEach(e => {
+        const status    = e.status || 'pending';
+        const icon      = EVENT_ICONS[e.type] || 'event';
+        const isPending = status === 'pending';
+        const card      = document.createElement('div');
+        card.className  = `event-card${status !== 'pending' ? ' ' + status : ''}`;
+        card.id         = 'ec-' + e._id;
+
+        const tags = (e.tags || []).map(t => `<span class="ec-tag">${t}</span>`).join('');
+        const unitCodes = (e.unitCodes || []).map(u =>
+          `<span class="ec-tag" style="background:#D1FAE5;border-color:#A7F3D0;color:#065F46">${u}</span>`
+        ).join('');
+
+        card.innerHTML = `
+          <div class="ec-top">
+            <div class="ec-icon">
+              <i class="material-icons">${icon}</i>
+            </div>
+            <div class="ec-info">
+              <h4>${e.title}</h4>
+              <div class="ec-sub">
+                <span><i class="material-icons">calendar_today</i>${fmtDate(e.date)}</span>
+                <span><i class="material-icons">${e.isOnline ? 'videocam' : 'place'}</i>${e.location || (e.isOnline ? 'Online' : '—')}</span>
+                <span><i class="material-icons">person</i>${e.organizer || '—'}</span>
+                <span><i class="material-icons">people</i>${(e.registeredStudents || []).length} registered</span>
+              </div>
+            </div>
+            <div class="ec-act">
+              ${statusPill(status)}
+              ${isPending ? `
+                <button class="btn-act btn-success" onclick="approveEvent('${e._id}',this)">
+                  <i class="material-icons" style="font-size:.9rem">check_circle</i> Approve
+                </button>
+                <button class="btn-act btn-danger" onclick="openRejectModal('${e._id}',this)">
+                  <i class="material-icons" style="font-size:.9rem">cancel</i> Reject
+                </button>` : `
+                <button class="btn-act btn-ghost" onclick="resetEventStatus('${e._id}',this)">
+                  <i class="material-icons" style="font-size:.9rem">refresh</i> Reset
+                </button>`}
+            </div>
+          </div>
+          ${e.description ? `<div class="ec-desc">${e.description}</div>` : ''}
+          <div class="ec-foot">
+            <span class="pill p-blue" style="font-size:.68rem">${e.type || 'general'}</span>
+            ${tags}${unitCodes}
+            ${e.rejectionReason ? `<span class="reason"><i class="material-icons" style="font-size:.8rem;vertical-align:middle">info</i> ${e.rejectionReason}</span>` : ''}
+          </div>`;
+        list.appendChild(card);
+      });
+    }
+
+    async function approveEvent(eventId, btn) {
+      btn.disabled = true; btn.textContent = 'Approving…';
+      try {
+        const res = await fetch(`/api/events/admin/${eventId}/approve`, { method: 'PUT' });
+        if (!res.ok) throw new Error();
+        toast('✅ Event approved');
+        const ev = _allEvents.find(e => e._id === eventId);
+        if (ev) ev.status = 'approved';
+        refreshEventBadge(); renderEvents();
+        renderDashEvents(_allEvents.filter(e => !e.status || e.status === 'pending'));
+      } catch {
+        toast('Failed to approve event', false);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="material-icons" style="font-size:.9rem">check_circle</i> Approve';
+      }
+    }
+
+    function openRejectModal(eventId, btn) {
+      _pendingReject = { eventId, btn };
+      $('rejectReason').value = '';
+      $('rejectModal').classList.add('open');
+      setTimeout(() => $('rejectReason').focus(), 50);
+    }
+
+    function closeRejectModal() {
+      $('rejectModal').classList.remove('open');
+      _pendingReject = null;
+    }
+
+    async function confirmReject() {
+      if (!_pendingReject) return;
+      const { eventId, btn } = _pendingReject;
+      const reason = $('rejectReason').value.trim();
+      closeRejectModal();
+      btn.disabled = true; btn.textContent = 'Rejecting…';
+      try {
+        const res = await fetch(`/api/events/admin/${eventId}/reject`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason })
+        });
+        if (!res.ok) throw new Error();
+        toast('Event rejected');
+        const ev = _allEvents.find(e => e._id === eventId);
+        if (ev) { ev.status = 'rejected'; if (reason) ev.rejectionReason = reason; }
+        refreshEventBadge(); renderEvents();
+        renderDashEvents(_allEvents.filter(e => !e.status || e.status === 'pending'));
+      } catch {
+        toast('Failed to reject event', false);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="material-icons" style="font-size:.9rem">cancel</i> Reject';
+      }
+    }
+
+    async function resetEventStatus(eventId, btn) {
+      btn.disabled = true; btn.textContent = '…';
+      try {
+        const res = await fetch(`/api/events/admin/${eventId}/reset`, { method: 'PUT' });
+        if (!res.ok) throw new Error();
+        toast('Event reset to pending');
+        const ev = _allEvents.find(e => e._id === eventId);
+        if (ev) { ev.status = 'pending'; ev.rejectionReason = null; }
+        refreshEventBadge(); renderEvents();
+      } catch {
+        toast('Failed to reset event', false);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="material-icons" style="font-size:.9rem">refresh</i> Reset';
+      }
+    }
+
+    $('rejectModal').addEventListener('click', e => { if (e.target === $('rejectModal')) closeRejectModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRejectModal(); });
+
+    loadDashboard();
+  </script>
 </body>
 </html>

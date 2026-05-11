@@ -48,9 +48,13 @@ io.on('connection', (socket) => {
 // 4) Routes
 const sampleRoute    = require('./routes/sampleRoute');
 const dashboardRoute = require('./routes/dashboardRoute');
+const reviewRoute = require('./routes/reviewRoute');
+const adminRoute  = require('./routes/adminRoute');
 
 app.use('/api/samples',   sampleRoute);
 app.use('/api/dashboard', dashboardRoute);
+app.use('/api/reviews', reviewRoute);
+app.use('/api/admin',   adminRoute);
 
 // Health check
 app.get('/health', (req, res) => {
