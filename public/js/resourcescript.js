@@ -146,3 +146,12 @@ document.addEventListener('DOMContentLoaded', function() {
   render();
 });
 
+//Switch between Upload by File and Upload by URL tabs
+function switchMethod(m) {
+  document.getElementById('tab-file').classList.toggle('active', m==='file');
+  document.getElementById('tab-url').classList.toggle('active',  m==='url');
+  document.getElementById('panel-file').style.display = m==='file' ? '' : 'none';
+  document.getElementById('panel-url').style.display  = m==='url'  ? '' : 'none';
+}
+
+ 
