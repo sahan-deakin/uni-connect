@@ -154,4 +154,10 @@ function switchMethod(m) {
   document.getElementById('panel-url').style.display  = m==='url'  ? '' : 'none';
 }
 
- 
+//Apply filter based on user's selection
+ function applyFilters() {
+  state.q    = document.getElementById('search-input').value.trim();
+  state.type = document.getElementById('filter-type').value;
+  state.uni  = document.getElementById('filter-uni').value;
+  state.page = 1; render();
+}
