@@ -28,6 +28,12 @@ body {
   line-height: 64px;
 }
 
+.logo-image {
+  height: 50px;
+  width: auto;
+  display: block;
+}
+
 .nav-custom a {
   color: var(--text);
 }
@@ -161,18 +167,17 @@ body {
       margin: 0;
     }
 
-    /* ── Navbar (identical to index) ───────────────────────────────────── */
+    /* Navbar*/
     .nav-custom {
       background: var(--navy) !important;
       box-shadow: 0 2px 16px rgba(0,0,0,0.18);
       height: 64px;
       line-height: 64px;
     }
-    .nav-custom .brand-logo {
-      font-weight: 700;
-      font-size: 1.4rem;
-      color: var(--white);
-      letter-spacing: -0.5px;
+    .nav-custom .brand-logo{
+      display: flex;
+      align-items: center;
+      height: 100%;
     }
     .nav-custom ul a {
       color: rgba(255,255,255,0.85);
