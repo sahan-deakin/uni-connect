@@ -244,7 +244,7 @@ body {
 .event-badge.academic { background: #EEEDFE; color: #3C3489; }
 .event-badge.career   { background: #E1F5EE; color: #085041; }
 .event-badge.social   { background: #FAECE7; color: #712B13; }
-.event-badge.spots    { background: #F3F4F6; color: var(--muted); }
+.event-badge.spots    { background: #F3F4F6; color: #686c71; }
 
 .event-title {
   font-size: 2rem;
