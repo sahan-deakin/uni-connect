@@ -210,7 +210,7 @@ body {
 .event-badge.academic { background: #EEEDFE; color: #3C3489; }
 .event-badge.career   { background: #E1F5EE; color: #085041; }
 .event-badge.social   { background: #FAECE7; color: #712B13; }
-.event-badge.spots    { background: #F3F4F6; color: var(--muted); }
+.event-badge.spots    { background: #F3F4F6; color: #686c71; }
 
 .event-title {
   font-size: 2rem;
@@ -317,7 +317,7 @@ body {
     }
 
     /* ── Navbar (identical to index) ───────────────────────────────────── */
-    .nav-custom {
+    /* .nav-custom {
       background: var(--navy) !important;
       box-shadow: 0 2px 16px rgba(0,0,0,0.18);
       height: 64px;
@@ -345,7 +345,7 @@ body {
       padding: 0 22px !important;
       box-shadow: none !important;
       transition: background .2s, transform .15s !important;
-    }
+    } */
     .btn-primary:hover { background: var(--teal-lt) !important; transform: translateY(-1px); }
 
     /* ── Page hero (compact) ───────────────────────────────────────────── */
