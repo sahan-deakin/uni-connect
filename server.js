@@ -26,6 +26,8 @@ app.use(express.urlencoded({ extended: false }));
 // 3) Routes
 const sampleRoute = require('./routes/sampleRoute');
 
+app.use('/resources', require('./routes/resourceRoutes'));
+
 app.use('/api/samples', sampleRoute);
 
 // Health check
