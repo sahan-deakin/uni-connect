@@ -161,3 +161,8 @@ function switchMethod(m) {
   state.uni  = document.getElementById('filter-uni').value;
   state.page = 1; render();
 }
+
+//Eventlistener to perform search on clicking Search button
+document.getElementById('search-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') applyFilters();
+});
