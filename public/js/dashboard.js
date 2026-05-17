@@ -274,7 +274,9 @@ function connectSocket() {
     try {
       const data = await fetchJSON('/api/dashboard/notifications');
       renderNotifications(data.notifications, data.unreadCount);
-    } catch { /* silent */ }
+    } catch { 
+      console.error('Failed to refresh notifications after socket update');
+     }
   });
 
   socket.on('disconnect', () => {
@@ -283,7 +285,7 @@ function connectSocket() {
   });
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+// Init 
 
 document.addEventListener('DOMContentLoaded', async () => {
   M.Sidenav.init(document.querySelectorAll('.sidenav'));
