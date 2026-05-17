@@ -1,4 +1,4 @@
-const Resource = require('../models/Resource');
+const Resource = require('../models/resourcesModel');
 
 async function createResource(fields, file, uploaderId) {
   const { title, unitCode, resourceType, description, tags, uploadMethod, resourceUrl } = fields;

@@ -1,5 +1,5 @@
 const resourceService = require('../services/resourceService');
-const { getDownloadUrl } = require('../services/storageService');
+//const { getDownloadUrl } = require('../services/storageService');
 
 //Get resources
 async function index(req, res) {
@@ -30,3 +30,8 @@ async function index(req, res) {
     });
   }
 }
+
+module.exports = {
+  index
+};
+ 

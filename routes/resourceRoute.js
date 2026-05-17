@@ -2,7 +2,7 @@ const express    = require('express');
 const multer     = require('multer');
 const router     = express.Router();
 const controller = require('../controllers/resourceController');
-const { requireAuth, requireModerator } = require('../middleware/auth');
+//const { requireAuth, requireModerator } = require('../middleware/auth');
 
 //Multer configuration
 const ALLOWED_MIMES = [
@@ -53,27 +53,30 @@ function handleUpload(req, res, next) {
 
 // GET  /resources to browse the resource library
 router.get('/', controller.index);
- 
+
+/*  
 // GET  /resources/:id to view a single resource
 router.get('/:id', controller.show);
 
- 
+
 // GET  /resources/upload to show the upload form
-router.get('/upload', requireAuth, controller.showUploadForm);
+router.get('/upload', controller.showUploadForm);
  
 // POST /resources/upload to process the upload submission
-router.post('/upload', requireAuth, handleUpload, controller.upload);
+router.post('/upload', handleUpload, controller.upload);
  
 // GET  /resources/:id/downloadto serve the file (authenticated)
-router.get('/:id/download', requireAuth, controller.download);
+router.get('/:id/download', controller.download);
  
 // POST /resources/:id/upvote to toggle upvote (AJAX)
-router.post('/:id/upvote', requireAuth, controller.upvote);
+router.post('/:id/upvote', controller.upvote);
  
 // POST /resources/:id/flag to flag a resource (AJAX)
-router.post('/:id/flag', requireAuth, controller.flag);
+router.post('/:id/flag', controller.flag);
  
 // DELETE /resources/:id to soft-delete (owner or moderator, AJAX)
-router.delete('/:id', requireAuth, controller.destroy);
+router.delete('/:id', controller.destroy); */
+
+
 
 module.exports = router;
