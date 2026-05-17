@@ -60,9 +60,6 @@ app.use('/api/reviews', reviewRoute);
 app.use('/api/admin',   adminRoute);
 app.use('/api/events', eventRoute);
 
-app.use('/resources', require('./routes/resourceRoute'));
-app.use('/api/samples', sampleRoute);
-
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', db: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' });
