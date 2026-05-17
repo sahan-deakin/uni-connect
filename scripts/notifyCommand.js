@@ -1,12 +1,7 @@
 const mongoose    = require('mongoose');
 const { io: SocketClient } = require('socket.io-client');
 
-//Hardcoded demo values
-const HARDCODED_SESSION_ID = 'sess_demo_001';
-const HARDCODED_USER_ID    = 'alex-johnson-demo';
-const DEMO_EMAIL           = 'alex.johnson@deakin.edu.au';
-// 
-
+const DEMO_EMAIL  = 'alex.johnson@deakin.edu.au';
 const MONGO_URI   = 'mongodb://127.0.0.1:27017/uni-connect';
 const SERVER_URL  = `http://localhost:3000`;
 const VALID_TYPES = ['message', 'forum_reply', 'connection_request', 'event', 'resource'];
@@ -28,6 +23,7 @@ if (!VALID_TYPES.includes(type)) {
 async function main() {
   await mongoose.connect(MONGO_URI);
 
+  const User         = require('../models/userModel');
   const Student      = require('../models/studentModel');
   const Notification = require('../models/notificationModel');
 
@@ -37,6 +33,15 @@ async function main() {
     await mongoose.disconnect();
     process.exit(1);
   }
+
+  // Resolve the User _id — this is what the client uses as its socket room
+  const user = await User.findOne({ email: DEMO_EMAIL });
+  if (!user) {
+    console.error('Demo user account not found. Run: npm run seed:dashboard');
+    await mongoose.disconnect();
+    process.exit(1);
+  }
+  const sessionId = user._id.toString();
 
   const notif = await Notification.create({ studentId: student._id, type, title, message });
   console.log(`[notify] Saved to DB - [${type}] "${title}"`);
@@ -50,10 +55,10 @@ async function main() {
 
   socket.on('connect', () => {
     socket.emit('admin-notify', {
-      sessionId: HARDCODED_SESSION_ID,
+      sessionId,
       notification: notif.toObject()
     });
-    setTimeout(() => done(`[notify] Pushed to session "${HARDCODED_SESSION_ID}" (user: ${HARDCODED_USER_ID})`), 200);
+    setTimeout(() => done(`[notify] Pushed to session "${sessionId}" (email: ${DEMO_EMAIL})`), 200);
   });
 
   socket.on('connect_error', () => {

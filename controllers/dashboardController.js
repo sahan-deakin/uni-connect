@@ -21,7 +21,7 @@ async function resolveStudent(req, res) {
 // Feature 1: Personalized Academic Feed
 const getPersonalizedFeed = async (req, res) => {
   try {
-    const student = await getDemoStudent();
+    const student = await resolveStudent(req, res).catch();
     if (!student) {
       return res.status(404).json({ error: 'Demo student not found. Run: npm run seed:dashboard' });
     }
