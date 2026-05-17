@@ -62,6 +62,10 @@ app.use('/api/events', eventRoute);
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', db: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' });
 });
+// Route for navbar partial
+app.get('/partials/navbar.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/partials/navbar.html'));
+});
 
 // 404 handler
 app.use((req, res) => {
