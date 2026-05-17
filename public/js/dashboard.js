@@ -93,6 +93,8 @@ function renderWelcome(student) {
     `Showing results for ${student.unitCodes.join(', ') || 'your enrolled units'}`;
   document.getElementById('unit-tags').innerHTML =
     student.unitCodes.map(u => `<span class="unit-chip">${u}</span>`).join('');
+
+  localStorage.setItem('uc_display_name', student.name);
 }
 
 function renderFeed({ resources, events, forums }) {
