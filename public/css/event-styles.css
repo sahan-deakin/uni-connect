@@ -1,0 +1,123 @@
+/* EVENTS PAGE */
+.events-hero {
+  padding: 0px 0 20px;
+  text-align: center;
+}
+
+.events-hero h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.events-hero h5 {
+  color: var(--muted);
+  margin-top: 10px;
+  font-size: 1rem;
+}
+
+/* SUBMIT BANNER */
+.submit-banner {
+  background: #dadaf9;
+  border-radius: 14px;
+  padding: 0px 30px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-submit-banner:hover {
+  background: #3C3489;
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding-bottom: 60px;
+}
+
+.event-card {
+  background: white;
+  border-radius: 14px;
+  border: 1px solid #E5E7EB;
+  overflow: hidden;
+}
+
+.event-card-bar {
+  height: 12px;
+}
+.event-card-bar.academic { background: #3A15CE; }
+.event-card-bar.career   { background: #0F6E56; }
+.event-card-bar.social   { background: #D85A30; }
+.event-card-body { padding: 18px 20px; }
+
+.event-badge {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.event-badge.academic { background: #EEEDFE; color: #3C3489; }
+.event-badge.career   { background: #E1F5EE; color: #085041; }
+.event-badge.social   { background: #FAECE7; color: #712B13; }
+.event-badge.spots    { background: #F3F4F6; color: #686c71; }
+
+.event-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.event-org {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.event-details {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.event-details li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.event-details li .material-icons {
+  font-size: 16px;
+  color: #9CA3AF;
+}
+
+.event-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #000000;
+  padding-top: 14px;
+}
+
+.btn-rsvp {
+  font-size: 13px;
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: 1.5px solid rgb(14, 108, 41);
+  color: rgb(14, 108, 41);
+  background: transparent;
+  cursor: pointer;
+}
+
+.btn-rsvp:hover { background: #b3f1c3; }
+
+.event-capacity {
+  font-size: 12px;
+  color: #9CA3AF;
+}

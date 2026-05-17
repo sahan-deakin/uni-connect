@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard - UniConnect</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- NAVBAR PLACEHOLDER -->
+<div id="navbar-placeholder"></div>
+
+<!-- DASHBOARD -->
+<div class="container dashboard-container">
+
+  <!-- Welcome Strip -->
+  <div class="welcome-strip">
+    <div class="welcome-info">
+      <h5>Welcome back, <span id="student-name">Alex</span>!</h5>
+      <span class="welcome-meta">
+        <span id="student-course">Bachelor of Computer Science</span>
+        &middot;
+        <span id="student-uni">Deakin University</span>
+      </span>
+    </div>
+    <div id="unit-tags" class="welcome-units"></div>
+    <div class="live-badge">
+      <span class="live-dot"></span> Live
+    </div>
+  </div>
+
+  <!-- Error Banner (hidden by default) -->
+  <div id="error-banner" class="error-banner" style="display:none">
+    <i class="material-icons">warning</i>
+    <span id="error-msg">Could not load dashboard data. Make sure the server is running and you have seeded the database (<code>npm run seed:dashboard</code>).</span>
+  </div>
+
+  <!-- ── Row 1: Academic Feed + Notifications ─────────────────────────────── -->
+  <div class="row">
+
+    <div class="col s12 l8">
+  
+    <!-- Feature 1: Personalized Academic Feed -->
+    <div class="col s12">
+      <div class="card dashboard-card">
+        <div class="card-content">
+          <div class="card-section-header">
+            <p class="section-title">
+              Personalized Academic Feed
+            </p>
+          </div>
+          <p class="section-subtitle" id="feed-subtitle">Based on your enrolled units</p>
+
+          <ul class="tabs feed-tabs" id="feed-tabs-el">
+            <li class="tab col s4">
+              <a class="active" href="#feed-res">
+                <i class="material-icons tiny">description</i> Resources
+              </a>
+            </li>
+            <li class="tab col s4">
+              <a href="#feed-events">
+                <i class="material-icons tiny">event</i> Events
+              </a>
+            </li>
+            <li class="tab col s4">
+              <a href="#feed-forums">
+                <i class="material-icons tiny">forum</i> Forums
+              </a>
+            </li>
+          </ul>
+
+          <div id="feed-res" class="tab-panel">
+            <div class="loading-placeholder"><div class="preloader-wrapper small active"><div class="spinner-layer spinner-blue-only"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div></div>
+          </div>
+          <div id="feed-events" class="tab-panel">
+            <div class="loading-placeholder"><div class="preloader-wrapper small active"><div class="spinner-layer spinner-blue-only"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div></div>
+          </div>
+          <div id="feed-forums" class="tab-panel">
+            <div class="loading-placeholder"><div class="preloader-wrapper small active"><div class="spinner-layer spinner-blue-only"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col s12">
+      <div class="card dashboard-card">
+        <div class="card-content">
+          <p class="section-title">
+            My Academic Activity
+          </p>
+          <p class="section-subtitle">Your academic activity at a glance</p>
+
+          <!-- Stats row -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <i class="material-icons">description</i>
+              <div class="stat-number" id="stat-resources">-</div>
+              <div class="stat-label">Resources Uploaded</div>
+            </div>
+            <div class="stat-card">
+              <i class="material-icons">event</i>
+              <div class="stat-number" id="stat-events">-</div>
+              <div class="stat-label">Events Registered</div>
+            </div>
+            <div class="stat-card">
+              <i class="material-icons">forum</i>
+              <div class="stat-number" id="stat-posts">-</div>
+              <div class="stat-label">Forum Posts</div>
+            </div>
+            <div class="stat-card">
+              <i class="material-icons">cloud_download</i>
+              <div class="stat-number" id="stat-downloads">-</div>
+              <div class="stat-label">Total Downloads</div>
+            </div>
+          </div>
+
+          <!-- Tracker tabs -->
+          <ul class="tabs tracker-tabs" id="tracker-tabs-el">
+            <li class="tab col s4">
+              <a class="active" href="#tracker-resources">
+                <i class="material-icons tiny">description</i>
+                <span class="hide-on-small-only"> My Resources</span>
+              </a>
+            </li>
+            <li class="tab col s4">
+              <a href="#tracker-events">
+                <i class="material-icons tiny">event</i>
+                <span class="hide-on-small-only"> My Events</span>
+              </a>
+            </li>
+            <li class="tab col s4">
+              <a href="#tracker-forums">
+                <i class="material-icons tiny">forum</i>
+                <span class="hide-on-small-only"> Forum Activity</span>
+              </a>
+            </li>
+          </ul>
+
+          <div id="tracker-resources" class="tab-panel">
+            <div class="loading-placeholder">Loading your resources...</div>
+          </div>
+          <div id="tracker-events" class="tab-panel">
+            <div class="loading-placeholder">Loading your events...</div>
+          </div>
+          <div id="tracker-forums" class="tab-panel">
+            <div class="loading-placeholder">Loading your posts...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div><!-- /col 1 -->
+    <!-- Feature 3: Real-Time Notifications -->
+    <div class="col s12 l4">
+      <div class="card dashboard-card" id="notifications-list-card">
+        <div class="card-content">
+          <div class="card-section-header">
+            <p class="section-title" style="margin:0">
+              Notifications
+              <span class="notif-count-chip" id="notif-count-chip" style="display:none">0</span>
+              <span class="socket-indicator" id="socket-indicator" title="Real-time connection status">
+                <span class="socket-dot disconnected"></span>
+              </span>
+            </p>
+            <button id="mark-all-read-btn" class="btn-flat btn-small dash-text-btn">Mark all read</button>
+          </div>
+          <div id="notifications-list">
+            <div class="loading-placeholder"><div class="preloader-wrapper small active"><div class="spinner-layer spinner-blue-only"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /row 1 -->
+
+
+  <!-- ── Row 3: Study & Event Tracker ─────────────────────────────────────── -->
+  <div class="row">
+
+  </div><!-- /row 3 -->
+
+</div><!-- /dashboard-container -->
+
+<footer class="footer">
+  <div class="container center">
+    <p>© 2026 UniConnect Victoria</p>
+  </div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/navbar.js"></script>
+<script src="js/dashboard.js"></script>
+
+</body>
+</html>
