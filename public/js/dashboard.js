@@ -1,7 +1,30 @@
 
-// Hardcoded for demo
-const HARDCODED_SESSION_ID = 'sess_demo_001';
-const HARDCODED_USER_ID    = 'alex-johnson-demo';
+// Auth
+function getToken() {
+  return localStorage.getItem('uc_token');
+}
+
+function parseJWT(token) {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch {
+    return null;
+  }
+}
+
+function logout() {
+  localStorage.removeItem('uc_token');
+  localStorage.removeItem('uc_user');
+  window.location.href = '/login.html';
+}
+
+// Redirect to login if no token
+const token = getToken();
+if (!token) {
+  window.location.href = '/login.html';
+}
+
+const currentUser = parseJWT(token) || {};
 
 let currentUnreadCount = 0;
 
@@ -27,8 +50,20 @@ function daysUntil(dateStr) {
   return `${days} days`;
 }
 
-async function fetchJSON(url) {
-  const res = await fetch(url);
+async function fetchJSON(url, options = {}) {
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      'Authorization': `Bearer ${getToken()}`,
+      ...(options.headers || {})
+    }
+  });
+
+  if (res.status === 401) {
+    logout();
+    return;
+  }
+
   if (!res.ok) throw new Error(`${res.status} from ${url}`);
   return res.json();
 }
@@ -50,13 +85,12 @@ function updateNotifBadge(count) {
 // Renderers 
 
 function renderWelcome(student) {
-  console.log('Rendering welcome for student:', student.name);
   document.getElementById('student-name').textContent = student.name.split(' ')[0];
   document.getElementById('nav-student-name').textContent = student.name;
   document.getElementById('student-course').textContent = student.course;
   document.getElementById('student-uni').textContent = student.university;
   document.getElementById('feed-subtitle').textContent =
-    `Showing results for ${student.unitCodes.join(', ')}`;
+    `Showing results for ${student.unitCodes.join(', ') || 'your enrolled units'}`;
   document.getElementById('unit-tags').innerHTML =
     student.unitCodes.map(u => `<span class="unit-chip">${u}</span>`).join('');
 }
@@ -205,7 +239,7 @@ function renderTracker(data) {
 
 async function markRead(notifId, el) {
   if (!el.classList.contains('unread')) return;
-  await fetch(`/api/dashboard/notifications/${notifId}/read`, { method: 'PUT' });
+  await fetchJSON(`/api/dashboard/notifications/${notifId}/read`, { method: 'PUT' });
   el.classList.remove('unread');
   el.querySelector('.notif-unread-dot')?.remove();
   currentUnreadCount = Math.max(0, currentUnreadCount - 1);
@@ -213,7 +247,7 @@ async function markRead(notifId, el) {
 }
 
 async function markAllRead() {
-  await fetch('/api/dashboard/notifications/read-all', { method: 'PUT' });
+  await fetchJSON('/api/dashboard/notifications/read-all', { method: 'PUT' });
   document.querySelectorAll('.notif-item.unread').forEach(el => {
     el.classList.remove('unread');
     el.querySelector('.notif-unread-dot')?.remove();
@@ -229,7 +263,8 @@ function connectSocket() {
   const dot = document.querySelector('.socket-dot');
 
   socket.on('connect', () => {
-    socket.emit('join', HARDCODED_SESSION_ID);
+    // Use user ID from JWT as session room identifier
+    socket.emit('join', currentUser.userId);
     dot.classList.replace('disconnected', 'connected');
     document.querySelector('.socket-indicator').title = 'Notification socket connected';
   });
@@ -258,6 +293,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   M.Tabs.init(document.getElementById('tracker-tabs-el'));
 
   document.getElementById('mark-all-read-btn').addEventListener('click', markAllRead);
+  document.getElementById('logout-btn')?.addEventListener('click', logout);
+  document.getElementById('logout-btn-mobile')?.addEventListener('click', logout);
 
   try {
     const [feedData, notifData, trackerData] = await Promise.all([
@@ -265,6 +302,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       fetchJSON('/api/dashboard/notifications'),
       fetchJSON('/api/dashboard/tracker')
     ]);
+
+    if (!feedData || !notifData || !trackerData) return; // redirected to login
 
     renderWelcome(feedData.student);
     renderFeed(feedData.feed);

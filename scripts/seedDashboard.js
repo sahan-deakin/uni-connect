@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 const Student = require('../models/studentModel');
+const User = require('../models/userModel');
 const Resource = require('../models/resourceModel');
 const Event = require('../models/eventModel');
 const ForumPost = require('../models/forumPostModel');
@@ -12,6 +14,7 @@ async function seed() {
   console.log('Connected. Clearing existing data...');
 
   await Promise.all([
+    User.deleteMany({}),
     Student.deleteMany({}),
     Resource.deleteMany({}),
     Event.deleteMany({}),
@@ -232,13 +235,29 @@ async function seed() {
     }
   ]);
 
+  // Create user accounts for all seeded students (password: password123)
+  const hashedPassword = await bcrypt.hash('password123', 10);
+  await User.insertMany([
+    { username: 'alex.johnson',    email: 'alex.johnson@deakin.edu.au',    password: hashedPassword },
+    { username: 'emma.wilson',     email: 'emma.wilson@deakin.edu.au',     password: hashedPassword },
+    { username: 'sarah.chen',      email: 'sarah.chen@deakin.edu.au',      password: hashedPassword },
+    { username: 'marcus.williams', email: 'marcus.williams@deakin.edu.au', password: hashedPassword },
+    { username: 'sahan.r',         email: 'sahan.r@deakin.edu.au',         password: hashedPassword }
+  ]);
+
   console.log('Seeded:');
+  console.log('  Users:         5');
   console.log('  Students:      5');
   console.log('  Resources:     5');
   console.log('  Events:        5');
   console.log('  Forum posts:   5');
-  console.log('  Notifications: 5');
-  console.log('\nDone. Login as: alex.johnson@deakin.edu.au');
+  console.log('  Notifications: 5 (for Alex)');
+  console.log('\nLogin credentials (all use password: password123):');
+  console.log('  alex.johnson@deakin.edu.au  <- has notifications & seeded data');
+  console.log('  emma.wilson@deakin.edu.au');
+  console.log('  sarah.chen@deakin.edu.au');
+  console.log('  marcus.williams@deakin.edu.au');
+  console.log('  sahan.r@deakin.edu.au');
 
   await mongoose.connection.close();
 }

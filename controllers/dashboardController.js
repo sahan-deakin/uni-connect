@@ -4,10 +4,18 @@ const Event = require('../models/eventModel');
 const ForumPost = require('../models/forumPostModel');
 const Notification = require('../models/notificationModel');
 
-const DEMO_EMAIL = 'alex.johnson@deakin.edu.au';
-
-async function getDemoStudent() {
-  return Student.findOne({ email: DEMO_EMAIL });
+async function resolveStudent(req, res) {
+  const { studentId } = req.user;
+  if (!studentId) {
+    res.status(404).json({ error: 'Student profile not found for your account' });
+    return null;
+  }
+  const student = await Student.findById(studentId);
+  if (!student) {
+    res.status(404).json({ error: 'Student profile not found' });
+    return null;
+  }
+  return student;
 }
 
 // Feature 1: Personalized Academic Feed
@@ -63,10 +71,8 @@ const getPersonalizedFeed = async (req, res) => {
 // Feature 3: Real-Time Notifications
 const getNotifications = async (req, res) => {
   try {
-    const student = await getDemoStudent();
-    if (!student) {
-      return res.status(404).json({ error: 'Demo student not found. Run: npm run seed:dashboard' });
-    }
+    const student = await resolveStudent(req, res);
+    if (!student) return;
 
     const [notifications, unreadCount] = await Promise.all([
       Notification.find({ studentId: student._id }).sort({ createdAt: -1 }).limit(20),
@@ -81,7 +87,7 @@ const getNotifications = async (req, res) => {
 
 const getUnreadCount = async (req, res) => {
   try {
-    const student = await getDemoStudent();
+    const student = await resolveStudent(req, res);
     if (!student) return res.json({ count: 0 });
 
     const count = await Notification.countDocuments({ studentId: student._id, read: false });
@@ -102,8 +108,8 @@ const markNotificationRead = async (req, res) => {
 
 const markAllRead = async (req, res) => {
   try {
-    const student = await getDemoStudent();
-    if (!student) return res.json({ success: true });
+    const student = await resolveStudent(req, res);
+    if (!student) return;
 
     await Notification.updateMany({ studentId: student._id, read: false }, { read: true });
     res.json({ success: true });
@@ -115,10 +121,8 @@ const markAllRead = async (req, res) => {
 // Feature 4: Integrated Study & Event Tracker
 const getTrackerData = async (req, res) => {
   try {
-    const student = await getDemoStudent();
-    if (!student) {
-      return res.status(404).json({ error: 'Demo student not found. Run: npm run seed:dashboard' });
-    }
+    const student = await resolveStudent(req, res);
+    if (!student) return;
 
     const [myResources, myEvents, myPosts] = await Promise.all([
       Resource.find({ uploadedBy: student._id }).sort({ createdAt: -1 }),

@@ -46,12 +46,14 @@ io.on('connection', (socket) => {
 });
 
 // 4) Routes
+const authRoute      = require('./routes/authRoute');
 const sampleRoute    = require('./routes/sampleRoute');
 const dashboardRoute = require('./routes/dashboardRoute');
 const reviewRoute = require('./routes/reviewRoute');
 const adminRoute  = require('./routes/adminRoute');
 const eventRoute = require('./routes/eventRoute');
 
+app.use('/api/auth',      authRoute);
 app.use('/api/samples',   sampleRoute);
 app.use('/api/dashboard', dashboardRoute);
 app.use('/api/reviews', reviewRoute);
