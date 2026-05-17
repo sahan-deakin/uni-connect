@@ -1,17 +1,13 @@
-/* NAV */
 .logo-image {
   height: 50px;
   width: auto;
   display: block;
 }
 
+/* NAV */
 .nav-custom {
   background: transparent;
   box-shadow: inset;
-}
-
-.nav-custom a {
-  color: var(--text);
 }
 
 .nav-custom .brand-logo{
@@ -34,6 +30,11 @@
   height: 100%;
   gap: 32px;
 }
+
+.nav-custom a {
+  color: var(--text);
+}
+
 
 /* EVENTS PAGE */
 .events-hero {
@@ -157,27 +158,4 @@
 .event-capacity {
   font-size: 12px;
   color: #9CA3AF;
-}
-
-/* CTA */
-.cta {
-  padding: 60px 0;
-}
-
-/* FOOTER */
-.footer {
-  padding: 20px 0;
-}
-
-/* RESPONSIVE */
-@media(max-width:992px){
-  .hero h1 {
-    font-size: 2.2rem;
-  }
-  .nav-custom .container {
-    padding: 0 16px;
-  }
-  .nav-wrapper {
-    padding: 0 16px;
-  }
 }

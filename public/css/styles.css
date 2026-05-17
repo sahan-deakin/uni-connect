@@ -109,3 +109,26 @@ body {
   background: var(--primary);
   color: white;
 }
+
+/* CTA */
+.cta {
+  padding: 60px 0;
+}
+
+/* FOOTER */
+.footer {
+  padding: 20px 0;
+}
+
+/* RESPONSIVE */
+@media(max-width:992px){
+  .hero h1 {
+    font-size: 2.2rem;
+  }
+  .nav-custom .container {
+    padding: 0 16px;
+  }
+  .nav-wrapper {
+    padding: 0 16px;
+  }
+}
