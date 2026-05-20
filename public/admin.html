@@ -9,6 +9,29 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="css/admin-styles.css" />
+
+  <style>
+    /* ── Modal overlay — hidden by default, shown via .open ── */
+    #rejectModal,
+    #blockModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 9000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #rejectModal.open,
+    #blockModal.open {
+      display: flex;
+    }
+    /* Prevent body scroll while a modal is open */
+    body.modal-open {
+      overflow: hidden;
+    }
+  </style>
 </head>
 
 <body>
@@ -64,8 +87,7 @@
         <div class="page-sub" id="pageSub">Overview &amp; analytics</div>
       </div>
       <div class="admin-chip">
-        <!-- NEED TO REPLACE WITH ACTUAL ADMIN INFO -->
-        <div class="admin-av">A</div> Admin
+        <div class="admin-av">A</div> rootadmin
       </div>
     </div>
 
@@ -229,6 +251,46 @@
         </div>
       </div>
 
+      <!-- ══ ALL USERS ══ -->
+      <div class="panel" id="panel-users">
+        <div class="sec-head">
+          <h2>All Users</h2>
+          <small id="usersCount">loading…</small>
+        </div>
+
+        <!-- Search + filter bar -->
+        <div class="filter-bar" style="gap:10px;flex-wrap:wrap;align-items:center">
+          <input
+            id="userSearch"
+            type="text"
+            placeholder="Search by username or email…"
+            oninput="filterUsers()"
+            style="flex:1;min-width:200px;max-width:320px;padding:6px 12px;border:1px solid var(--bdr);border-radius:6px;font-size:.85rem;background:var(--bg);color:var(--txt)"
+          />
+          <button class="filter-btn active" onclick="setUserFilter('all',   this)">All</button>
+          <button class="filter-btn"        onclick="setUserFilter('user',  this)">Users</button>
+          <button class="filter-btn"        onclick="setUserFilter('admin', this)">Admins</button>
+          <button class="filter-btn"        onclick="setUserFilter('blocked',this)">Blocked</button>
+        </div>
+
+        <div class="tbl-card" style="margin-top:14px">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Joined</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTable">
+              <tr><td colspan="5" style="text-align:center;color:var(--mut);padding:28px">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div><!-- /content -->
   </main>
 
@@ -249,6 +311,29 @@
     </div>
   </div>
 
+  <!-- ── Block-user modal ── -->
+  <div id="blockModal">
+    <div class="modal-box">
+      <h3>Block User</h3>
+      <p id="blockModalTarget" style="color:var(--mut);font-size:.85rem;margin-bottom:12px"></p>
+      <label style="font-size:.8rem;color:var(--mut);display:block;margin-bottom:4px">Duration</label>
+      <select id="blockDurationModal" style="width:100%;padding:8px 10px;border:1px solid var(--bdr);border-radius:6px;background:var(--bg);color:var(--txt);font-size:.85rem;margin-bottom:12px">
+        <option value="3months">3 Months</option>
+        <option value="6months">6 Months</option>
+        <option value="1year">1 Year</option>
+        <option value="permanent">Permanent</option>
+      </select>
+      <label style="font-size:.8rem;color:var(--mut);display:block;margin-bottom:4px">Reason (optional)</label>
+      <textarea id="blockReasonModal" placeholder="e.g. Repeated spam, policy violation…" style="margin-bottom:0"></textarea>
+      <div class="modal-foot">
+        <button class="btn-act btn-ghost" onclick="closeBlockModal()">Cancel</button>
+        <button class="btn-act btn-danger" onclick="confirmBlockFromModal()">
+          <i class="material-icons" style="font-size:.9rem">block</i> Block
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   <script>
     const $ = id => document.getElementById(id);
@@ -259,7 +344,7 @@
       blocked:    ['Blocked Users',        'Accounts currently suspended'],
       resources:  ['Academic Resources',  'Manage resource content'],
       events:     ['Events',              'Approve or reject submitted events'],
-      users:      ['All Users',           'User directory'],
+      users:      ['All Users',           'User directory & account management'],
       settings:   ['Settings',            'System configuration'],
     };
 
@@ -274,6 +359,7 @@
       if (name === 'reported') loadReported();
       if (name === 'blocked')  loadBlocked();
       if (name === 'events')   loadEvents();
+      if (name === 'users')    loadUsers();
     }
 
     function toast(msg, ok = true) {
@@ -327,41 +413,50 @@
       }
     }
 
-    // ── DASHBOARD ──
-    async function loadDashboard() {
+    // ── DASHBOARD ──────────────────────────────────────────────────────────
+    // Each endpoint is fetched independently — one failure won't blank all stat cards
+    async function safeFetch(url) {
       try {
-        const [rR, bR, sR, eR] = await Promise.all([
-          fetch('/api/reviews/reported/list'),
-          fetch('/api/admin/blocked-users'),
-          fetch('/api/samples'),
-          fetch('/api/events/pending'),
-        ]);
-        const reported      = await rR.json();
-        const blocked       = await bR.json();
-        const samples       = await sR.json();
-        const pendingEvents = await eR.json();
+        const r = await fetch(url);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return await r.json();
+      } catch (e) {
+        console.warn(`[dashboard] ${url} →`, e.message);
+        return null;
+      }
+    }
 
-        $('statReported').textContent  = reported.length;
-        $('statBlocked').textContent   = blocked.length;
-        $('statResources').textContent = Array.isArray(samples) ? samples.length : '—';
-        $('statUsers').textContent     = '6';
-        $('statEvents').textContent    = pendingEvents.length;
+    async function loadDashboard() {
+      const [reported, blocked, samples, pendingEvents, allUsers] = await Promise.all([
+        safeFetch('/api/reviews/reported/list'),
+        safeFetch('/api/admin/blocked-users'),
+        safeFetch('/api/resources'),   // ← update to match your resources route if different
+        safeFetch('/api/events/pending'),
+        safeFetch('/api/admin/users'),
+      ]);
 
-        const badge = $('navBadge');
-        badge.textContent   = reported.length;
-        badge.style.display = reported.length ? 'inline' : 'none';
+      $('statReported').textContent  = Array.isArray(reported)     ? reported.length      : '—';
+      $('statBlocked').textContent   = Array.isArray(blocked)       ? blocked.length       : '—';
+      $('statResources').textContent = Array.isArray(samples)       ? samples.length       : '—';
+      $('statUsers').textContent     = Array.isArray(allUsers)      ? allUsers.length      : '—';
+      $('statEvents').textContent    = Array.isArray(pendingEvents) ? pendingEvents.length : '—';
 
-        const evtBadge = $('navEventBadge');
-        evtBadge.textContent   = pendingEvents.length;
-        evtBadge.style.display = pendingEvents.length ? 'inline' : 'none';
+      const reportedLen = Array.isArray(reported) ? reported.length : 0;
+      const badge = $('navBadge');
+      badge.textContent   = reportedLen;
+      badge.style.display = reportedLen ? 'inline' : 'none';
 
-        $('dashCount').textContent      = reported.length;
-        $('dashEventCount').textContent = pendingEvents.length;
+      const pendingLen = Array.isArray(pendingEvents) ? pendingEvents.length : 0;
+      const evtBadge = $('navEventBadge');
+      evtBadge.textContent   = pendingLen;
+      evtBadge.style.display = pendingLen ? 'inline' : 'none';
 
-        renderBreakdown(reported);
-        renderDashReviews(reported);
-        renderDashEvents(pendingEvents);
-      } catch (e) { console.error(e); }
+      $('dashCount').textContent      = reportedLen;
+      $('dashEventCount').textContent = pendingLen;
+
+      renderBreakdown(reported      || []);
+      renderDashReviews(reported    || []);
+      renderDashEvents(pendingEvents || []);
     }
 
     function renderBreakdown(reported) {
@@ -409,7 +504,7 @@
             </tr>`).join('');
     }
 
-    // ── REPORTED REVIEWS ──
+    // ── REPORTED REVIEWS ───────────────────────────────────────────────────
     async function loadReported() {
       const list = $('reviewList');
       try {
@@ -479,12 +574,21 @@
       }
     }
 
-    function dismiss(reviewId, btn) {
-      btn.disabled = true; fadeRemove('rc-' + reviewId); toast('Review dismissed');
-      setTimeout(loadReported, 400);
+    async function dismiss(reviewId, btn) {
+      btn.disabled = true;
+      try {
+        const res = await fetch(`/api/reviews/${reviewId}/resolve`, { method: 'PUT' });
+        if (!res.ok) throw new Error();
+        fadeRemove('rc-' + reviewId);
+        toast('Review dismissed');
+        setTimeout(() => { loadReported(); loadDashboard(); }, 400);
+      } catch {
+        toast('Failed to dismiss review', false);
+        btn.disabled = false;
+      }
     }
 
-    // ── BLOCKED USERS ──
+    // ── BLOCKED USERS ──────────────────────────────────────────────────────
     async function loadBlocked() {
       const tbody = $('blockedTable');
       try {
@@ -523,7 +627,7 @@
       }
     }
 
-    // ── EVENTS ──
+    // ── EVENTS ─────────────────────────────────────────────────────────────
     let _allEvents     = [];
     let _activeFilter  = 'pending';
     let _pendingReject = null;
@@ -553,7 +657,7 @@
 
     function filterEvents(filter, btn) {
       _activeFilter = filter;
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#panel-events .filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       renderEvents();
     }
@@ -647,19 +751,21 @@
       _pendingReject = { eventId, btn };
       $('rejectReason').value = '';
       $('rejectModal').classList.add('open');
+      document.body.classList.add('modal-open');
       setTimeout(() => $('rejectReason').focus(), 50);
     }
 
     function closeRejectModal() {
       $('rejectModal').classList.remove('open');
+      document.body.classList.remove('modal-open');
       _pendingReject = null;
     }
 
     async function confirmReject() {
       if (!_pendingReject) return;
-      const { eventId, btn } = _pendingReject;
+      const { eventId, btn } = _pendingReject;   // capture before closeRejectModal() nulls _pendingReject
       const reason = $('rejectReason').value.trim();
-      closeRejectModal();
+      closeRejectModal();                         // safe to close now — btn ref is captured above
       btn.disabled = true; btn.textContent = 'Rejecting…';
       try {
         const res = await fetch(`/api/events/admin/${eventId}/reject`, {
@@ -675,6 +781,7 @@
         renderDashEvents(_allEvents.filter(e => !e.status || e.status === 'pending'));
       } catch {
         toast('Failed to reject event', false);
+        // btn ref is still valid even though modal is closed
         btn.disabled = false;
         btn.innerHTML = '<i class="material-icons" style="font-size:.9rem">cancel</i> Reject';
       }
@@ -696,8 +803,197 @@
       }
     }
 
+    // ── ALL USERS ──────────────────────────────────────────────────────────
+    let _allUsers       = [];
+    let _userFilter     = 'all';
+    let _pendingBlock   = null;   // { userId, username }
+
+    async function loadUsers() {
+      const tbody = $('usersTable');
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--mut);padding:28px">Loading…</td></tr>`;
+      try {
+        const users = await fetch('/api/admin/users').then(r => r.json());
+        _allUsers = users;
+        renderUsers();
+      } catch {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--red);padding:22px">Failed to load users</td></tr>`;
+        toast('Error loading users', false);
+      }
+    }
+
+    function setUserFilter(filter, btn) {
+      _userFilter = filter;
+      document.querySelectorAll('#panel-users .filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderUsers();
+    }
+
+    function filterUsers() {
+      renderUsers();
+    }
+
+    function renderUsers() {
+      const tbody   = $('usersTable');
+      const query   = ($('userSearch').value || '').toLowerCase().trim();
+
+      let filtered = _allUsers;
+
+      // Role / status filter
+      if (_userFilter === 'admin')   filtered = filtered.filter(u => u.role === 'admin');
+      if (_userFilter === 'user')    filtered = filtered.filter(u => u.role !== 'admin');
+      if (_userFilter === 'blocked') filtered = filtered.filter(u => u.blocked?.isBlocked);
+
+      // Search filter
+      if (query) {
+        filtered = filtered.filter(u =>
+          (u.username || '').toLowerCase().includes(query) ||
+          (u.email    || '').toLowerCase().includes(query)
+        );
+      }
+
+      $('usersCount').textContent = `${filtered.length} of ${_allUsers.length}`;
+
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--mut);padding:32px">No users match.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(u => {
+        const bg        = avatarBg(u.username);
+        const isBlocked = u.blocked?.isBlocked;
+        const isAdmin   = u.role === 'admin';
+
+        // Status pill
+        const statusHtml = isBlocked
+          ? `<span class="pill p-red">Blocked</span>`
+          : isAdmin
+            ? `<span class="pill p-grn">Active</span>`
+            : `<span class="pill p-grn">Active</span>`;
+
+        // Role pill
+        const rolePill = isAdmin
+          ? `<span class="pill p-blue">Admin</span>`
+          : `<span class="pill p-gray">User</span>`;
+
+        // Actions — admins cannot be blocked
+        let actions = '';
+        if (isAdmin) {
+          actions = `<span style="color:var(--mut);font-size:.78rem">Protected</span>`;
+        } else if (isBlocked) {
+          actions = `
+            <button class="btn-act btn-success" onclick="unblockFromUsers('${u._id}', this)">
+              <i class="material-icons" style="font-size:.9rem">lock_open</i> Unblock
+            </button>`;
+        } else {
+          actions = `
+            <button class="btn-act btn-danger" onclick="openBlockModal('${u._id}', '${u.username}')">
+              <i class="material-icons" style="font-size:.9rem">block</i> Block
+            </button>`;
+        }
+
+        return `
+          <tr id="ur-${u._id}">
+            <td>
+              <div class="ucell">
+                <div class="uav" style="background:${bg}20;color:${bg}">${initials(u.username)}</div>
+                <div>
+                  <div class="uname">${u.username}</div>
+                  <div class="uemail">${u.email}</div>
+                </div>
+              </div>
+            </td>
+            <td>${rolePill}</td>
+            <td>${statusHtml}
+              ${isBlocked && u.blocked?.blockedUntil
+                ? `<span style="font-size:.72rem;color:var(--mut);display:block;margin-top:2px">until ${fmtDate(u.blocked.blockedUntil)}</span>`
+                : ''}
+            </td>
+            <td style="color:var(--mut);font-size:.8rem">${fmtDate(u.createdAt)}</td>
+            <td style="text-align:right">${actions}</td>
+          </tr>`;
+      }).join('');
+    }
+
+    function openBlockModal(userId, username) {
+      _pendingBlock = { userId, username };
+      $('blockModalTarget').textContent = `Blocking: ${username}`;
+      $('blockDurationModal').value  = '3months';
+      $('blockReasonModal').value    = '';
+      $('blockModal').classList.add('open');
+      document.body.classList.add('modal-open');
+      setTimeout(() => $('blockDurationModal').focus(), 50);
+    }
+
+    function closeBlockModal() {
+      $('blockModal').classList.remove('open');
+      document.body.classList.remove('modal-open');
+      _pendingBlock = null;
+    }
+
+    async function confirmBlockFromModal() {
+      if (!_pendingBlock) return;
+      const { userId, username } = _pendingBlock;
+      const duration = $('blockDurationModal').value;
+      const reason   = $('blockReasonModal').value.trim() || 'Blocked by admin';
+      closeBlockModal();
+
+      const row = $('ur-' + userId);
+      if (row) { row.style.opacity = '0.4'; row.style.pointerEvents = 'none'; }
+
+      try {
+        const res = await fetch(`/api/admin/block-user/${userId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ duration, reason })
+        });
+        if (!res.ok) throw new Error();
+        toast(`✅ ${username} blocked`);
+        // Update local state and re-render
+        const u = _allUsers.find(u => u._id === userId);
+        if (u) {
+          u.blocked = { isBlocked: true, reason, blockedAt: new Date().toISOString(),
+            blockedUntil: duration === 'permanent' ? null : calcExpiry(duration) };
+        }
+        renderUsers();
+        loadDashboard();
+      } catch {
+        toast('Failed to block user', false);
+        if (row) { row.style.opacity = ''; row.style.pointerEvents = ''; }
+      }
+    }
+
+    async function unblockFromUsers(userId, btn) {
+      btn.disabled = true; btn.textContent = '…';
+      try {
+        if (!(await fetch(`/api/admin/unblock-user/${userId}`, { method: 'PUT' })).ok) throw new Error();
+        toast('✅ User unblocked');
+        const u = _allUsers.find(u => u._id === userId);
+        if (u) u.blocked = { isBlocked: false };
+        renderUsers();
+        loadDashboard();
+      } catch {
+        toast('Failed to unblock', false);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="material-icons" style="font-size:.9rem">lock_open</i> Unblock';
+      }
+    }
+
+    function calcExpiry(duration) {
+      const d = new Date();
+      if (duration === '3months') d.setMonth(d.getMonth() + 3);
+      else if (duration === '6months') d.setMonth(d.getMonth() + 6);
+      else if (duration === '1year') d.setFullYear(d.getFullYear() + 1);
+      return d.toISOString();
+    }
+
+    // ── Modal keyboard / backdrop handlers ────────────────────────────────
     $('rejectModal').addEventListener('click', e => { if (e.target === $('rejectModal')) closeRejectModal(); });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRejectModal(); });
+    $('blockModal').addEventListener('click',  e => { if (e.target === $('blockModal'))  closeBlockModal(); });
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return;
+      closeRejectModal();
+      closeBlockModal();
+    });
 
     loadDashboard();
   </script>
