@@ -99,9 +99,21 @@ const getUnreadCount = async (req, res) => {
 
 const markNotificationRead = async (req, res) => {
   try {
-    await Notification.findByIdAndUpdate(req.params.id, { read: true });
+    const student = await resolveStudent(req, res);
+    if (!student) return;
+
+    const notification = await Notification.findOneAndUpdate(
+      { _id: req.params.id, studentId: student._id },
+      { read: true },
+      { new: true }
+    );
+
+    if (!notification) return res.status(404).json({ error: 'Notification not found' });
     res.json({ success: true });
   } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid notification ID' });
+    }
     res.status(500).json({ error: err.message });
   }
 };

@@ -46,19 +46,21 @@ io.on('connection', (socket) => {
 });
 
 // 4) Routes
-const authRoute      = require('./routes/authRoute');
-const sampleRoute    = require('./routes/sampleRoute');
-const dashboardRoute = require('./routes/dashboardRoute');
-const reviewRoute = require('./routes/reviewRoute');
-const adminRoute  = require('./routes/adminRoute');
-const eventRoute = require('./routes/eventRoute');
+const authRoute         = require('./routes/authRoute');
+const sampleRoute       = require('./routes/sampleRoute');
+const dashboardRoute    = require('./routes/dashboardRoute');
+const reviewRoute       = require('./routes/reviewRoute');
+const adminRoute        = require('./routes/adminRoute');
+const eventRoute        = require('./routes/eventRoute');
+const notificationRoute = require('./routes/notificationRoute');
 
-app.use('/api/auth',      authRoute);
-app.use('/api/samples',   sampleRoute);
-app.use('/api/dashboard', dashboardRoute);
-app.use('/api/reviews', reviewRoute);
-app.use('/api/admin',   adminRoute);
-app.use('/api/events', eventRoute);
+app.use('/api/auth',          authRoute);
+app.use('/api/samples',       sampleRoute);
+app.use('/api/dashboard',     dashboardRoute);
+app.use('/api/reviews',       reviewRoute);
+app.use('/api/admin',         adminRoute);
+app.use('/api/events',        eventRoute);
+app.use('/api/notifications', notificationRoute);
 
 // Health check
 app.get('/health', (req, res) => {
