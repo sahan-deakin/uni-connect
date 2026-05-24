@@ -56,19 +56,54 @@
 
 /* SUBMIT BANNER */
 .submit-banner {
-  background: #dadaf9;
-  border-radius: 14px;
-  padding: 0px 30px;
+  background: #d9d4f3;
+  border-radius: 25px;
+  padding: 20px 40px;
+}
+
+.submit-banner-text {
+  align-items: center;
   display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.btn-submit-banner {
+  margin-top: 10px;
 }
 
 .btn-submit-banner:hover {
   background: #3C3489;
 }
+/* Form */
+/* MODAL STYLING */
+.modal {
+  border-radius: 20px;
+  max-width: 650px;
+}
 
+.modal-content h4 {
+  font-weight: 700;
+  margin-bottom: 30px;
+}
+
+.modal .input-field input:focus,
+.modal .input-field textarea:focus {
+  border-bottom: 1px solid #6c63ff !important;
+  box-shadow: 0 1px 0 0 #6c63ff !important;
+}
+
+.modal .btn {
+  background: #6c63ff;
+  border-radius: 30px;
+  padding: 0 30px;
+}
+
+.modal .btn:hover {
+  background: #574bdb;
+}
+/* ---------------------------------- */
+/* Event cards */
 .events-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
