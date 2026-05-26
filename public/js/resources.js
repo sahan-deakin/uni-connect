@@ -300,3 +300,92 @@ document.addEventListener('DOMContentLoaded', () => {
 
   fetchResources();
 });
+
+async function submitResource() {
+
+  try {
+
+    const title = document.getElementById('m-title').value;
+
+    const unit = document.getElementById('m-unit').value;
+
+    const type = document.getElementById('m-type').value;
+
+    const desc = document.getElementById('m-desc').value;
+
+    // Basic validation
+    if (!title || !unit || !type || !desc) {
+
+      M.toast({
+        html: 'Please fill in all required fields'
+      });
+
+      return;
+    }
+
+    // Build new resource object
+    const resourceData = {
+
+      title,
+      unit,
+      type,
+      desc,
+
+      uploader: 'Anonymous Student',
+
+      institution: 'Deakin',
+
+      tags: [],
+
+      upvotes: 0,
+
+      score: 70
+    };
+
+    // Send POST request
+    const response = await fetch('/api/resources', {
+
+      method: 'POST',
+
+      headers: {
+        'Content-Type': 'application/json'
+      },
+
+      body: JSON.stringify(resourceData)
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+
+    // Success toast
+    M.toast({
+      html: 'Resource uploaded successfully!'
+    });
+
+    // Close modal
+    const modal = M.Modal.getInstance(
+      document.getElementById('upload-modal')
+    );
+
+    modal.close();
+
+    // Reset form
+    document.getElementById('m-title').value = '';
+    document.getElementById('m-unit').value = '';
+    document.getElementById('m-desc').value = '';
+
+    // Reload resources
+    fetchResources();
+
+  } catch (err) {
+
+    console.error(err);
+
+    M.toast({
+      html: 'Upload failed'
+    });
+  }
+}
