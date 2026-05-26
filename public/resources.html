@@ -77,6 +77,14 @@
       <i class="material-icons" style="font-size:1.1rem;">search</i>
       Search
     </button>
+    <a href="#upload-modal"
+   class="upload-top-btn modal-trigger">
+
+  <i class="material-icons">cloud_upload</i>
+
+  Upload Resource
+
+</a>
   </div>
 </div>
 
@@ -194,6 +202,20 @@
       </div>
 
       <div class="input-field col s12 m6">
+        <select id="m-institution">
+          <option value="" disabled selected>Select university</option>
+          <option value="Deakin">Deakin</option>
+          <option value="Monash">Monash</option>
+          <option value="RMIT">RMIT</option>
+          <option value="Melbourne">Melbourne</option>
+          <option value="Swinburne">Swinburne</option>
+          <option value="La Trobe">La Trobe</option>
+        </select>
+
+        <label>University *</label>
+      </div>
+
+      <div class="input-field col s12 m6">
         <select id="m-type">
           <option value="" disabled selected>Choose type</option>
           <option>Notes</option>
@@ -209,6 +231,18 @@
       <div class="input-field col s12">
         <textarea id="m-desc" class="materialize-textarea" style="min-height:72px;"></textarea>
         <label for="m-desc">Description (min 20 characters) *</label>
+      </div>
+
+      <div class="input-field col s12">
+        <input
+          id="m-tags"
+          type="text"
+          placeholder="e.g. algorithms, graphs, week1"
+        >
+
+        <label for="m-tags" class="active">
+          Tags (comma separated)
+        </label>
       </div>
 
       <div class="input-field col s12" id="panel-file">

@@ -1,49 +1,66 @@
 const mongoose = require('mongoose');
 
-const resourceSchema = new mongoose.Schema(
-  {
-    title: {
-      type: String,
-      required: true
-    },
+const resourceSchema = new mongoose.Schema({
 
-    desc: String,
-
-    type: {
-      type: String,
-      enum: ['Notes', 'Textbook', 'Video Link', 'Past Exam', 'Slides'],
-      default: 'Notes'
-    },
-
-    unit: {
-      type: String,
-      required: true
-    },
-
-    uploader: String,
-
-    institution: String,
-
-    tags: [String],
-
-    upvotes: {
-      type: Number,
-      default: 0
-    },
-
-    score: {
-      type: Number,
-      default: 0
-    },
-
-    downloadCount: {
-      type: Number,
-      default: 0
-    }
+  title: {
+    type: String,
+    required: true
   },
-  {
-    timestamps: true
+
+  desc: {
+    type: String,
+    required: true
+  },
+
+  type: {
+    type: String,
+    enum: [
+      'Notes',
+      'Textbook',
+      'Video Link',
+      'Past Exam',
+      'Slides'
+    ],
+    default: 'Notes'
+  },
+
+  unit: {
+    type: String,
+    required: true
+  },
+
+  institution: {
+    type: String,
+    required: true
+  },
+
+  uploader: {
+    type: String,
+    default: 'Anonymous Student'
+  },
+
+  tags: {
+    type: [String],
+    default: []
+  },
+
+  upvotes: {
+    type: Number,
+    default: 0
+  },
+
+  score: {
+    type: Number,
+    default: 70
+  },
+
+  downloadCount: {
+    type: Number,
+    default: 0
   }
-);
+
+}, {
+  timestamps: true
+});
 
 module.exports = mongoose.model('Resource', resourceSchema);

@@ -324,22 +324,35 @@ async function submitResource() {
     }
 
     // Build new resource object
+    
+    const tags = document
+    .getElementById('m-tags')
+    .value
+    .split(',')
+    .map(tag => tag.trim())
+    .filter(tag => tag);
+
     const resourceData = {
 
-      title,
-      unit,
-      type,
-      desc,
+    title,
 
-      uploader: 'Anonymous Student',
+    unit,
 
-      institution: 'Deakin',
+    type,
 
-      tags: [],
+    desc,
 
-      upvotes: 0,
+    institution: document.getElementById('m-institution').value,
 
-      score: 70
+    uploader: 'Anonymous Student',
+
+    tags,
+
+    upvotes: 0,
+
+    score: 70,
+
+    downloadCount: 0
     };
 
     // Send POST request

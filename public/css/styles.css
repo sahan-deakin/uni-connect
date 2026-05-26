@@ -1178,4 +1178,28 @@ body {
   .resource-card { flex-direction: column; }
   .resource-right { flex-direction: row; align-items: center; width: 100%; justify-content: space-between; }
 }
- 
+
+/* Top upload button */
+.upload-top-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  height: 52px;
+  padding: 0 1.2rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #14b8a6, #0f766e);
+  color: white;
+  font-weight: 600;
+  transition: all .2s ease;
+}
+
+.upload-top-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(20,184,166,.25);
+  background: linear-gradient(135deg, #0d9488, #115e59);
+}
+
+.upload-top-btn i {
+  font-size: 1.1rem;
+}
