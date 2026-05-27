@@ -258,7 +258,7 @@ async function seed() {
     { username: 'marcus.williams', email: 'marcus.williams@deakin.edu.au', password: hashedPassword, role: 'user'  },
     { username: 'sahan.r',         email: 'sahan.r@deakin.edu.au',         password: hashedPassword, role: 'user'  },
 
-    // --- admin moderation test users (previously in userProfileSeed.js) ---
+    // --- admin moderation test users ---
     { username: 'sahanT',    email: 'sahan@gmail.com',     password: hashedPassword, role: 'user'  },
     { username: 'asangaT',   email: 'asanga@gmail.com',    password: hashedPassword, role: 'user'  },
     { username: 'nishadi',   email: 'nishadi@gmail.com',   password: hashedPassword, role: 'user'  },
@@ -271,8 +271,8 @@ async function seed() {
 
   const byName = Object.fromEntries(userDocs.map(u => [u.username, u._id]));
 
-  // ── Reviews / reported content (previously in userProfileSeed.js) ─────────
-  // Covers the three main admin moderation scenarios: spam, abusive language,
+  // ── Reviews / reported content ────────────────────────────────────────────
+  // Covers admin moderation scenarios: spam, abusive language,
   // impersonation — useful for testing the Reported Reviews panel.
   await Review.insertMany([
     {
