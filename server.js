@@ -51,14 +51,16 @@ const sampleRoute    = require('./routes/sampleRoute');
 const dashboardRoute = require('./routes/dashboardRoute');
 const reviewRoute = require('./routes/reviewRoute');
 const adminRoute  = require('./routes/adminRoute');
-const eventRoute = require('./routes/eventRoute');
+const eventRoute    = require('./routes/eventRoute');
+const resourceRoute = require('./routes/resourceRoute');
 
 app.use('/api/auth',      authRoute);
 app.use('/api/samples',   sampleRoute);
 app.use('/api/dashboard', dashboardRoute);
-app.use('/api/reviews', reviewRoute);
-app.use('/api/admin',   adminRoute);
-app.use('/api/events', eventRoute);
+app.use('/api/reviews',   reviewRoute);
+app.use('/api/admin',     adminRoute);
+app.use('/api/events',    eventRoute);
+app.use('/api/resources', resourceRoute);
 
 // Health check
 app.get('/health', (req, res) => {
