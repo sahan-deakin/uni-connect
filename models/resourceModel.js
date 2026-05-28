@@ -1,5 +1,15 @@
 const mongoose = require('mongoose');
 
+
+
+const resourceReportSchema = new mongoose.Schema({
+  reportedAt: { type: Date, default: Date.now },
+  reason:     { type: String, required: true, trim: true },
+  isResolved: { type: Boolean, default: false },
+  resolvedAt: { type: Date, default: null }
+}, { _id: false });
+
+
 const resourceSchema = new mongoose.Schema({
 
   title: {
@@ -65,7 +75,10 @@ const resourceSchema = new mongoose.Schema({
   downloadCount: {
     type: Number,
     default: 0
-  }
+  },
+
+  //  Resource report 
+  report: { type: resourceReportSchema, default: null }
 
 }, {
   timestamps: true

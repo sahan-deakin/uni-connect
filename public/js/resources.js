@@ -488,3 +488,37 @@ async function submitResource() {
     });
   }
 }
+
+// ── Report popup ──
+let _reportId = null;
+
+function openReport(id, title, e) {
+  e.stopPropagation();
+  _reportId = id;
+  document.getElementById('rp-title').textContent = `"${title}"`;
+  document.getElementById('rp-msg').value = '';
+  document.getElementById('rp-err').style.display = 'none';
+  document.getElementById('report-popup').style.display = 'flex';
+  setTimeout(() => document.getElementById('rp-msg').focus(), 50);
+}
+
+function closeReport() {
+  document.getElementById('report-popup').style.display = 'none';
+}
+
+document.getElementById('report-popup').addEventListener('click', e => { if(e.target===e.currentTarget) closeReport(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeReport(); });
+
+async function submitReport() {
+  const msg = document.getElementById('rp-msg').value.trim();
+  const err = document.getElementById('rp-err');
+  if (!msg) { err.textContent='Please describe the issue.'; err.style.display='block'; return; }
+  try {
+    const res = await fetch(`/api/resources/${_reportId}/report`, {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({reason:msg})
+    });
+    if (!res.ok) { const d=await res.json(); err.textContent=d.error||'Failed.'; err.style.display='block'; return; }
+    closeReport();
+    M.toast({html:'✅ Report submitted — our team will review it shortly.',classes:'rounded',displayLength:4000});
+  } catch { err.textContent='Network error. Try again.'; err.style.display='block'; }
+}
