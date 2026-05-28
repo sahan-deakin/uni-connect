@@ -16,6 +16,7 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/event-styles.css">
 </head>
 
 <body>
@@ -29,17 +30,87 @@
   <h5>Discover and register for upcoming events across Victorian universities</h5>
 </section>
 <!-- SUBMIT EVENT BANNER -->
-<section class="submit-banner-section">
+<section class="submit-banner-section" id="submit-event">
   <div class="container">
     <div class="submit-banner">
       <div class="submit-banner-text">
-        <h5>Organising an event? <a href="#submit-event" class="btn btn-submit-banner">Submit your event</a></h5>
-        <p>Share your upcoming event with students across Victorian universities. Submitted events are reviewed by our team before going live.</p>
+        <h5>Organising an event?</h5>
+          <p>Share your upcoming event with students across Victorian universities. Submitted events are reviewed by our team before going live.</p>
+          <button class="btn btn-submit-banner modal-trigger" data-target="eventModal">
+          Submit your Event
+          </button>
       </div>
-      
     </div>
   </div>
 </section>
+
+<!-- EVENT SUBMISSION MODAL -->
+<div id="eventModal" class="modal">
+  <div class="modal-content">
+    <h4>Create New Event</h4>
+    <form id="eventForm">
+
+      <div class="input-field">
+        <input id="event_name" type="text" required>
+        <label for="event_name">Event Name</label>
+      </div>
+
+      <div class="input-field">
+        <input id="organiser" type="text" required>
+        <label for="organiser">Organiser / University</label>
+      </div>
+
+      <div class="input-field">
+        <select required>
+          <option value="" disabled selected>Choose category</option>
+          <option value="Academic">Academic</option>
+          <option value="Career">Career</option>
+          <option value="Social">Social</option>
+          <option value="Sport">Sport</option>
+          <option value="Other">Other</option>
+        </select>
+        <label>Event Category</label>
+      </div>
+
+      <div class="input-field">
+        <input id="event_date" type="date" required>
+        <label for="event_date">Date</label>
+      </div>
+
+      <div class="input-field">
+        <input id="event_time" type="time" required>
+        <label for="event_time">Time</label>
+      </div>
+
+      <div class="input-field">
+        <input id="location" type="text" required>
+        <label for="location">Location</label>
+      </div>
+
+      <div class="input-field">
+        <input id="capacity" type="number" required>
+        <label for="capacity">Maximum Capacity</label>
+      </div>
+
+      <div class="input-field">
+        <textarea id="description" class="materialize-textarea"></textarea>
+        <label for="description">Event Description</label>
+      </div>
+
+      <div class="center">
+        <button type="submit" class="btn waves-effect waves-light">
+          Submit Event
+          <i class="material-icons right">send</i>
+        </button>
+      </div>
+    </form>
+
+    </div>
+      <div class="modal-footer">
+        <a href="#!" class="modal-close btn-flat">Close</a>
+      </div>
+    </div>
+
 <!-- FILTER BAR -->
 <section class="events-filter">
   <div class="container">
@@ -122,14 +193,29 @@
     </div>
   </div>
 </section>
-
-</body>
-
-<script src="js/navbar.js"></script>
 <!-- FOOTER -->
 <footer class="footer">
   <div class="container center">
     <p>© 2026 UniConnect Victoria</p>
   </div>
 </footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+
+    // Initialize modal
+    const modals = document.querySelectorAll('.modal');
+    M.Modal.init(modals);
+
+    // Initialize select dropdown
+    const selects = document.querySelectorAll('select');
+    M.FormSelect.init(selects);
+
+  });
+</script>
+
+<script src="js/navbar.js"></script>
+</body>
 </html>
