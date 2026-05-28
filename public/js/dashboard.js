@@ -227,7 +227,7 @@ function renderTracker(data) {
             <div class="tracker-item-actions">
               <span class="tracker-item-time">${upcoming ? daysUntil(e.date) : 'Done'}</span>
               ${editBtn}
-              <button class="tracker-action-btn red-text" onclick="deleteEvent('${e._id}')" title="${deleteLabel}">
+              <button class="tracker-action-btn red-text" onclick="deleteEvent('${e._id}', ${e.isCreator})" title="${deleteLabel}">
                 <i class="material-icons tiny">delete</i>
               </button>
             </div>
@@ -277,54 +277,84 @@ async function markAllRead() {
 
 // Student item actions
 
-async function deleteResource(id) {
-  if (!confirm('Delete this resource? This cannot be undone.')) return;
-  try {
-    await fetchJSON(`/api/student/resources/${id}`, { method: 'DELETE' });
-    document.getElementById(`res-${id}`)?.remove();
-    M.toast({ html: 'Resource deleted', classes: 'green darken-1' });
-  } catch {
-    M.toast({ html: 'Failed to delete resource', classes: 'red darken-1' });
-  }
+function showConfirm({ title, msg, label, icon = 'delete', onConfirm }) {
+  document.getElementById('confirm-modal-title').textContent = title;
+  document.getElementById('confirm-modal-msg').textContent   = msg;
+  document.getElementById('confirm-modal-label').textContent = label;
+  document.getElementById('confirm-modal-icon').textContent  = icon;
+  const okBtn = document.getElementById('confirm-modal-ok');
+  okBtn.onclick = () => {
+    M.Modal.getInstance(document.getElementById('confirm-modal')).close();
+    onConfirm();
+  };
+  M.Modal.getInstance(document.getElementById('confirm-modal')).open();
 }
 
-async function deleteForumPost(id) {
-  if (!confirm('Delete this forum post? This cannot be undone.')) return;
-  try {
-    await fetchJSON(`/api/student/forum-posts/${id}`, { method: 'DELETE' });
-    document.getElementById(`post-${id}`)?.remove();
-    M.toast({ html: 'Post deleted', classes: 'green darken-1' });
-  } catch {
-    M.toast({ html: 'Failed to delete post', classes: 'red darken-1' });
-  }
+function deleteResource(id) {
+  showConfirm({
+    title: 'Delete Resource',
+    msg:   'This will permanently remove the resource. This cannot be undone.',
+    label: 'Delete',
+    onConfirm: async () => {
+      try {
+        await fetchJSON(`/api/student/resources/${id}`, { method: 'DELETE' });
+        document.getElementById(`res-${id}`)?.remove();
+        M.toast({ html: 'Resource deleted', classes: 'teal darken-1' });
+      } catch {
+        M.toast({ html: 'Failed to delete resource', classes: 'red darken-1' });
+      }
+    }
+  });
 }
 
-async function deleteEvent(id) {
-  if (!confirm('Remove this event? This cannot be undone.')) return;
-  try {
-    const result = await fetchJSON(`/api/student/events/${id}`, { method: 'DELETE' });
-    document.getElementById(`evt-${id}`)?.remove();
-    const msg = result.action === 'deleted' ? 'Event deleted' : 'Unregistered from event';
-    M.toast({ html: msg, classes: 'green darken-1' });
-  } catch {
-    M.toast({ html: 'Failed to remove event', classes: 'red darken-1' });
-  }
+function deleteForumPost(id) {
+  showConfirm({
+    title: 'Delete Post',
+    msg:   'This will permanently remove your forum post. This cannot be undone.',
+    label: 'Delete',
+    onConfirm: async () => {
+      try {
+        await fetchJSON(`/api/student/forum-posts/${id}`, { method: 'DELETE' });
+        document.getElementById(`post-${id}`)?.remove();
+        M.toast({ html: 'Post deleted', classes: 'teal darken-1' });
+      } catch {
+        M.toast({ html: 'Failed to delete post', classes: 'red darken-1' });
+      }
+    }
+  });
 }
 
-let editingEventId = null;
+function deleteEvent(id, isCreator) {
+  showConfirm({
+    title: isCreator ? 'Delete Event' : 'Unregister from Event',
+    msg:   isCreator
+      ? 'This will permanently delete the event for all registered students.'
+      : 'You will be removed from this event\'s registration list.',
+    label: isCreator ? 'Delete' : 'Unregister',
+    icon:  isCreator ? 'delete' : 'event_busy',
+    onConfirm: async () => {
+      try {
+        const result = await fetchJSON(`/api/student/events/${id}`, { method: 'DELETE' });
+        document.getElementById(`evt-${id}`)?.remove();
+        const msg = result.action === 'deleted' ? 'Event deleted' : 'Unregistered from event';
+        M.toast({ html: msg, classes: 'teal darken-1' });
+      } catch {
+        M.toast({ html: 'Failed to remove event', classes: 'red darken-1' });
+      }
+    }
+  });
+}
 
 function openEditEvent(e) {
-  editingEventId = e._id;
-  document.getElementById('edit-event-id').value    = e._id;
-  document.getElementById('edit-event-title').value = e.title || '';
-  document.getElementById('edit-event-desc').value  = e.description || '';
-  document.getElementById('edit-event-date').value  = e.date ? e.date.slice(0, 16) : '';
-  document.getElementById('edit-event-location').value = e.location || '';
-  document.getElementById('edit-event-type').value  = e.type || '';
+  document.getElementById('edit-event-id').value        = e._id;
+  document.getElementById('edit-event-title').value     = e.title || '';
+  document.getElementById('edit-event-desc').value      = e.description || '';
+  document.getElementById('edit-event-date').value      = e.date ? e.date.slice(0, 16) : '';
+  document.getElementById('edit-event-location').value  = e.location || '';
+  document.getElementById('edit-event-type').value      = e.type || '';
   M.FormSelect.init(document.getElementById('edit-event-type'));
   M.updateTextFields();
-  const modal = M.Modal.getInstance(document.getElementById('edit-event-modal'));
-  modal.open();
+  M.Modal.getInstance(document.getElementById('edit-event-modal')).open();
 }
 
 async function submitEditEvent() {
@@ -344,12 +374,12 @@ async function submitEditEvent() {
 
   try {
     await fetchJSON(`/api/student/events/${id}`, {
-      method: 'PUT',
+      method:  'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      body:    JSON.stringify(body)
     });
     M.Modal.getInstance(document.getElementById('edit-event-modal')).close();
-    M.toast({ html: 'Event updated (pending re-approval)', classes: 'green darken-1' });
+    M.toast({ html: 'Event updated — pending re-approval', classes: 'teal darken-1' });
     const trackerData = await fetchJSON('/api/dashboard/tracker');
     if (trackerData) renderTracker(trackerData);
   } catch {

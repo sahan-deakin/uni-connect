@@ -193,7 +193,8 @@
 <!-- Edit Event Modal -->
 <div id="edit-event-modal" class="modal">
   <div class="modal-content">
-    <h5>Edit Event</h5>
+    <h4>Edit Event</h4>
+    <p class="modal-sub">Update your event details. Saving will reset it to pending approval.</p>
     <input type="hidden" id="edit-event-id">
     <div class="row" style="margin-bottom:0">
       <div class="input-field col s12">
@@ -223,14 +224,30 @@
           <option value="study">Study</option>
           <option value="social">Social</option>
         </select>
-        <label>Event Type</label>
+        <label for="edit-event-type">Event Type</label>
       </div>
     </div>
-    <p class="edit-event-notice"><i class="material-icons tiny">info</i> Saving will reset the event to pending approval.</p>
   </div>
   <div class="modal-footer">
-    <button class="modal-close btn-flat waves-effect">Cancel</button>
-    <button class="btn waves-effect blue darken-1" onclick="submitEditEvent()">Save Changes</button>
+    <a href="#!" class="btn btn-cancel modal-close waves-effect">Cancel</a>
+    <a href="#!" class="btn btn-submit waves-effect waves-light" onclick="submitEditEvent()">
+      <i class="material-icons left">save</i>Save Changes
+    </a>
+  </div>
+</div>
+
+<!-- Delete / Unregister Confirm Modal -->
+<div id="confirm-modal" class="modal" style="max-width:420px!important;width:92%!important">
+  <div class="modal-content">
+    <h4 id="confirm-modal-title">Confirm</h4>
+    <p class="modal-sub" id="confirm-modal-msg"></p>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="btn btn-cancel modal-close waves-effect">Cancel</a>
+    <a href="#!" id="confirm-modal-ok" class="btn waves-effect waves-light btn-confirm-danger">
+      <i class="material-icons left" id="confirm-modal-icon">delete</i>
+      <span id="confirm-modal-label">Delete</span>
+    </a>
   </div>
 </div>
 
