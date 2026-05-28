@@ -106,9 +106,9 @@ function renderFeed({ resources, events, forums }) {
           <div class="feed-item-body">
             <div class="feed-item-title">${r.title}</div>
             <div class="feed-item-meta">
-              <span class="unit-chip small">${r.unitCode}</span>
-              <span class="type-badge ${r.type}">${r.type.replace('-', ' ')}</span>
-              · By ${r.uploadedBy?.name || 'Unknown'} · ${r.downloadCount} downloads
+              <span class="unit-chip small">${r.unit}</span>
+              <span class="type-badge ${r.type}">${r.type}</span>
+              · By ${r.uploader || 'Unknown'} · ${r.downloadCount} downloads
             </div>
           </div>
           <span class="feed-item-time">${timeAgo(r.createdAt)}</span>
@@ -193,13 +193,18 @@ function renderTracker(data) {
   // My Resources
   document.getElementById('tracker-resources').innerHTML = data.myResources.length
     ? data.myResources.map(r => `
-        <div class="tracker-item">
+        <div class="tracker-item" id="res-${r._id}">
           <i class="material-icons blue-text">description</i>
           <div>
             <div class="tracker-item-title">${r.title}</div>
-            <div class="tracker-item-meta">${r.unitCode} · ${r.type.replace('-', ' ')} · ${r.downloadCount} downloads</div>
+            <div class="tracker-item-meta">${r.unit} · ${r.type} · ${r.downloadCount} downloads</div>
           </div>
-          <span class="tracker-item-time">${timeAgo(r.createdAt)}</span>
+          <div class="tracker-item-actions">
+            <span class="tracker-item-time">${timeAgo(r.createdAt)}</span>
+            <button class="tracker-action-btn red-text" onclick="deleteResource('${r._id}')" title="Delete">
+              <i class="material-icons tiny">delete</i>
+            </button>
+          </div>
         </div>`).join('')
     : '<p class="empty-state">You haven\'t uploaded any resources yet.</p>';
 
@@ -207,8 +212,10 @@ function renderTracker(data) {
   document.getElementById('tracker-events').innerHTML = data.myEvents.length
     ? data.myEvents.map(e => {
         const upcoming = new Date(e.date) >= new Date();
+        const editBtn = `<button class="tracker-action-btn blue-text" onclick="openEditEvent(${JSON.stringify(e).replace(/"/g, '&quot;')})" title="Edit"><i class="material-icons tiny">edit</i></button>`;
+        const deleteLabel = e.isCreator ? 'Delete event' : 'Unregister';
         return `
-          <div class="tracker-item">
+          <div class="tracker-item" id="evt-${e._id}">
             <i class="material-icons ${upcoming ? 'orange' : 'grey'}-text">event</i>
             <div>
               <div class="tracker-item-title">${e.title}</div>
@@ -217,7 +224,13 @@ function renderTracker(data) {
                 <span class="${upcoming ? 'upcoming-chip' : 'past-chip'}">${upcoming ? 'Upcoming' : 'Past'}</span>
               </div>
             </div>
-            <span class="tracker-item-time">${upcoming ? daysUntil(e.date) : 'Done'}</span>
+            <div class="tracker-item-actions">
+              <span class="tracker-item-time">${upcoming ? daysUntil(e.date) : 'Done'}</span>
+              ${editBtn}
+              <button class="tracker-action-btn red-text" onclick="deleteEvent('${e._id}', ${e.isCreator})" title="${deleteLabel}">
+                <i class="material-icons tiny">delete</i>
+              </button>
+            </div>
           </div>`;
       }).join('')
     : '<p class="empty-state">You haven\'t registered for any events yet.</p>';
@@ -225,16 +238,20 @@ function renderTracker(data) {
   // Forum Activity
   document.getElementById('tracker-forums').innerHTML = data.myPosts.length
     ? data.myPosts.map(p => `
-        <div class="tracker-item">
+        <div class="tracker-item" id="post-${p._id}">
           <i class="material-icons green-text">forum</i>
           <div>
             <div class="tracker-item-title">${p.title}</div>
             <div class="tracker-item-meta">${p.unitCode || 'General'} · ${p.replies} replies · ${p.likes} likes · ${p.views} views</div>
           </div>
-          <span class="tracker-item-time">${timeAgo(p.createdAt)}</span>
+          <div class="tracker-item-actions">
+            <span class="tracker-item-time">${timeAgo(p.createdAt)}</span>
+            <button class="tracker-action-btn red-text" onclick="deleteForumPost('${p._id}')" title="Delete">
+              <i class="material-icons tiny">delete</i>
+            </button>
+          </div>
         </div>`).join('')
     : '<p class="empty-state">You haven\'t posted in any forums yet.</p>';
-
 }
 
 //Actions
@@ -256,6 +273,157 @@ async function markAllRead() {
   });
   currentUnreadCount = 0;
   updateNotifBadge(0);
+}
+
+// Student item actions
+
+function showConfirm({ title, msg, label, icon = 'delete', onConfirm }) {
+  document.getElementById('confirm-modal-title').textContent = title;
+  document.getElementById('confirm-modal-msg').textContent   = msg;
+  document.getElementById('confirm-modal-label').textContent = label;
+  document.getElementById('confirm-modal-icon').textContent  = icon;
+  const okBtn = document.getElementById('confirm-modal-ok');
+  okBtn.onclick = () => {
+    M.Modal.getInstance(document.getElementById('confirm-modal')).close();
+    onConfirm();
+  };
+  M.Modal.getInstance(document.getElementById('confirm-modal')).open();
+}
+
+function deleteResource(id) {
+  showConfirm({
+    title: 'Delete Resource',
+    msg:   'This will permanently remove the resource. This cannot be undone.',
+    label: 'Delete',
+    onConfirm: async () => {
+      try {
+        await fetchJSON(`/api/student/resources/${id}`, { method: 'DELETE' });
+        document.getElementById(`res-${id}`)?.remove();
+        M.toast({ html: 'Resource deleted', classes: 'teal darken-1' });
+      } catch {
+        M.toast({ html: 'Failed to delete resource', classes: 'red darken-1' });
+      }
+    }
+  });
+}
+
+function deleteForumPost(id) {
+  showConfirm({
+    title: 'Delete Post',
+    msg:   'This will permanently remove your forum post. This cannot be undone.',
+    label: 'Delete',
+    onConfirm: async () => {
+      try {
+        await fetchJSON(`/api/student/forum-posts/${id}`, { method: 'DELETE' });
+        document.getElementById(`post-${id}`)?.remove();
+        M.toast({ html: 'Post deleted', classes: 'teal darken-1' });
+      } catch {
+        M.toast({ html: 'Failed to delete post', classes: 'red darken-1' });
+      }
+    }
+  });
+}
+
+function deleteEvent(id, isCreator) {
+  showConfirm({
+    title: isCreator ? 'Delete Event' : 'Unregister from Event',
+    msg:   isCreator
+      ? 'This will permanently delete the event for all registered students.'
+      : 'You will be removed from this event\'s registration list.',
+    label: isCreator ? 'Delete' : 'Unregister',
+    icon:  isCreator ? 'delete' : 'event_busy',
+    onConfirm: async () => {
+      try {
+        const result = await fetchJSON(`/api/student/events/${id}`, { method: 'DELETE' });
+        document.getElementById(`evt-${id}`)?.remove();
+        const msg = result.action === 'deleted' ? 'Event deleted' : 'Unregistered from event';
+        M.toast({ html: msg, classes: 'teal darken-1' });
+      } catch {
+        M.toast({ html: 'Failed to remove event', classes: 'red darken-1' });
+      }
+    }
+  });
+}
+
+async function submitCreateEvent() {
+  const title     = document.getElementById('ce-title').value.trim();
+  const organizer = document.getElementById('ce-organizer').value.trim();
+  const type      = document.getElementById('ce-type').value;
+  const date      = document.getElementById('ce-date').value;
+  const location  = document.getElementById('ce-location').value.trim();
+  const description = document.getElementById('ce-desc').value.trim();
+
+  if (!title || !organizer || !type || !date || !location) {
+    M.toast({ html: 'Please fill in all required fields', classes: 'orange darken-2' });
+    return;
+  }
+
+  try {
+    await fetchJSON('/api/events', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ title, organizer, type, date, location, description })
+    });
+
+    M.Modal.getInstance(document.getElementById('create-event-modal')).close();
+    M.toast({ html: 'Event submitted — pending approval', classes: 'teal darken-1' });
+
+    // Reset form
+    ['ce-title','ce-organizer','ce-date','ce-location','ce-desc'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('ce-type').value = '';
+    M.FormSelect.init(document.getElementById('ce-type'));
+    M.updateTextFields();
+
+    // Refresh tracker so the new event shows up
+    const trackerData = await fetchJSON('/api/dashboard/tracker');
+    if (trackerData) renderTracker(trackerData);
+  } catch {
+    M.toast({ html: 'Failed to submit event', classes: 'red darken-1' });
+  }
+}
+
+function openEditEvent(e) {
+  document.getElementById('edit-event-id').value        = e._id;
+  document.getElementById('edit-event-title').value     = e.title || '';
+  document.getElementById('edit-event-desc').value      = e.description || '';
+  document.getElementById('edit-event-date').value      = e.date ? e.date.slice(0, 16) : '';
+  document.getElementById('edit-event-location').value  = e.location || '';
+  document.getElementById('edit-event-type').value      = e.type || '';
+  M.FormSelect.init(document.getElementById('edit-event-type'));
+  M.updateTextFields();
+  M.Modal.getInstance(document.getElementById('edit-event-modal')).open();
+}
+
+async function submitEditEvent() {
+  const id = document.getElementById('edit-event-id').value;
+  const body = {
+    title:       document.getElementById('edit-event-title').value.trim(),
+    description: document.getElementById('edit-event-desc').value.trim(),
+    date:        document.getElementById('edit-event-date').value,
+    location:    document.getElementById('edit-event-location').value.trim(),
+    type:        document.getElementById('edit-event-type').value
+  };
+
+  if (!body.title || !body.date) {
+    M.toast({ html: 'Title and date are required', classes: 'orange darken-2' });
+    return;
+  }
+
+  try {
+    await fetchJSON(`/api/student/events/${id}`, {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(body)
+    });
+    M.Modal.getInstance(document.getElementById('edit-event-modal')).close();
+    M.toast({ html: 'Event updated — pending re-approval', classes: 'teal darken-1' });
+    const trackerData = await fetchJSON('/api/dashboard/tracker');
+    if (trackerData) renderTracker(trackerData);
+  } catch {
+    M.toast({ html: 'Failed to update event', classes: 'red darken-1' });
+  }
 }
 
 //Real-time socket
@@ -293,6 +461,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   M.Sidenav.init(document.querySelectorAll('.sidenav'));
   M.Tabs.init(document.getElementById('feed-tabs-el'));
   M.Tabs.init(document.getElementById('tracker-tabs-el'));
+  M.Modal.init(document.querySelectorAll('.modal'));
+  M.FormSelect.init(document.querySelectorAll('select'));
 
   document.getElementById('mark-all-read-btn').addEventListener('click', markAllRead);
   document.getElementById('logout-btn')?.addEventListener('click', logout);

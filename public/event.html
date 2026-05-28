@@ -70,7 +70,7 @@
       </div>
 
       <div class="input-field">
-        <select required>
+        <select id="event-type-select" required>
           <option value="" disabled selected>Choose category</option>
           <option value="academic">Academic</option>
           <option value="networking">Networking</option>
@@ -80,7 +80,7 @@
           <option value="study">Study</option>
           <option value="social">Social</option>
         </select>
-        <label>Event Category</label>
+        <label for="event-type-select">Event Category</label>
       </div>
 
       <div class="input-field">
@@ -152,6 +152,13 @@
 <script>
   document.addEventListener('DOMContentLoaded', function () {
 
+    // ── Auth helpers ─────────────────────────────────────────────────────────
+    const token = localStorage.getItem('uc_token');
+    let currentStudentId = null;
+    if (token) {
+      try { currentStudentId = JSON.parse(atob(token.split('.')[1])).studentId; } catch (_) {}
+    }
+
     loadEvents();
 
     // Initialize modal
@@ -185,40 +192,53 @@
     // New event submission
     const eventForm = document.getElementById('eventForm');
 
-    eventForm.addEventListener('submit', function (e) {
+    eventForm.addEventListener('submit', async function (e) {
       e.preventDefault();
 
-      const eventName = document.getElementById('event_name').value;
-      const organiser = document.getElementById('organiser').value;
-      const eventDate = document.getElementById('event_date').value;
-      const location = document.getElementById('location').value;
+      const title      = document.getElementById('event_name').value.trim();
+      const organizer  = document.getElementById('organiser').value.trim();
+      const type       = document.getElementById('event-type-select').value;
+      const date       = document.getElementById('event_date').value;
+      const location   = document.getElementById('location').value.trim();
+      const description = document.getElementById('description').value.trim();
 
-      if (!eventName || !organiser || !eventDate || !location) {
-        showOverlay(
-          'Submission Failed',
-          'Please fill in all required fields.',
-          '❌'
-        );
+      if (!title || !organizer || !type || !date || !location) {
+        showOverlay('Submission Failed', 'Please fill in all required fields.', '❌');
         return;
       }
 
-        showOverlay(
-          'Event Submitted!',
-          'Your event has been submitted for review.',
-          '✅'
-        );
+      const token = localStorage.getItem('uc_token');
+
+      try {
+        const res = await fetch('/api/events', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify({ title, organizer, type, date, location, description })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showOverlay('Submission Failed', data.error || 'Something went wrong.', '❌');
+          return;
+        }
+
+        showOverlay('Event Submitted!', 'Your event has been submitted for review. It will appear once approved.', '✅');
 
         eventForm.reset();
-
         M.updateTextFields();
-
-        const selects = document.querySelectorAll('select');
-        M.FormSelect.init(selects);
+        M.FormSelect.init(document.querySelectorAll('select'));
 
         setTimeout(() => {
-        const modal = M.Modal.getInstance(document.getElementById('eventModal'));
-        modal.close();
-      }, 1000);
+          M.Modal.getInstance(document.getElementById('eventModal')).close();
+        }, 1500);
+
+      } catch (err) {
+        showOverlay('Submission Failed', 'Could not reach the server. Please try again.', '❌');
+      }
     });
 
     // Filter based on category
@@ -276,15 +296,16 @@
         year: 'numeric'
       });
 
-      // Registration count
-      const registeredCount = event.registeredStudents
-        ? event.registeredStudents.length
-        : 0;
+      // Registration count + current user's registration state
+      const registeredCount = event.registeredStudents ? event.registeredStudents.length : 0;
+      const isRegistered = currentStudentId &&
+        event.registeredStudents &&
+        event.registeredStudents.some(id => String(id) === String(currentStudentId));
 
       // Build card
       const card = `
         <div class="event-card" data-type="${typeClass}">
-        
+
           <div class="event-card-bar ${typeClass}"></div>
 
           <div class="event-card-body">
@@ -294,7 +315,7 @@
                 ${event.type || 'Event'}
               </span>
 
-              <span class="event-badge spots">
+              <span class="event-badge spots" id="reg-count-${event._id}">
                 ${registeredCount} Registered
               </span>
             </div>
@@ -323,11 +344,12 @@
 
             <div class="event-footer">
 
-              <button class="btn-rsvp">
-                REGISTER
+              <button class="btn-rsvp${isRegistered ? ' registered' : ''}"
+                      data-event-id="${event._id}">
+                ${isRegistered ? 'UN-REGISTER' : 'REGISTER'}
               </button>
 
-              <span class="event-capacity">
+              <span class="event-capacity" id="reg-footer-${event._id}">
                 ${registeredCount} Registered
               </span>
 
@@ -349,38 +371,57 @@
     }
 
     function initializeRegisterButtons() {
+      document.querySelectorAll('.btn-rsvp').forEach(button => {
+        button.addEventListener('click', async function () {
 
-    document.querySelectorAll('.btn-rsvp').forEach(button => {
-
-      button.addEventListener('click', function () {
-
-        const isRegistered = this.classList.contains('registered');
-
-          if (!isRegistered) {
-
-            showOverlay(
-              'Successfully Registered!',
-              "You're all set. See you at the event!",
-              '🎉'
-            );
-
-          this.textContent = 'UN-REGISTER';
-          this.classList.add('registered');
-
-          } else {
-
-            showOverlay(
-              'Unregistered',
-              'You have been removed from this event.',
-              '👋'
-            );
-
-          this.textContent = 'REGISTER';
-          this.classList.remove('registered');
+          if (!token) {
+            showOverlay('Login Required', 'Please log in to register for events.', '🔐');
+            return;
           }
+
+          const eventId      = this.dataset.eventId;
+          const isRegistered = this.classList.contains('registered');
+          this.disabled      = true;
+
+          try {
+            const res = await fetch(`/api/events/${eventId}/register`, {
+              method:  isRegistered ? 'DELETE' : 'POST',
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+              showOverlay('Error', data.error || 'Something went wrong.', '❌');
+              return;
+            }
+
+            if (!isRegistered) {
+              showOverlay('Successfully Registered!', "You're all set. See you at the event!", '🎉');
+              this.textContent = 'UN-REGISTER';
+              this.classList.add('registered');
+            } else {
+              showOverlay('Unregistered', 'You have been removed from this event.', '👋');
+              this.textContent = 'REGISTER';
+              this.classList.remove('registered');
+            }
+
+            // Update both registration count badges on the card
+            if (data.registeredCount !== undefined) {
+              const label = `${data.registeredCount} Registered`;
+              const badge  = document.getElementById(`reg-count-${eventId}`);
+              const footer = document.getElementById(`reg-footer-${eventId}`);
+              if (badge)  badge.textContent  = label;
+              if (footer) footer.textContent = label;
+            }
+
+          } catch (_) {
+            showOverlay('Error', 'Could not reach the server.', '❌');
+          } finally {
+            this.disabled = false;
+          }
+        });
       });
-  });
-}
+    }
 });
   
 

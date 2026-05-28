@@ -60,6 +60,7 @@ const adminRoute  = require('./routes/adminRoute');
 const eventRoute = require('./routes/eventRoute');
 const resourceRoute = require('./routes/resourceRoute');
 const forumRoute    = require('./routes/forumRoute');
+const studentRoute  = require('./routes/studentRoute');
 
 app.use('/api/auth',      authRoute);
 app.use('/api/samples',   sampleRoute);
@@ -70,6 +71,7 @@ app.use('/api/events', eventRoute);
 app.use('/api/resources', resourceRoute);
 app.use('/api/forum',     forumRoute);
 app.use('/uploads', express.static('uploads'));
+app.use('/api/student',   studentRoute);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -87,6 +89,7 @@ app.use((req, res) => {
 
 // Global error handler
 app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
   if (err.name === 'CastError' && err.kind === 'ObjectId') {
     return res.status(400).json({ error: 'Invalid id format' });
   }

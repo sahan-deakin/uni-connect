@@ -1,4 +1,5 @@
 const resourceService = require('../services/resourceService');
+const Student = require('../models/studentModel');
 
 // GET all resources
 exports.getAllResources = async (req, res) => {
@@ -47,6 +48,12 @@ exports.createResource = async (req, res) => {
 
   try {
 
+    let uploaderName = 'Anonymous Student';
+    if (req.user?.studentId) {
+      const student = await Student.findById(req.user.studentId).select('name').lean();
+      if (student?.name) uploaderName = student.name;
+    }
+
     const resourceData = {
 
       title: req.body.title,
@@ -59,7 +66,7 @@ exports.createResource = async (req, res) => {
 
   institution: req.body.institution,
 
-  uploader: req.body.uploader,
+  uploader: uploaderName,
 
   upvotes: Number(req.body.upvotes || 0),
 
