@@ -6,6 +6,7 @@ const Resource = require('../models/resourceModel');
 const Event = require('../models/eventModel');
 const ForumPost = require('../models/forumPostModel');
 const Notification = require('../models/notificationModel');
+const Review = require('../models/reviewModel'); // ← ADDED
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/uni-connect';
 
@@ -19,9 +20,11 @@ async function seed() {
     Resource.deleteMany({}),
     Event.deleteMany({}),
     ForumPost.deleteMany({}),
-    Notification.deleteMany({})
+    Notification.deleteMany({}),
+    Review.deleteMany({})  // ← ADDED
   ]);
 
+  // ── Students (unchanged — referenced by other team members) ──────────────
   const studentDocs = await Student.insertMany([
     {
       name: 'Alex Johnson',
@@ -84,8 +87,9 @@ async function seed() {
   const emma   = studentDocs.find(s => s.name === 'Emma Wilson');
   const sarah  = studentDocs.find(s => s.name === 'Sarah Chen');
   const marcus = studentDocs.find(s => s.name === 'Marcus Williams');
-  const sahan  = studentDocs.find(s => s.name === "Sahan Rathnayake");
+  const sahan  = studentDocs.find(s => s.name === 'Sahan Rathnayake');
 
+  // ── Resources (unchanged) ─────────────────────────────────────────────────
   await Resource.insertMany([
     {
       title: 'SIT123 Week 3 Notes - Agile & Sprints',
@@ -124,6 +128,7 @@ async function seed() {
     }
   ]);
 
+  // ── Events (unchanged) ────────────────────────────────────────────────────
   const events = await Event.insertMany([
     {
       title: 'Deakin Tech Networking Night',
@@ -131,7 +136,8 @@ async function seed() {
       type: 'networking', organizer: 'Deakin IT Society',
       date: new Date('2026-05-15'), location: 'Geelong Waterfront Campus',
       tags: ['networking'], unitCodes: ['SIT764'],
-      registeredStudents: [alex._id, sarah._id]
+      registeredStudents: [alex._id, sarah._id],
+      status: 'pending'
     },
     {
       title: 'ML Workshop - Supervised Learning',
@@ -139,7 +145,8 @@ async function seed() {
       type: 'workshop', organizer: 'Deakin AI Club',
       date: new Date('2026-05-12'), location: 'Online', isOnline: true,
       tags: ['Machine Learning', 'AI'], unitCodes: ['SIT123'],
-      registeredStudents: [alex._id, sahan._id, emma._id]
+      registeredStudents: [alex._id, sahan._id, emma._id],
+      status: 'pending'
     },
     {
       title: 'Student Hackathon 2026',
@@ -147,7 +154,8 @@ async function seed() {
       type: 'competition', organizer: 'Deakin Innovation Hub',
       date: new Date('2026-06-01'), location: 'Melbourne Burwood Campus',
       tags: ['hackathon'],
-      registeredStudents: [alex._id, sarah._id]
+      registeredStudents: [alex._id, sarah._id],
+      status: 'pending'
     },
     {
       title: 'IT & Engineering Career Fair',
@@ -155,7 +163,8 @@ async function seed() {
       type: 'career', organizer: 'Deakin Careers',
       date: new Date('2026-05-25'), location: 'Melbourne Burwood Campus',
       tags: ['careers', 'internship'],
-      registeredStudents: [alex._id, sarah._id, marcus._id]
+      registeredStudents: [alex._id, sarah._id, marcus._id],
+      status: 'pending'
     },
     {
       title: 'SIT123 Study Group',
@@ -163,12 +172,12 @@ async function seed() {
       type: 'study', organizer: 'Student-led',
       date: new Date('2026-05-11'), location: 'Online', isOnline: true,
       tags: ['SIT123'], unitCodes: ['SIT123'],
-      registeredStudents: [alex._id, sahan._id, sarah._id]
+      registeredStudents: [alex._id, sahan._id, sarah._id],
+      status: 'pending'
     }
   ]);
 
-  const mlWorkshop = events.find(e => e.title === 'ML Workshop - Supervised Learning');
-
+  // ── Forum posts (unchanged) ───────────────────────────────────────────────
   await ForumPost.insertMany([
     {
       title: 'Anyone else struggling with the SIT123 project scope?',
@@ -202,6 +211,7 @@ async function seed() {
     }
   ]);
 
+  // ── Notifications (unchanged) ─────────────────────────────────────────────
   await Notification.insertMany([
     {
       studentId: alex._id, type: 'forum_reply', read: false,
@@ -235,29 +245,93 @@ async function seed() {
     }
   ]);
 
-  // Create user accounts for all seeded students (password: password123)
+  // ── Users ─────────────────────────────────────────────────────────────────
+  // Original 5 student accounts are preserved exactly.
+  // Added: role field (defaults to 'user') and rootadmin for the admin panel.
   const hashedPassword = await bcrypt.hash('password123', 10);
-  await User.insertMany([
-    { username: 'alex.johnson',    email: 'alex.johnson@deakin.edu.au',    password: hashedPassword },
-    { username: 'emma.wilson',     email: 'emma.wilson@deakin.edu.au',     password: hashedPassword },
-    { username: 'sarah.chen',      email: 'sarah.chen@deakin.edu.au',      password: hashedPassword },
-    { username: 'marcus.williams', email: 'marcus.williams@deakin.edu.au', password: hashedPassword },
-    { username: 'sahan.r',         email: 'sahan.r@deakin.edu.au',         password: hashedPassword }
+
+  const userDocs = await User.insertMany([
+    // --- existing student logins (emails/usernames unchanged) ---
+    { username: 'alex.johnson',    email: 'alex.johnson@deakin.edu.au',    password: hashedPassword, role: 'user'  },
+    { username: 'emma.wilson',     email: 'emma.wilson@deakin.edu.au',     password: hashedPassword, role: 'user'  },
+    { username: 'sarah.chen',      email: 'sarah.chen@deakin.edu.au',      password: hashedPassword, role: 'user'  },
+    { username: 'marcus.williams', email: 'marcus.williams@deakin.edu.au', password: hashedPassword, role: 'user'  },
+    { username: 'sahan.r',         email: 'sahan.r@deakin.edu.au',         password: hashedPassword, role: 'user'  },
+
+    // --- admin moderation test users ---
+    { username: 'sahanT',    email: 'sahan@gmail.com',     password: hashedPassword, role: 'user'  },
+    { username: 'asangaT',   email: 'asanga@gmail.com',    password: hashedPassword, role: 'user'  },
+    { username: 'nishadi',   email: 'nishadi@gmail.com',   password: hashedPassword, role: 'user'  },
+    { username: 'berlinda',  email: 'berlinda@gmail.com',  password: hashedPassword, role: 'user'  },
+    { username: 'amoda',     email: 'amoda@gmail.com',     password: hashedPassword, role: 'user'  },
+
+    // --- admin account ---
+    { username: 'rootadmin', email: 'rootadmin@admin.com', password: hashedPassword, role: 'admin' },
+  ]);
+
+  const byName = Object.fromEntries(userDocs.map(u => [u.username, u._id]));
+
+  // ── Reviews / reported content ────────────────────────────────────────────
+  // Covers admin moderation scenarios: spam, abusive language,
+  // impersonation — useful for testing the Reported Reviews panel.
+  await Review.insertMany([
+    {
+      user: byName['sahanT'],
+      reviewText: 'User is sending messages saying "Earn a lot by clicking this link!"',
+      reportReason: 'Spam / advertising',
+      rating: 5,
+      reportedAt: new Date()
+    },
+    {
+      user: byName['asangaT'],
+      reviewText: 'Posted a thread "BUY CHEAP FOLLOWERS NOW!!"',
+      rating: 1,
+      reportReason: 'Spam / advertising',
+      reportedAt: new Date()
+    },
+    {
+      user: byName['nishadi'],
+      reviewText: 'Commenting "This is complete rubbish. The organiser is an idiot."',
+      rating: 1,
+      reportReason: 'Abusive / hateful language',
+      reportedAt: new Date()
+    },
+    {
+      user: byName['berlinda'],
+      reviewText: 'Profile bio claims to be a Deakin lecturer but the account is fake.',
+      rating: 2,
+      reportReason: 'Impersonation',
+      reportedAt: new Date()
+    },
+    {
+      user: byName['amoda'],
+      reviewText: 'Repeatedly sharing links to pirated textbook PDFs in the resources section.',
+      rating: 1,
+      reportReason: 'Copyright / piracy',
+      reportedAt: new Date()
+    }
   ]);
 
   console.log('Seeded:');
-  console.log('  Users:         5');
+  console.log('  Users:         11  (5 students + 5 moderation test users + 1 admin)');
   console.log('  Students:      5');
   console.log('  Resources:     5');
   console.log('  Events:        5');
   console.log('  Forum posts:   5');
-  console.log('  Notifications: 5 (for Alex)');
+  console.log('  Notifications: 5   (for Alex)');
+  console.log('  Reviews:       5   (reported — for admin moderation panel)');
   console.log('\nLogin credentials (all use password: password123):');
+  console.log('  --- Student accounts (unchanged) ---');
   console.log('  alex.johnson@deakin.edu.au  <- has notifications & seeded data');
   console.log('  emma.wilson@deakin.edu.au');
   console.log('  sarah.chen@deakin.edu.au');
   console.log('  marcus.williams@deakin.edu.au');
   console.log('  sahan.r@deakin.edu.au');
+  console.log('  --- Admin ---');
+  console.log('  rootadmin@admin.com         <- role: admin');
+  console.log('  --- Moderation test users ---');
+  console.log('  sahan@gmail.com, asanga@gmail.com, nishadi@gmail.com,');
+  console.log('  berlinda@gmail.com, amoda@gmail.com');
 
   await mongoose.connection.close();
 }

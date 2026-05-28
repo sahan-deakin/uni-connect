@@ -2,19 +2,29 @@ const Event = require('../models/eventModel');
 
 /**
  * Get all events for admin (any status), newest first.
+ * Normalises missing status → 'pending' so seeded/legacy docs
+ * without the field still appear correctly in the admin panel.
  */
-const getAllEvents = () =>
-  Event.find({})
-    .sort({ createdAt: -1 })
-    .lean();
+const getAllEvents = async () => {
+  const events = await Event.find({}).sort({ createdAt: -1 }).lean();
+  return events.map(e => ({ ...e, status: e.status || 'pending' }));
+};
 
 /**
  * Get only pending events (used by dashboard summary).
+ * Matches docs where status === 'pending' OR the field doesn't exist yet
+ * (covers events seeded before the status field was added to the schema).
  */
-const getPendingEvents = () =>
-  Event.find({ status: 'pending' })
-    .sort({ date: 1 })
-    .lean();
+const getPendingEvents = async () => {
+  const events = await Event.find({
+    $or: [
+      { status: 'pending' },
+      { status: { $exists: false } },
+      { status: null }
+    ]
+  }).sort({ date: 1 }).lean();
+  return events.map(e => ({ ...e, status: 'pending' }));
+};
 
 /**
  * Get a single event by ID.

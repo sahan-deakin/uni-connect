@@ -330,7 +330,8 @@
 <script>
   // Redirect if already logged in
   if (localStorage.getItem('uc_token')) {
-    window.location.href = '/dashboard.html';
+    const storedUser = JSON.parse(localStorage.getItem('uc_user') || '{}');
+    window.location.href = storedUser.role === 'admin' ? '/admin.html' : '/dashboard.html';
   }
 
   function switchTab(tab) {
@@ -391,7 +392,8 @@
 
       localStorage.setItem('uc_token', data.token);
       localStorage.setItem('uc_user',  JSON.stringify(data.user));
-      window.location.href = '/dashboard.html';
+      // Redirect based on role
+      window.location.href = data.user.role === 'admin' ? '/admin.html' : '/dashboard.html';
     } catch (err) {
       showAlert('login', 'Network error. Is the server running?');
     } finally {
@@ -430,7 +432,7 @@
 
       localStorage.setItem('uc_token', data.token);
       localStorage.setItem('uc_user',  JSON.stringify(data.user));
-      window.location.href = '/dashboard.html';
+      window.location.href = data.user.role === 'admin' ? '/admin.html' : '/dashboard.html';
     } catch (err) {
       showAlert('register', 'Network error. Is the server running?');
     } finally {
