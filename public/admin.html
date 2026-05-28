@@ -754,7 +754,7 @@
         }
 
         tbody.innerHTML = resources.map(r => {
-          const uploader = r.uploadedBy?.name || r.uploadedBy?.email || '—';
+          const uploader = r.uploader || '—';
           const reported = r.report?.reportedAt ? new Date(r.report.reportedAt).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '—';
           const reason   = (r.report?.reason || '—').slice(0, 80);
           return `
@@ -763,7 +763,7 @@
                 <div style="font-weight:600;font-size:.875rem;color:var(--text);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escAdm(r.title)}">${escAdm(r.title)}</div>
                 <div style="font-size:.75rem;color:var(--mut)">${capitaliseAdm(r.type)}</div>
               </td>
-              <td><span style="background:rgba(13,115,119,.1);color:#0d7377;border-radius:5px;padding:2px 8px;font-size:.72rem;font-weight:700">${escAdm(r.unitCode)}</span></td>
+              <td><span style="background:rgba(13,115,119,.1);color:#0d7377;border-radius:5px;padding:2px 8px;font-size:.72rem;font-weight:700">${escAdm(r.unit)}</span></td>
               <td style="font-size:.8rem;color:var(--mut)">${escAdm(uploader)}</td>
               <td style="font-size:.8rem;color:var(--mut)">${reported}</td>
               <td style="font-size:.8rem;color:var(--mut);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escAdm(r.report?.reason || '')}">${escAdm(reason)}</td>

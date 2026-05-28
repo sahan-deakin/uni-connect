@@ -30,8 +30,7 @@ const getPersonalizedFeed = async (req, res) => {
     const relevantTags = [...interests, ...skills];
 
     const [resources, events, forums] = await Promise.all([
-      Resource.find({ unitCode: { $in: unitCodes } })
-        .populate('uploadedBy', 'name')
+      Resource.find({ unit: { $in: unitCodes } })
         .sort({ createdAt: -1 })
         .limit(6),
 
@@ -137,7 +136,7 @@ const getTrackerData = async (req, res) => {
     if (!student) return;
 
     const [myResources, myEventsRaw, myPosts] = await Promise.all([
-      Resource.find({ uploadedBy: student._id }).sort({ createdAt: -1 }),
+      Resource.find({ uploader: student.name }).sort({ createdAt: -1 }),
       Event.find({
         $or: [
           { registeredStudents: student._id },

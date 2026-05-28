@@ -106,9 +106,9 @@ function renderFeed({ resources, events, forums }) {
           <div class="feed-item-body">
             <div class="feed-item-title">${r.title}</div>
             <div class="feed-item-meta">
-              <span class="unit-chip small">${r.unitCode}</span>
-              <span class="type-badge ${r.type}">${r.type.replace('-', ' ')}</span>
-              · By ${r.uploadedBy?.name || 'Unknown'} · ${r.downloadCount} downloads
+              <span class="unit-chip small">${r.unit}</span>
+              <span class="type-badge ${r.type}">${r.type}</span>
+              · By ${r.uploader || 'Unknown'} · ${r.downloadCount} downloads
             </div>
           </div>
           <span class="feed-item-time">${timeAgo(r.createdAt)}</span>
@@ -197,7 +197,7 @@ function renderTracker(data) {
           <i class="material-icons blue-text">description</i>
           <div>
             <div class="tracker-item-title">${r.title}</div>
-            <div class="tracker-item-meta">${r.unitCode} · ${r.type.replace('-', ' ')} · ${r.downloadCount} downloads</div>
+            <div class="tracker-item-meta">${r.unit} · ${r.type} · ${r.downloadCount} downloads</div>
           </div>
           <div class="tracker-item-actions">
             <span class="tracker-item-time">${timeAgo(r.createdAt)}</span>

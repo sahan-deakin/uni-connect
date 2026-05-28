@@ -93,37 +93,37 @@ async function seed() {
   await Resource.insertMany([
     {
       title: 'SIT123 Week 3 Notes - Agile & Sprints',
-      description: 'My notes from week 3 lectures. Covers sprint planning and reviews. Might have a few gaps but should be useful.',
-      type: 'notes', unitCode: 'SIT123',
-      uploadedBy: sarah._id, tags: ['agile', 'planning'],
+      desc: 'My notes from week 3 lectures. Covers sprint planning and reviews. Might have a few gaps but should be useful.',
+      type: 'Notes', unit: 'SIT123', institution: 'Deakin',
+      uploader: 'Sarah Chen', tags: ['agile', 'planning'],
       downloadCount: 47, createdAt: new Date('2026-05-07')
     },
     {
       title: 'SIT234 Parallel Computing Quick Guide',
-      description: 'Put this together when studying for the mid-sem. Covers OpenMP basics and a bit of MPI.',
-      type: 'guide', unitCode: 'SIT234',
-      uploadedBy: marcus._id, tags: ['parallel', 'OpenMP'],
+      desc: 'Put this together when studying for the mid-sem. Covers OpenMP basics and a bit of MPI.',
+      type: 'Slides', unit: 'SIT234', institution: 'Deakin',
+      uploader: 'Marcus Williams', tags: ['parallel', 'OpenMP'],
       downloadCount: 31, createdAt: new Date('2026-05-05')
     },
     {
       title: 'SIT764 Capstone Requirements 2026',
-      description: 'Official rubric from the unit guide. Pasted it here so its easier to find.',
-      type: 'guide', unitCode: 'SIT764',
-      uploadedBy: alex._id, tags: ['capstone', 'rubric'],
+      desc: 'Official rubric from the unit guide. Pasted it here so its easier to find.',
+      type: 'Slides', unit: 'SIT764', institution: 'Deakin',
+      uploader: 'Alex Johnson', tags: ['capstone', 'rubric'],
       downloadCount: 28, createdAt: new Date('2026-05-03')
     },
     {
       title: 'ML Algorithms Cheat Sheet',
-      description: 'Quick summary of common algorithms - when to use what, pros/cons. Mostly from lecture slides and YouTube.',
-      type: 'notes', unitCode: 'SIT123',
-      uploadedBy: sahan._id, tags: ['ML', 'algorithms'],
+      desc: 'Quick summary of common algorithms - when to use what, pros/cons. Mostly from lecture slides and YouTube.',
+      type: 'Notes', unit: 'SIT123', institution: 'Deakin',
+      uploader: 'Sahan Rathnayake', tags: ['ML', 'algorithms'],
       downloadCount: 62, createdAt: new Date('2026-05-08')
     },
     {
       title: 'SIT123 Past Exam 2025',
-      description: 'Found this on the library portal. Has worked answers for most questions.',
-      type: 'past-exam', unitCode: 'SIT123',
-      uploadedBy: sarah._id, tags: ['exam', 'revision'],
+      desc: 'Found this on the library portal. Has worked answers for most questions.',
+      type: 'Past Exam', unit: 'SIT123', institution: 'Deakin',
+      uploader: 'Sarah Chen', tags: ['exam', 'revision'],
       downloadCount: 89, createdAt: new Date('2026-05-04')
     }
   ]);
