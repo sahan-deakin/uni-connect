@@ -450,6 +450,7 @@
 
 <div id="forum-toast"></div>
 
+<script src="/socket.io/socket.io.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 <script src="/js/navbar.js"></script>
 <script>
@@ -687,6 +688,62 @@
   });
 
   loadPosts();
+
+  //  Real-time socket: live new-post banner 
+  (function initForumSocket() {
+    const socket = io();
+    let _pendingNewPosts = 0;
+
+    socket.on('connect', () => {
+      socket.emit('join-forum');
+      console.log('[forum socket] connected, joined forum-room');
+    });
+
+    socket.on('forum:new-post', (post) => {
+      // Don't show the banner for the user who just submitted the post.
+      // Use userId (from uc_user.userId) — more reliable than matching by name.
+      const me = JSON.parse(localStorage.getItem('uc_user') || '{}');
+      if (post.authorId && me.userId && post.authorId === me.userId) return;
+
+      _pendingNewPosts++;
+      showNewPostBanner(_pendingNewPosts, post.authorName, post.title);
+    });
+
+    socket.on('disconnect', () => {
+      console.log('[forum socket] disconnected');
+    });
+
+    function showNewPostBanner(count, author, title) {
+      let banner = document.getElementById('forum-live-banner');
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'forum-live-banner';
+        banner.style.cssText = `
+          position:fixed; top:68px; left:50%; transform:translateX(-50%);
+          z-index:8000; background:#0d7377; color:#fff; border-radius:24px;
+          padding:9px 20px; font-family:'Inter',sans-serif; font-size:.83rem;
+          font-weight:600; box-shadow:0 4px 20px rgba(13,115,119,.45);
+          cursor:pointer; display:flex; align-items:center; gap:8px;
+          white-space:nowrap; transition:opacity .2s;
+        `;
+        banner.innerHTML = '<i style="font-size:1rem;font-family:\'Material Icons\';font-style:normal">arrow_upward</i><span id="forum-live-text"></span>';
+        banner.addEventListener('click', () => {
+          _pendingNewPosts = 0;
+          banner.style.opacity = '0';
+          setTimeout(() => banner.remove(), 200);
+          loadPosts();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        document.body.appendChild(banner);
+      }
+      document.getElementById('forum-live-text').textContent =
+        count === 1
+          ? `${author} posted "${title.slice(0,30)}${title.length>30?'…':''}" — click to refresh`
+          : `${count} new posts — click to refresh`;
+      banner.style.opacity = '1';
+    }
+  })();
+
 </script>
 </body>
 </html>

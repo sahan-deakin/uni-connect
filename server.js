@@ -40,6 +40,12 @@ io.on('connection', (socket) => {
     io.to(sessionId).emit('new-notification', notification);
   });
 
+  // Forum page clients join a shared room to receive live post updates
+  socket.on('join-forum', () => {
+    socket.join('forum-room');
+    console.log(`[socket] ${socket.id} joined forum-room`);
+  });
+
   socket.on('disconnect', () => {
     console.log(`[socket] ${socket.id} disconnected`);
   });
