@@ -167,7 +167,7 @@ async function seed() {
       status: 'pending'
     },
     {
-      title: 'SIT123 Study Group',
+      title: 'SIT123/SIT712 - Study Group',
       description: 'Weekly meetup to work through assignments. Jump in if you want.',
       type: 'study', organizer: 'Student-led',
       date: new Date('2026-05-11'), location: 'Online', isOnline: true,
