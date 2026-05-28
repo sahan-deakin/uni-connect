@@ -1,4 +1,5 @@
 const ForumPost = require('../models/forumPostModel');
+const socketService = require('../services/socketService');
 
 //  GET /api/forum/posts  — all non-deleted posts (newest first)
 exports.getPosts = async (req, res, next) => {
@@ -29,11 +30,21 @@ exports.createPost = async (req, res, next) => {
       tags: Array.isArray(tags) ? tags : [],
     });
 
+    // Notify everyone on the forum page about the new post in real time
+    socketService.notifyForum('forum:new-post', {
+      _id:        post._id,
+      title:      post.title,
+      authorName: post.authorName,
+      authorId:   authorId,        // used by client to skip own posts
+      unitCode:   post.unitCode,
+      createdAt:  post.createdAt
+    });
+
     res.status(201).json(post);
   } catch (err) { next(err); }
 };
 
-// ── POST /api/forum/posts/:postId/comments — add a comment
+//  POST /api/forum/posts/:postId/comments — add a comment
 exports.addComment = async (req, res, next) => {
   try {
     const { content, authorName } = req.body;
@@ -55,7 +66,7 @@ exports.addComment = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-// ── POST /api/forum/posts/:postId/report — report a post
+//  POST /api/forum/posts/:postId/report — report a post
 exports.reportPost = async (req, res, next) => {
   try {
     const { reason, details, reportedByName } = req.body;
@@ -82,7 +93,7 @@ exports.reportPost = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-// ── GET /api/forum/admin/posts — ALL posts including deleted (admin only)
+//  GET /api/forum/admin/posts — ALL posts including deleted (admin only)
 exports.adminGetPosts = async (req, res, next) => {
   try {
     const posts = await ForumPost.find({})
@@ -92,7 +103,7 @@ exports.adminGetPosts = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-// ── GET /api/forum/admin/reported — posts with at least one unresolved report
+//  GET /api/forum/admin/reported — posts with at least one unresolved report
 exports.adminGetReported = async (req, res, next) => {
   try {
     const posts = await ForumPost.find({
@@ -118,7 +129,7 @@ exports.adminDeletePost = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-// ── PUT /api/forum/admin/reports/:postId/resolve — mark all reports on a post resolved
+//  PUT /api/forum/admin/reports/:postId/resolve — mark all reports on a post resolved
 exports.adminResolveReport = async (req, res, next) => {
   try {
     const post = await ForumPost.findById(req.params.postId);

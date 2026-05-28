@@ -13,4 +13,15 @@ function emitToSession(sessionId, notification) {
   _io.to(sessionId).emit('new-notification', notification);
 }
 
-module.exports = { init, emitToSession, HARDCODED_SESSION_ID, HARDCODED_USER_ID };
+function notifyForum(event, data) {
+  if (!_io) return;
+  _io.to('forum-room').emit(event, data);
+}
+
+module.exports = {
+  init,
+  emitToSession,
+  notifyForum,
+  HARDCODED_SESSION_ID,
+  HARDCODED_USER_ID
+};
