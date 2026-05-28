@@ -181,9 +181,14 @@ function renderCard(r) {
           ${r.score}
         </div>
 
-        <button class="upvote-btn">
+        <button class="upvote-btn" onclick="event.stopPropagation()">
           <i class="material-icons">arrow_upward</i>
           ${r.upvotes}
+        </button>
+
+        <button class="upvote-btn" style="color:#d32f2f;border-color:#fca5a5"
+          onclick="openReport('${r._id}','${(r.title||'').replace(/'/g,'&#39;')}',event)">
+          <i class="material-icons" style="font-size:.95rem">flag</i> Report
         </button>
 
         <span class="institution-label">
