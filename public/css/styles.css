@@ -595,6 +595,29 @@ body {
   font-weight: 600;
 }
 
+.tracker-tab-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px 0 4px;
+  border-bottom: 1px solid #F3F4F6;
+  margin-bottom: 2px;
+}
+
+.tracker-create-btn {
+  font-size: 0.78rem !important;
+  height: auto !important;
+  line-height: normal !important;
+  padding: 4px 10px !important;
+  color: var(--teal) !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+  border-radius: 6px !important;
+  transition: background .15s !important;
+}
+.tracker-create-btn:hover { background: rgba(13,115,119,.08) !important; }
+
 .tracker-item-actions {
   display: flex;
   align-items: center;

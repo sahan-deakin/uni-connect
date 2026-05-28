@@ -16,7 +16,7 @@ const forumReportSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const forumPostSchema = new mongoose.Schema({
-  postId: { type: String, unique: true },
+  postId: { type: String, unique: true, sparse: true },
   title: { type: String, required: true, trim: true },
   content: { type: String, required: true, trim: true },
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

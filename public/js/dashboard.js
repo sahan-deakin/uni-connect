@@ -345,6 +345,45 @@ function deleteEvent(id, isCreator) {
   });
 }
 
+async function submitCreateEvent() {
+  const title     = document.getElementById('ce-title').value.trim();
+  const organizer = document.getElementById('ce-organizer').value.trim();
+  const type      = document.getElementById('ce-type').value;
+  const date      = document.getElementById('ce-date').value;
+  const location  = document.getElementById('ce-location').value.trim();
+  const description = document.getElementById('ce-desc').value.trim();
+
+  if (!title || !organizer || !type || !date || !location) {
+    M.toast({ html: 'Please fill in all required fields', classes: 'orange darken-2' });
+    return;
+  }
+
+  try {
+    await fetchJSON('/api/events', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ title, organizer, type, date, location, description })
+    });
+
+    M.Modal.getInstance(document.getElementById('create-event-modal')).close();
+    M.toast({ html: 'Event submitted — pending approval', classes: 'teal darken-1' });
+
+    // Reset form
+    ['ce-title','ce-organizer','ce-date','ce-location','ce-desc'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('ce-type').value = '';
+    M.FormSelect.init(document.getElementById('ce-type'));
+    M.updateTextFields();
+
+    // Refresh tracker so the new event shows up
+    const trackerData = await fetchJSON('/api/dashboard/tracker');
+    if (trackerData) renderTracker(trackerData);
+  } catch {
+    M.toast({ html: 'Failed to submit event', classes: 'red darken-1' });
+  }
+}
+
 function openEditEvent(e) {
   document.getElementById('edit-event-id').value        = e._id;
   document.getElementById('edit-event-title').value     = e.title || '';

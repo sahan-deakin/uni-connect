@@ -24,7 +24,13 @@ async function seed() {
     Review.deleteMany({})  // ← ADDED
   ]);
 
-  // ── Students (unchanged — referenced by other team members) ──────────────
+  // Drop stale non-sparse postId index so it is recreated as sparse on next sync
+  try {
+    await ForumPost.collection.dropIndex('postId_1');
+  } catch (_) { /* index may not exist yet — that's fine */ }
+  await ForumPost.syncIndexes();
+
+  // Students
   const studentDocs = await Student.insertMany([
     {
       name: 'Alex Johnson',
@@ -89,7 +95,7 @@ async function seed() {
   const marcus = studentDocs.find(s => s.name === 'Marcus Williams');
   const sahan  = studentDocs.find(s => s.name === 'Sahan Rathnayake');
 
-  // ── Resources (unchanged) ─────────────────────────────────────────────────
+  // Resources
   await Resource.insertMany([
     {
       title: 'SIT123 Week 3 Notes - Agile & Sprints',
@@ -128,7 +134,7 @@ async function seed() {
     }
   ]);
 
-  // ── Events (unchanged) ────────────────────────────────────────────────────
+  // Events
   const events = await Event.insertMany([
     {
       title: 'Deakin Tech Networking Night',
@@ -177,7 +183,7 @@ async function seed() {
     }
   ]);
 
-  // ── Forum posts (unchanged) ───────────────────────────────────────────────
+  // Forum posts
   await ForumPost.insertMany([
     {
       title: 'Anyone else struggling with the SIT123 project scope?',
@@ -211,7 +217,7 @@ async function seed() {
     }
   ]);
 
-  // ── Notifications (unchanged) ─────────────────────────────────────────────
+  // Notifications
   await Notification.insertMany([
     {
       studentId: alex._id, type: 'forum_reply', read: false,
@@ -245,7 +251,7 @@ async function seed() {
     }
   ]);
 
-  // ── Users ─────────────────────────────────────────────────────────────────
+  // Users
   // Original 5 student accounts are preserved exactly.
   // Added: role field (defaults to 'user') and rootadmin for the admin panel.
   const hashedPassword = await bcrypt.hash('password123', 10);
@@ -271,7 +277,7 @@ async function seed() {
 
   const byName = Object.fromEntries(userDocs.map(u => [u.username, u._id]));
 
-  // ── Reviews / reported content ────────────────────────────────────────────
+  // Reviews / reported content
   // Covers admin moderation scenarios: spam, abusive language,
   // impersonation — useful for testing the Reported Reviews panel.
   await Review.insertMany([

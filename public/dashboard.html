@@ -144,6 +144,11 @@
             <div class="loading-placeholder">Loading your resources...</div>
           </div>
           <div id="tracker-events" class="tab-panel">
+            <div class="tracker-tab-header">
+              <a href="#!" class="btn-flat tracker-create-btn modal-trigger" data-target="create-event-modal">
+                <i class="material-icons tiny left">add</i>Create Event
+              </a>
+            </div>
             <div class="loading-placeholder">Loading your events...</div>
           </div>
           <div id="tracker-forums" class="tab-panel">
@@ -247,6 +252,55 @@
     <a href="#!" id="confirm-modal-ok" class="btn waves-effect waves-light btn-confirm-danger">
       <i class="material-icons left" id="confirm-modal-icon">delete</i>
       <span id="confirm-modal-label">Delete</span>
+    </a>
+  </div>
+</div>
+
+<!-- Create Event Modal -->
+<div id="create-event-modal" class="modal">
+  <div class="modal-content">
+    <h4>Create New Event</h4>
+    <p class="modal-sub">Your event will be reviewed by our team before it goes live.</p>
+    <div class="row" style="margin-bottom:0">
+      <div class="input-field col s12">
+        <input id="ce-title" type="text">
+        <label for="ce-title">Event Title *</label>
+      </div>
+      <div class="input-field col s12 m6">
+        <input id="ce-organizer" type="text">
+        <label for="ce-organizer">Organiser / University *</label>
+      </div>
+      <div class="input-field col s12 m6">
+        <select id="ce-type">
+          <option value="" disabled selected>Choose category *</option>
+          <option value="academic">Academic</option>
+          <option value="networking">Networking</option>
+          <option value="workshop">Workshop</option>
+          <option value="competition">Competition</option>
+          <option value="career">Career</option>
+          <option value="study">Study</option>
+          <option value="social">Social</option>
+        </select>
+        <label for="ce-type">Event Category *</label>
+      </div>
+      <div class="input-field col s12 m6">
+        <input id="ce-date" type="datetime-local">
+        <label for="ce-date" class="active">Date &amp; Time *</label>
+      </div>
+      <div class="input-field col s12 m6">
+        <input id="ce-location" type="text">
+        <label for="ce-location">Location *</label>
+      </div>
+      <div class="input-field col s12">
+        <textarea id="ce-desc" class="materialize-textarea"></textarea>
+        <label for="ce-desc">Description</label>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="btn btn-cancel modal-close waves-effect">Cancel</a>
+    <a href="#!" class="btn btn-submit waves-effect waves-light" onclick="submitCreateEvent()">
+      <i class="material-icons left">send</i>Submit Event
     </a>
   </div>
 </div>
