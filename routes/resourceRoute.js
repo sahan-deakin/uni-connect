@@ -39,5 +39,7 @@ router.put('/:id/resolve-report', resourceController.resolveResourceReport);
 // DELETE /api/resources/:id             — admin: remove resource
 router.delete('/:id', resourceController.deleteResource);
 
+router.post('/:id/upvote', resourceController.upvoteResource);
+
 
 module.exports = router;

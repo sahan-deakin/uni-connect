@@ -140,24 +140,43 @@ exports.createResource = async (req, res) => {
   }
 }; */
 
+const Resource = require('../models/resourceModel');
 // UPVOTE resource
-exports.upvoteResource = async (req, res) => {
-  try {
-    const updated = await resourceService.upvoteResource(req.params.id);
 
-    res.status(200).json({
+exports.upvoteResource = async (req, res) => {
+
+  try {
+
+    const resource = await Resource.findById(req.params.id);
+
+    if (!resource) {
+
+      return res.status(404).json({
+        success: false,
+        error: 'Resource not found'
+      });
+    }
+
+    resource.upvotes += 1;
+
+    await resource.save();
+
+    res.json({
       success: true,
-      data: updated
+      data: resource
     });
+
   } catch (err) {
+
+    console.error(err);
+
     res.status(500).json({
       success: false,
-      message: err.message
+      error: 'Server error'
     });
   }
 };
 
-const Resource = require('../models/resourceModel');
 
 // GET /api/resources/reported
 // Returns all resources that have an unresolved report — for admin panel

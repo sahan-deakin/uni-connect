@@ -80,28 +80,7 @@
       <!-- SIDEBAR -->
       <div class="col s12 l4">
 
-        <div class="resource-sidebar-card">
-
-          <h5>Quick Actions</h5>
-
-          
-          <button class="btn-large resource-action-btn secondary-btn">
-            <i class="material-icons left">
-              thumb_up
-            </i>
-
-            Upvote
-          </button>
-
-          <button class="btn-large resource-action-btn secondary-btn">
-            <i class="material-icons left">
-              thumb_down
-            </i>
-
-            Report
-          </button>
-
-        </div>
+        
 
         <div class="resource-sidebar-card">
 
@@ -140,6 +119,115 @@
 <script src="js/navbar.js"></script>
 
 <script src="js/resourceView.js"></script>
+
+<script src="js/resources.js"></script>
+
+<div id="report-popup" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:9100;
+  background:rgba(0,0,0,.45);
+  align-items:center;
+  justify-content:center;
+  padding:20px;">
+
+  <div style="
+    background:#fff;
+    border-radius:16px;
+    padding:28px;
+    width:100%;
+    max-width:420px;
+    box-shadow:0 16px 48px rgba(0,0,0,.2);">
+
+    <div style="
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:4px;">
+
+      <i class="material-icons" style="color:#d32f2f;">
+        flag
+      </i>
+
+      <h5 style="
+        margin:0;
+        font-size:1rem;
+        font-weight:700;
+        color:#1a3557;">
+
+        Report Resource
+
+      </h5>
+    </div>
+
+    <p id="rp-title"
+       style="
+         font-size:.82rem;
+         color:#6b7280;
+         margin:0 0 16px;
+         padding-left:32px;">
+    </p>
+
+    <textarea
+      id="rp-msg"
+      rows="3"
+      placeholder="Briefly describe the issue…"
+      style="
+        width:100%;
+        border:1.5px solid #e5e7eb;
+        border-radius:10px;
+        padding:10px 14px;
+        font-family:inherit;
+        font-size:.9rem;
+        resize:vertical;
+        outline:none;">
+    </textarea>
+
+    <p id="rp-err"
+       style="
+         color:#d32f2f;
+         font-size:.8rem;
+         margin:4px 0 0;
+         display:none;">
+    </p>
+
+    <div style="
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      margin-top:16px;">
+
+      <button onclick="closeReport()"
+        style="
+          background:transparent;
+          border:1.5px solid #e5e7eb;
+          border-radius:8px;
+          padding:8px 18px;
+          cursor:pointer;">
+
+        Cancel
+
+      </button>
+
+      <button onclick="submitReport()"
+        style="
+          background:#d32f2f;
+          border:none;
+          border-radius:8px;
+          padding:8px 18px;
+          color:#fff;
+          cursor:pointer;">
+
+        Submit
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
 
 </body>
 </html>
