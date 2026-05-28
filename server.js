@@ -85,6 +85,14 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
+// Global error handler
+app.use((err, req, res, next) => {
+  if (err.name === 'CastError' && err.kind === 'ObjectId') {
+    return res.status(400).json({ error: 'Invalid id format' });
+  }
+  res.status(500).json({ error: err.message || 'Server error' });
+});
+
 // 5) Start server
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
