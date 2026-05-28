@@ -20,14 +20,20 @@
     "seed": "node scripts/seed.js",
     "seed:dashboard": "node scripts/seedDashboard.js",
     "notify": "node scripts/notifyCommand.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha test/**/*.test.js --timeout 5000"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.6.1",
+    "multer": "^2.1.1",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3"
+  },
+  "devDependencies": {
+    "chai": "^6.2.2",
+    "mocha": "^11.7.6",
+    "sinon": "^22.0.0"
   }
 }

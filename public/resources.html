@@ -77,6 +77,14 @@
       <i class="material-icons" style="font-size:1.1rem;">search</i>
       Search
     </button>
+    <a href="#upload-modal"
+   class="upload-top-btn modal-trigger">
+
+  <i class="material-icons">cloud_upload</i>
+
+  Upload Resource
+
+</a>
   </div>
 </div>
 
@@ -194,6 +202,20 @@
       </div>
 
       <div class="input-field col s12 m6">
+        <select id="m-institution">
+          <option value="" disabled selected>Select university</option>
+          <option value="Deakin">Deakin</option>
+          <option value="Monash">Monash</option>
+          <option value="RMIT">RMIT</option>
+          <option value="Melbourne">Melbourne</option>
+          <option value="Swinburne">Swinburne</option>
+          <option value="La Trobe">La Trobe</option>
+        </select>
+
+        <label>University *</label>
+      </div>
+
+      <div class="input-field col s12 m6">
         <select id="m-type">
           <option value="" disabled selected>Choose type</option>
           <option>Notes</option>
@@ -211,11 +233,23 @@
         <label for="m-desc">Description (min 20 characters) *</label>
       </div>
 
+      <div class="input-field col s12">
+        <input
+          id="m-tags"
+          type="text"
+          placeholder="e.g. algorithms, graphs, week1"
+        >
+
+        <label for="m-tags" class="active">
+          Tags (comma separated)
+        </label>
+      </div>
+
       <div class="input-field col s12" id="panel-file">
         <div class="file-field">
           <div class="btn" style="background:var(--teal);">
             <span>Browse</span>
-            <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.zip">
+            <input type="file"   id="resource-file" accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.zip">
           </div>
           <div class="file-path-wrapper">
             <input class="file-path" type="text" placeholder="PDF, DOCX, PPTX, ZIP — max 10 MB">
@@ -272,124 +306,8 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 <script src="js/navbar.js"></script>
+<script src="js/resources.js"></script>
 
-<script>
-let _resources = [], _unit = '', _type = '', _sort = 'score';
-
-const ICONS = { notes:'description','past-exam':'quiz',guide:'slideshow',video:'play_circle',textbook:'menu_book' };
-const CSS   = { notes:'notes','past-exam':'exam',guide:'slides',video:'video',textbook:'book' };
-
-document.addEventListener('DOMContentLoaded', async () => {
-  M.Modal.init(document.querySelectorAll('.modal'));
-  M.FormSelect.init(document.querySelectorAll('select'));
-  try {
-    const data = await fetch('/api/dashboard/resources').then(r => r.json());
-    _resources = Array.isArray(data) ? data : (data.resources || []);
-  } catch { _resources = []; }
-  render();
-});
-
-function setUnit(el, v) { document.querySelectorAll('#unit-chips .filter-chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); _unit=v; render(); }
-function setType(el, v) { el.closest('.filter-chip-group').querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); _type=v; render(); }
-function setSort(el, v) { if(el){el.closest('.filter-chip-group').querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');} _sort=v; document.getElementById('sort-inline').value=v; render(); }
-function applyFilters() { render(document.getElementById('search-input').value.trim().toLowerCase()); }
-
-function render(q='') {
-  let items = _resources.filter(r =>
-    (!q || [r.title,r.description,r.unitCode].some(f=>(f||'').toLowerCase().includes(q))) &&
-    (!_unit || (r.unitCode||'').toUpperCase()===_unit.toUpperCase()) &&
-    (!_type || (r.type||'').toLowerCase()===_type.toLowerCase())
-  );
-  if (_sort==='newest') items.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
-  else items.sort((a,b)=>(b.downloadCount||0)-(a.downloadCount||0));
-
-  document.getElementById('result-count').textContent = items.length;
-  const list = document.getElementById('resource-list');
-  const empty = document.getElementById('empty-state');
-  if (!items.length) { list.innerHTML=''; empty.style.display='flex'; return; }
-  empty.style.display = 'none';
-  list.innerHTML = items.map(r => card(r)).join('');
-}
-
-function card(r) {
-  const t = (r.type||'notes').toLowerCase();
-  const score = r.downloadCount||0;
-  const tags  = (r.tags||[]).map(t=>`<span class="tag-pill">${t}</span>`).join('');
-  return `
-    <div class="resource-card">
-      <div class="resource-icon ${CSS[t]||'other'}"><i class="material-icons">${ICONS[t]||'description'}</i></div>
-      <div class="resource-body">
-        <div class="resource-title">${esc(r.title)}</div>
-        <div class="resource-meta">
-          <span class="unit-badge">${esc(r.unitCode)}</span>
-          <span class="sep">·</span><span>${cap(r.type)}</span>
-          <span class="sep">·</span><span>${esc(r.uploadedBy?.name||'Student')}</span>
-        </div>
-        <p class="resource-desc">${esc(r.description||'')}</p>
-        ${tags?`<div class="tag-list">${tags}</div>`:''}
-      </div>
-      <div class="resource-right">
-        <div class="score-badge ${score>50?'high':score>20?'medium':'low'}">
-          <i class="material-icons">download</i> ${score}
-        </div>
-        <button class="upvote-btn"><i class="material-icons">thumb_up</i> Upvote</button>
-        <button class="upvote-btn" style="color:#d32f2f;border-color:#fca5a5"
-          onclick="openReport('${r._id}','${esc(r.title)}',event)">
-          <i class="material-icons" style="font-size:.95rem">flag</i> Report
-        </button>
-      </div>
-    </div>`;
-}
-
-const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const cap = s => s ? s[0].toUpperCase()+s.slice(1) : '';
-
-// ── Upload modal ──
-function switchMethod(m) {
-  document.getElementById('panel-file').style.display = m==='file' ? '' : 'none';
-  document.getElementById('panel-url').style.display  = m==='url'  ? '' : 'none';
-  document.getElementById('tab-file').classList.toggle('active', m==='file');
-  document.getElementById('tab-url').classList.toggle('active',  m==='url');
-}
-function submitResource() { M.toast({html:'Resource upload coming soon!',classes:'rounded'}); }
-
-// ── Report popup ──
-let _reportId = null;
-
-function openReport(id, title, e) {
-  e.stopPropagation();
-  _reportId = id;
-  document.getElementById('rp-title').textContent = `"${title}"`;
-  document.getElementById('rp-msg').value = '';
-  document.getElementById('rp-err').style.display = 'none';
-  document.getElementById('report-popup').style.display = 'flex';
-  setTimeout(() => document.getElementById('rp-msg').focus(), 50);
-}
-
-function closeReport() {
-  document.getElementById('report-popup').style.display = 'none';
-}
-
-document.getElementById('report-popup').addEventListener('click', e => { if(e.target===e.currentTarget) closeReport(); });
-document.addEventListener('keydown', e => { if(e.key==='Escape') closeReport(); });
-
-async function submitReport() {
-  const msg = document.getElementById('rp-msg').value.trim();
-  const err = document.getElementById('rp-err');
-  if (!msg) { err.textContent='Please describe the issue.'; err.style.display='block'; return; }
-  try {
-    const res = await fetch(`/api/resources/${_reportId}/report`, {
-      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({reason:msg})
-    });
-    if (!res.ok) { const d=await res.json(); err.textContent=d.error||'Failed.'; err.style.display='block'; return; }
-    closeReport();
-    M.toast({html:'✅ Report submitted — our team will review it shortly.',classes:'rounded',displayLength:4000});
-  } catch { err.textContent='Network error. Try again.'; err.style.display='block'; }
-}
-
-document.getElementById('search-input').addEventListener('input', applyFilters);
-document.getElementById('search-input').addEventListener('keydown', e => { if(e.key==='Enter') applyFilters(); });
-</script>
 
 </body>
 </html>
