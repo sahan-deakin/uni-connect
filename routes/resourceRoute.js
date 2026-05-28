@@ -5,6 +5,7 @@ const router = express.Router();
 const resourceController = require('../controllers/resourceController');
 
 const upload = require('../middleware/uploadMiddleware');
+const { requireAuth } = require('../middleware/authMiddleware');
 
 // GET all resources
 router.get('/', resourceController.getAllResources);
@@ -18,6 +19,7 @@ router.get('/:id', resourceController.getResourceById);
 // CREATE resource
 router.post(
   '/',
+  requireAuth,
   upload.single('resourceFile'),
   resourceController.createResource
 );

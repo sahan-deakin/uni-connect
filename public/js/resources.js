@@ -398,7 +398,7 @@ async function submitResource() {
 
     formData.append('institution', institution);
 
-    formData.append('uploader', 'Anonymous Student');
+    // uploader is resolved server-side from the auth token
 
     formData.append('tags', JSON.stringify(tags));
 
@@ -427,6 +427,10 @@ async function submitResource() {
     const response = await fetch('/api/resources', {
 
       method: 'POST',
+
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('uc_token')}`
+      },
 
       body: formData
     });
