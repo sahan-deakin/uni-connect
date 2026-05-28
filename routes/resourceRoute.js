@@ -4,6 +4,8 @@ const router = express.Router();
 
 const resourceController = require('../controllers/resourceController');
 
+const upload = require('../middleware/uploadMiddleware');
+
 // GET all resources
 router.get('/', resourceController.getAllResources);
 
@@ -11,7 +13,11 @@ router.get('/', resourceController.getAllResources);
 router.get('/:id', resourceController.getResourceById);
 
 // CREATE resource
-router.post('/', resourceController.createResource);
+router.post(
+  '/',
+  upload.single('resourceFile'),
+  resourceController.createResource
+);
 
 // DELETE resource
 router.delete('/:id', resourceController.deleteResource);

@@ -39,6 +39,14 @@ const resourceSchema = new mongoose.Schema({
     default: 'Anonymous Student'
   },
 
+  fileUrl: {
+  type: String
+  },
+
+  originalFileName: {
+    type: String
+  },
+
   tags: {
     type: [String],
     default: []

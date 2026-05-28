@@ -61,6 +61,7 @@ app.use('/api/reviews', reviewRoute);
 app.use('/api/admin',   adminRoute);
 app.use('/api/events', eventRoute);
 app.use('/api/resources', resourceRoute);
+app.use('/uploads', express.static('uploads'));
 
 // Health check
 app.get('/health', (req, res) => {

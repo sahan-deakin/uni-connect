@@ -29,7 +29,63 @@ async function fetchResource() {
   }
 }
 
+const downloadButton = r.fileUrl
+
+  ? `
+      <a
+        href="${r.fileUrl}"
+        target="_blank"
+        download
+        class="btn-large resource-action-btn">
+
+        <i class="material-icons left">
+          download
+        </i>
+
+        Download Resource
+
+      </a>
+    `
+
+  : `
+      <button
+        class="btn-large grey"
+        disabled>
+
+        No File Available
+
+      </button>
+    `;
+
 function renderResource(r) {
+
+    const downloadButton = r.fileUrl
+
+    ? `
+        <a
+          href="${r.fileUrl}"
+          target="_blank"
+          download
+          class="btn-large resource-action-btn">
+
+          <i class="material-icons left">
+            download
+          </i>
+
+          Download Resource
+
+        </a>
+      `
+
+    : `
+        <button
+          class="btn-large grey"
+          disabled>
+
+          No File Available
+
+        </button>
+      `;
 
   // HERO CONTENT
   document.getElementById('resource-hero-content')
@@ -57,6 +113,8 @@ function renderResource(r) {
     .innerHTML = `
 
       <div class="resource-main-card">
+
+      ${downloadButton}
 
         <div class="resource-content-section">
 

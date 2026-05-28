@@ -313,92 +313,170 @@ async function submitResource() {
 
   try {
 
-    const title = document.getElementById('m-title').value;
+    const title =
+      document.getElementById('m-title').value.trim();
 
-    const unit = document.getElementById('m-unit').value;
+    const unit =
+      document.getElementById('m-unit').value.trim();
 
-    const type = document.getElementById('m-type').value;
+    const type =
+      document.getElementById('m-type').value;
 
-    const desc = document.getElementById('m-desc').value;
+    const desc =
+      document.getElementById('m-desc').value.trim();
 
-    // Basic validation
-    if (!title || !unit || !type || !desc) {
+    const institution =
+      document.getElementById('m-institution').value;
+
+    const tags = document
+      .getElementById('m-tags')
+      .value
+      .split(',')
+      .map(tag => tag.trim())
+      .filter(tag => tag);
+
+    // File input
+    const fileInput =
+      document.getElementById('resource-file');
+
+    const file =
+      fileInput ? fileInput.files[0] : null;
+
+    // URL input
+    const url =
+      document.getElementById('m-url')
+      ? document.getElementById('m-url').value.trim()
+      : '';
+
+    // ================================
+    // VALIDATION
+    // ================================
+
+    if (
+      !title ||
+      !unit ||
+      !type ||
+      !desc ||
+      !institution
+    ) {
 
       M.toast({
-        html: 'Please fill in all required fields'
+        html: 'Please complete all required fields'
       });
 
       return;
     }
 
-    // Build new resource object
-    
-    const tags = document
-    .getElementById('m-tags')
-    .value
-    .split(',')
-    .map(tag => tag.trim())
-    .filter(tag => tag);
+    // Require either file OR URL
+    if (!file && !url) {
 
-    const resourceData = {
+      M.toast({
+        html: 'Please upload a file or provide a URL'
+      });
 
-    title,
+      return;
+    }
 
-    unit,
+    // ================================
+    // BUILD FORM DATA
+    // ================================
 
-    type,
+    const formData = new FormData();
 
-    desc,
+    formData.append('title', title);
 
-    institution: document.getElementById('m-institution').value,
+    formData.append('unit', unit);
 
-    uploader: 'Anonymous Student',
+    formData.append('type', type);
 
-    tags,
+    formData.append('desc', desc);
 
-    upvotes: 0,
+    formData.append('institution', institution);
 
-    score: 70,
+    formData.append('uploader', 'Anonymous Student');
 
-    downloadCount: 0
-    };
+    formData.append('tags', JSON.stringify(tags));
 
-    // Send POST request
+    formData.append('upvotes', 0);
+
+    formData.append('score', 70);
+
+    formData.append('downloadCount', 0);
+
+    // Append uploaded file
+    if (file) {
+
+      formData.append('resourceFile', file);
+    }
+
+    // Append URL if provided
+    if (url) {
+
+      formData.append('resourceUrl', url);
+    }
+
+    // ================================
+    // SEND REQUEST
+    // ================================
+
     const response = await fetch('/api/resources', {
 
       method: 'POST',
 
-      headers: {
-        'Content-Type': 'application/json'
-      },
-
-      body: JSON.stringify(resourceData)
+      body: formData
     });
 
     const result = await response.json();
 
+    // ================================
+    // HANDLE ERRORS
+    // ================================
+
     if (!result.success) {
-      throw new Error(result.message);
+
+      throw new Error(
+        result.message || 'Upload failed'
+      );
     }
 
-    // Success toast
+    // ================================
+    // SUCCESS
+    // ================================
+
     M.toast({
       html: 'Resource uploaded successfully!'
     });
 
     // Close modal
-    const modal = M.Modal.getInstance(
-      document.getElementById('upload-modal')
-    );
+    const modal =
+      M.Modal.getInstance(
+        document.getElementById('upload-modal')
+      );
 
     modal.close();
 
-    // Reset form
+    // ================================
+    // RESET FORM
+    // ================================
+
     document.getElementById('m-title').value = '';
+
     document.getElementById('m-unit').value = '';
+
     document.getElementById('m-desc').value = '';
 
-    // Reload resources
+    document.getElementById('m-tags').value = '';
+
+    document.getElementById('m-url').value = '';
+
+    if (fileInput) {
+      fileInput.value = '';
+    }
+
+    // Reset Materialize fields
+    M.updateTextFields();
+
+    // Refresh resource list
     fetchResources();
 
   } catch (err) {
@@ -406,7 +484,7 @@ async function submitResource() {
     console.error(err);
 
     M.toast({
-      html: 'Upload failed'
+      html: err.message || 'Upload failed'
     });
   }
 }
