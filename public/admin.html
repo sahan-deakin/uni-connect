@@ -54,11 +54,19 @@
         <i class="material-icons">flag</i> Reported Reviews
         <span class="nav-badge" id="navBadge">0</span>
       </button>
+      <button class="nav-item" onclick="showPanel('reportedPosts',this)">
+        <i class="material-icons">report_problem</i> Reported Posts
+        <span class="nav-badge" id="navForumReportBadge" style="display:none">0</span>
+      </button>
       <button class="nav-item" onclick="showPanel('blocked',this)">
         <i class="material-icons">block</i> Blocked Users
       </button>
 
       <div class="nav-section-label">Content</div>
+      <button class="nav-item" onclick="showPanel('forumPosts',this)">
+        <i class="material-icons">forum</i> Forum Posts
+        <span class="nav-badge ylw" id="navForumBadge" style="display:none">0</span>
+      </button>
       <button class="nav-item" onclick="showPanel('resources',this)">
         <i class="material-icons">menu_book</i> Academic Resources
         <span class="nav-badge ylw" id="navResourcesBadge" style="display:none">0</span>
@@ -318,6 +326,51 @@
         </div>
       </div>
 
+      <!-- ══ REPORTED FORUM POSTS ══ -->
+      <div class="panel" id="panel-reportedPosts">
+        <div class="sec-head">
+          <h2>Reported Forum Posts</h2>
+          <small id="reportedPostsCount">loading…</small>
+        </div>
+        <div id="reportedPostsList">
+          <div class="empty"><div class="ico">⏳</div><p>Loading…</p></div>
+        </div>
+      </div>
+
+      <!-- ══ ALL FORUM POSTS ══ -->
+      <div class="panel" id="panel-forumPosts">
+        <div class="sec-head">
+          <h2>Forum Posts</h2>
+          <small id="forumPostsCount">loading…</small>
+        </div>
+        <div class="filter-bar" style="gap:10px;flex-wrap:wrap;align-items:center">
+          <input id="forumSearch" type="text" placeholder="Search posts…"
+            oninput="renderForumPosts()"
+            style="flex:1;min-width:200px;max-width:320px;padding:6px 12px;border:1px solid var(--bdr);border-radius:6px;font-size:.85rem;background:var(--bg);color:var(--txt)" />
+          <button class="filter-btn active" onclick="setForumFilter('all',this)">All</button>
+          <button class="filter-btn"        onclick="setForumFilter('active',this)">Active</button>
+          <button class="filter-btn"        onclick="setForumFilter('deleted',this)">Deleted</button>
+          <button class="filter-btn"        onclick="setForumFilter('reported',this)">Has Reports</button>
+        </div>
+        <div class="tbl-card" style="margin-top:14px">
+          <table>
+            <thead>
+              <tr>
+                <th>Post ID</th>
+                <th>Title / Author</th>
+                <th>Comments</th>
+                <th>Reports</th>
+                <th>Posted</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="forumPostsTable">
+              <tr><td colspan="6" style="text-align:center;color:var(--mut);padding:28px">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div><!-- /content -->
   </main>
 
@@ -366,13 +419,15 @@
     const $ = id => document.getElementById(id);
 
     const META = {
-      dashboard:  ['Dashboard',           'Overview & analytics'],
-      reported:   ['Reported Reviews',    'User-flagged content awaiting moderation'],
-      blocked:    ['Blocked Users',        'Accounts currently suspended'],
-      resources:  ['Academic Resources',  'Manage resource content'],
-      events:     ['Events',              'Approve or reject submitted events'],
-      users:      ['All Users',           'User directory & account management'],
-      settings:   ['Settings',            'System configuration'],
+      dashboard:      ['Dashboard',              'Overview & analytics'],
+      reported:       ['Reported Reviews',       'User-flagged content awaiting moderation'],
+      reportedPosts:  ['Reported Forum Posts',   'Forum posts flagged by students'],
+      blocked:        ['Blocked Users',           'Accounts currently suspended'],
+      forumPosts:     ['Forum Posts',             'Browse and moderate all community posts'],
+      resources:      ['Academic Resources',     'Manage resource content'],
+      events:         ['Events',                 'Approve or reject submitted events'],
+      users:          ['All Users',              'User directory & account management'],
+      settings:       ['Settings',              'System configuration'],
     };
 
     function showPanel(name, btn) {
@@ -383,11 +438,13 @@
       const [t, s] = META[name] || [name, ''];
       $('pageTitle').textContent = t;
       $('pageSub').textContent = s;
-      if (name === 'reported')  loadReported();
-      if (name === 'blocked')   loadBlocked();
-      if (name === 'events')    loadEvents();
-      if (name === 'users')     loadUsers();
-      if (name === 'resources') loadReportedResources();
+      if (name === 'reported')       loadReported();
+      if (name === 'blocked')        loadBlocked();
+      if (name === 'events')         loadEvents();
+      if (name === 'users')          loadUsers();
+      if (name === 'resources')      loadReportedResources();
+      if (name === 'reportedPosts')  loadReportedForumPosts();
+      if (name === 'forumPosts')     loadForumPosts();
     }
 
     function toast(msg, ok = true) {
@@ -455,13 +512,14 @@
     }
 
     async function loadDashboard() {
-      const [reported, blocked, samples, pendingEvents, allUsers, reportedResources] = await Promise.all([
+      const [reported, blocked, samples, pendingEvents, allUsers, reportedResources, reportedForumPosts] = await Promise.all([
         safeFetch('/api/reviews/reported/list'),
         safeFetch('/api/admin/blocked-users'),
         safeFetch('/api/resources'),   // ← update to match your resources route if different
         safeFetch('/api/events/pending'),
         safeFetch('/api/admin/users'),
         safeFetch('/api/resources/reported'),
+        safeFetch('/api/forum/admin/reported'),
       ]);
 
       $('statReported').textContent  = Array.isArray(reported)     ? reported.length      : '—';
@@ -485,6 +543,13 @@
       if (resBadge) {
         resBadge.textContent   = resReportedLen;
         resBadge.style.display = resReportedLen ? 'inline' : 'none';
+      }
+
+      const forumReportedLen = Array.isArray(reportedForumPosts) ? reportedForumPosts.length : 0;
+      const forumRepBadge = $('navForumReportBadge');
+      if (forumRepBadge) {
+        forumRepBadge.textContent   = forumReportedLen;
+        forumRepBadge.style.display = forumReportedLen ? 'inline' : 'none';
       }
 
       $('dashCount').textContent      = reportedLen;
@@ -1116,6 +1181,192 @@
         window.location.href = '/login.html';
       }
     })();
+
+    // ══ REPORTED FORUM POSTS ══════════════════════════════════════════════
+    let _reportedForumPosts = [];
+
+    async function loadReportedForumPosts() {
+      const wrap = $('reportedPostsList');
+      wrap.innerHTML = `<div class="empty"><div class="ico">⏳</div><p>Loading…</p></div>`;
+      try {
+        _reportedForumPosts = await fetch('/api/forum/admin/reported').then(r => r.json());
+        renderReportedForumPosts();
+      } catch {
+        wrap.innerHTML = `<div class="empty"><div class="ico">⚠️</div><p>Failed to load reported posts.</p></div>`;
+        toast('Error loading forum reports', false);
+      }
+    }
+
+    function renderReportedForumPosts() {
+      const wrap = $('reportedPostsList');
+      $('reportedPostsCount').textContent = `${_reportedForumPosts.length} reported`;
+      const forumRepBadge = $('navForumReportBadge');
+      if (forumRepBadge) {
+        forumRepBadge.textContent   = _reportedForumPosts.length;
+        forumRepBadge.style.display = _reportedForumPosts.length ? 'inline' : 'none';
+      }
+
+      if (!_reportedForumPosts.length) {
+        wrap.innerHTML = `<div class="empty"><div class="ico">✅</div><p>No reported posts.</p></div>`;
+        return;
+      }
+
+      wrap.innerHTML = _reportedForumPosts.map(p => {
+        const reports = p.reports || [];
+        const unresolvedReports = reports.filter(r => !r.isResolved);
+        const reportRows = unresolvedReports.map(r => `
+          <div style="background:#FEF2F2;border-left:3px solid var(--red);border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:6px">
+            <span style="font-size:.78rem;font-weight:600;color:var(--red)">${r.reason}</span>
+            <span style="font-size:.75rem;color:var(--mut);margin-left:8px">by ${r.reportedByName} · ${fmtDate(r.createdAt)}</span>
+            ${r.details ? `<div style="font-size:.8rem;color:var(--txt);margin-top:3px">${r.details}</div>` : ''}
+          </div>`).join('');
+
+        return `<div class="rev-card" id="rp-${p._id}" style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+            <div>
+              <span style="font-size:.68rem;color:var(--mut);background:var(--bg);border:1px solid var(--bdr);border-radius:4px;padding:2px 7px"># ${p.postId}</span>
+              <span style="font-weight:700;font-size:.95rem;color:var(--navy);margin-left:8px">${p.title}</span>
+              <span style="font-size:.78rem;color:var(--mut);margin-left:8px">by ${p.authorName}</span>
+            </div>
+            <span class="pill p-red">${unresolvedReports.length} report${unresolvedReports.length !== 1 ? 's' : ''}</span>
+          </div>
+          <div style="font-size:.84rem;color:var(--txt);margin-bottom:10px;background:var(--bg);padding:10px 12px;border-radius:8px">${p.content}</div>
+          ${reportRows}
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+            <button class="btn-act btn-danger"  onclick="adminDeleteForumPost('${p._id}', this, 'reported')">
+              <i class="material-icons" style="font-size:.9rem">delete</i> Delete Post
+            </button>
+            <button class="btn-act btn-success" onclick="adminResolveForumReports('${p._id}', this)">
+              <i class="material-icons" style="font-size:.9rem">check_circle</i> Resolve Reports
+            </button>
+            <button class="btn-act btn-ghost" onclick="openBlockModalFromForum('${p.author}', '${p.authorName}', '${p._id}')">
+              <i class="material-icons" style="font-size:.9rem">block</i> Block Author
+            </button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    async function adminDeleteForumPost(mongoId, btn, source) {
+      btn.disabled = true; btn.textContent = 'Deleting…';
+      try {
+        const res = await fetch(`/api/forum/admin/posts/${mongoId}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error();
+        toast('✅ Post deleted');
+        if (source === 'reported') {
+          _reportedForumPosts = _reportedForumPosts.filter(p => p._id !== mongoId);
+          renderReportedForumPosts();
+        } else {
+          const p = _allForumPosts.find(p => p._id === mongoId);
+          if (p) { p.isDeleted = true; p.deletedAt = new Date().toISOString(); }
+          renderForumPosts();
+        }
+        loadDashboard();
+      } catch {
+        toast('Failed to delete post', false);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="material-icons" style="font-size:.9rem">delete</i> Delete Post';
+      }
+    }
+
+    async function adminResolveForumReports(mongoId, btn) {
+      btn.disabled = true; btn.textContent = 'Resolving…';
+      try {
+        const res = await fetch(`/api/forum/admin/reports/${mongoId}/resolve`, { method: 'PUT' });
+        if (!res.ok) throw new Error();
+        toast('✅ Reports resolved');
+        _reportedForumPosts = _reportedForumPosts.filter(p => p._id !== mongoId);
+        renderReportedForumPosts();
+      } catch {
+        toast('Failed to resolve reports', false);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="material-icons" style="font-size:.9rem">check_circle</i> Resolve Reports';
+      }
+    }
+
+    function openBlockModalFromForum(userId, username, postId) {
+      _pendingBlock = { userId, username };
+      $('blockModalTarget').textContent = `Blocking: ${username}`;
+      $('blockDurationModal').value = '3months';
+      $('blockReasonModal').value   = '';
+      $('blockModal').classList.add('open');
+      document.body.classList.add('modal-open');
+      setTimeout(() => $('blockDurationModal').focus(), 50);
+    }
+
+    // ══ ALL FORUM POSTS ═══════════════════════════════════════════════════
+    let _allForumPosts = [];
+    let _forumFilter   = 'all';
+
+    async function loadForumPosts() {
+      $('forumPostsTable').innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--mut);padding:28px">Loading…</td></tr>`;
+      try {
+        _allForumPosts = await fetch('/api/forum/admin/posts').then(r => r.json());
+        renderForumPosts();
+      } catch {
+        $('forumPostsTable').innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--red);padding:22px">Failed to load posts</td></tr>`;
+        toast('Error loading forum posts', false);
+      }
+    }
+
+    function setForumFilter(filter, btn) {
+      _forumFilter = filter;
+      document.querySelectorAll('#panel-forumPosts .filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderForumPosts();
+    }
+
+    function renderForumPosts() {
+      const tbody = $('forumPostsTable');
+      const query = ($('forumSearch')?.value || '').toLowerCase().trim();
+      let filtered = _allForumPosts;
+
+      if (_forumFilter === 'active')   filtered = filtered.filter(p => !p.isDeleted);
+      if (_forumFilter === 'deleted')  filtered = filtered.filter(p =>  p.isDeleted);
+      if (_forumFilter === 'reported') filtered = filtered.filter(p => (p.reports||[]).length > 0);
+
+      if (query) {
+        filtered = filtered.filter(p =>
+          (p.title||'').toLowerCase().includes(query) ||
+          (p.authorName||'').toLowerCase().includes(query) ||
+          (p.postId||'').toLowerCase().includes(query)
+        );
+      }
+
+      $('forumPostsCount').textContent = `${filtered.length} of ${_allForumPosts.length}`;
+
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--mut);padding:32px">No posts match.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(p => {
+        const reportCount = (p.reports||[]).filter(r => !r.isResolved).length;
+        const statusPillHtml = p.isDeleted
+          ? `<span class="pill p-gray">Deleted</span>`
+          : reportCount > 0
+            ? `<span class="pill p-red">${reportCount} report${reportCount !== 1 ? 's' : ''}</span>`
+            : `<span class="pill p-grn">Active</span>`;
+
+        const actions = p.isDeleted
+          ? `<span style="color:var(--mut);font-size:.78rem">Deleted ${fmtDateSh(p.deletedAt)}</span>`
+          : `<button class="btn-act btn-danger" onclick="adminDeleteForumPost('${p._id}', this, 'all')">
+               <i class="material-icons" style="font-size:.9rem">delete</i> Delete
+             </button>`;
+
+        return `<tr id="fp-${p._id}">
+          <td style="font-family:monospace;font-size:.75rem;color:var(--mut)">${p.postId || '—'}</td>
+          <td>
+            <div style="font-weight:600;font-size:.85rem;color:var(--navy)">${p.title}</div>
+            <div style="font-size:.75rem;color:var(--mut)">by ${p.authorName} · ${fmtDate(p.createdAt)}</div>
+          </td>
+          <td style="color:var(--mut);font-size:.82rem">${(p.comments||[]).length}</td>
+          <td>${statusPillHtml}</td>
+          <td style="color:var(--mut);font-size:.8rem">${fmtDate(p.createdAt)}</td>
+          <td style="text-align:right">${actions}</td>
+        </tr>`;
+      }).join('');
+    }
 
     loadDashboard();
   </script>

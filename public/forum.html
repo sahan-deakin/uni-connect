@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forum – UniConnect</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    :root {
+      --navy: #1A3557;
+      --teal: #0D7377;
+      --teal-lt: #14a098;
+      --acc: #4F46E5;
+      --bg: #F9FAFB;
+      --sur: #ffffff;
+      --bdr: #E5E7EB;
+      --txt: #111827;
+      --mut: #6B7280;
+      --red: #EF4444;
+      --grn: #10B981;
+      --ylw: #F59E0B;
+    }
+
+    body { background: var(--bg); font-family: 'Inter', sans-serif; }
+
+    .forum-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 28px 16px 60px;
+    }
+
+    .forum-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .forum-header h2 {
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 0;
+    }
+    .forum-header p { color: var(--mut); font-size: .88rem; margin: 2px 0 0; }
+
+    /* ── New Post button ── */
+    .btn-new-post {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--teal);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 18px;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-new-post:hover { background: var(--teal-lt); }
+
+    /* ── Post card ── */
+    .post-card {
+      background: var(--sur);
+      border: 1px solid var(--bdr);
+      border-radius: 12px;
+      padding: 18px 20px 14px;
+      margin-bottom: 16px;
+      transition: box-shadow .15s;
+    }
+    .post-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .post-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--teal);
+      color: #fff;
+      font-size: .78rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .post-author { font-weight: 600; font-size: .85rem; color: var(--txt); }
+    .post-date   { font-size: .77rem; color: var(--mut); }
+    .post-id-badge {
+      margin-left: auto;
+      font-size: .68rem;
+      color: var(--mut);
+      background: var(--bg);
+      border: 1px solid var(--bdr);
+      border-radius: 4px;
+      padding: 2px 7px;
+      letter-spacing: .3px;
+    }
+
+    .post-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 6px;
+      cursor: pointer;
+    }
+    .post-title:hover { color: var(--teal); text-decoration: underline; }
+
+    .post-body {
+      font-size: .87rem;
+      color: var(--txt);
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    .post-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .tag-pill {
+      background: #EFF6FF;
+      color: var(--acc);
+      font-size: .72rem;
+      font-weight: 600;
+      padding: 2px 9px;
+      border-radius: 20px;
+    }
+    .unit-pill {
+      background: #F0FDF4;
+      color: var(--grn);
+      font-size: .72rem;
+      font-weight: 600;
+      padding: 2px 9px;
+      border-radius: 20px;
+    }
+
+    .post-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      border-top: 1px solid var(--bdr);
+      padding-top: 10px;
+      margin-top: 2px;
+    }
+    .act-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: none;
+      border: none;
+      font-size: .8rem;
+      color: var(--mut);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: background .12s, color .12s;
+      font-family: 'Inter', sans-serif;
+    }
+    .act-btn:hover { background: var(--bg); color: var(--txt); }
+    .act-btn .material-icons { font-size: 1rem; }
+    .act-btn.report-btn:hover { color: var(--red); background: #FEF2F2; }
+
+    /* ── Comments ── */
+    .comments-section { margin-top: 14px; }
+    .comment-item {
+      background: #F9FAFB;
+      border-left: 3px solid var(--teal);
+      border-radius: 0 8px 8px 0;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+    }
+    .comment-author { font-weight: 600; font-size: .8rem; color: var(--navy); }
+    .comment-date   { font-size: .73rem; color: var(--mut); margin-left: 8px; }
+    .comment-body   { font-size: .84rem; color: var(--txt); margin-top: 4px; line-height: 1.45; }
+
+    .comment-input-wrap {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .comment-input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid var(--bdr);
+      border-radius: 8px;
+      font-size: .84rem;
+      font-family: 'Inter', sans-serif;
+      background: var(--sur);
+      color: var(--txt);
+      resize: none;
+    }
+    .comment-input:focus { outline: none; border-color: var(--teal); }
+    .btn-comment {
+      padding: 8px 14px;
+      background: var(--teal);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .12s;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+    .btn-comment:hover { background: var(--teal-lt); }
+
+    /* ── Modals (create post + report) ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.48);
+      z-index: 9000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    body.modal-open { overflow: hidden; }
+
+    .modal-box {
+      background: var(--sur);
+      border-radius: 14px;
+      padding: 28px 28px 22px;
+      width: 100%;
+      max-width: 560px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+    }
+    .modal-box h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 16px;
+    }
+
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block;
+      font-size: .78rem;
+      color: var(--mut);
+      font-weight: 600;
+      margin-bottom: 4px;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--bdr);
+      border-radius: 8px;
+      font-size: .87rem;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--txt);
+      box-sizing: border-box;
+    }
+    .form-group textarea { resize: vertical; min-height: 90px; }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus { outline: none; border-color: var(--teal); }
+
+    .modal-foot {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .btn-cancel {
+      padding: 9px 16px;
+      background: none;
+      border: 1px solid var(--bdr);
+      border-radius: 8px;
+      font-size: .84rem;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      color: var(--mut);
+    }
+    .btn-cancel:hover { background: var(--bg); }
+    .btn-submit {
+      padding: 9px 20px;
+      background: var(--teal);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: .84rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-submit:hover { background: var(--teal-lt); }
+    .btn-submit.danger { background: var(--red); }
+    .btn-submit.danger:hover { background: #B91C1C; }
+
+    /* report reason chips */
+    .reason-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .reason-chip {
+      padding: 5px 12px;
+      border: 1.5px solid var(--bdr);
+      border-radius: 20px;
+      font-size: .78rem;
+      cursor: pointer;
+      color: var(--txt);
+      background: var(--sur);
+      transition: all .12s;
+      font-family: 'Inter', sans-serif;
+    }
+    .reason-chip.selected {
+      border-color: var(--red);
+      background: #FEF2F2;
+      color: var(--red);
+      font-weight: 600;
+    }
+
+    /* empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--mut);
+    }
+    .empty-state .ico { font-size: 2.5rem; margin-bottom: 10px; }
+    .empty-state p { font-size: .9rem; }
+
+    /* toast */
+    #forum-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: .84rem;
+      font-weight: 600;
+      color: #fff;
+      z-index: 99999;
+      display: none;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    }
+    #forum-toast.ok  { background: var(--grn); }
+    #forum-toast.err { background: var(--red); }
+
+    /* Loading spinner */
+    .loading-wrap { text-align: center; padding: 40px; color: var(--mut); font-size: .9rem; }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div id="navbar-placeholder"></div>
+
+<div class="forum-wrap">
+  <!-- Header -->
+  <div class="forum-header">
+    <div>
+      <h2><i class="material-icons" style="vertical-align:middle;font-size:1.5rem;color:var(--teal)">forum</i> Community Forum</h2>
+      <p>Ask questions, share knowledge, and connect with fellow students</p>
+    </div>
+    <button class="btn-new-post" onclick="openNewPostModal()">
+      <i class="material-icons" style="font-size:1rem">add</i> New Post
+    </button>
+  </div>
+
+  <!-- Posts container -->
+  <div id="posts-container">
+    <div class="loading-wrap">
+      <div class="preloader-wrapper small active">
+        <div class="spinner-layer spinner-teal-only">
+          <div class="circle-clipper left"><div class="circle"></div></div>
+          <div class="gap-patch"><div class="circle"></div></div>
+          <div class="circle-clipper right"><div class="circle"></div></div>
+        </div>
+      </div>
+      <p style="margin-top:10px">Loading posts…</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── New Post Modal ── -->
+<div class="modal-overlay" id="newPostModal">
+  <div class="modal-box">
+    <h3><i class="material-icons" style="vertical-align:middle;font-size:1.1rem;margin-right:6px;color:var(--teal)">create</i>New Post</h3>
+
+    <div class="form-group">
+      <label>Title *</label>
+      <input id="postTitle" type="text" placeholder="What's your question or topic?" maxlength="160" />
+    </div>
+    <div class="form-group">
+      <label>Content *</label>
+      <textarea id="postContent" placeholder="Describe your question or share what you know…"></textarea>
+    </div>
+    <div class="form-group" style="display:flex;gap:10px">
+      <div style="flex:1">
+        <label>Unit Code (optional)</label>
+        <input id="postUnit" type="text" placeholder="e.g. SIT725" maxlength="12" />
+      </div>
+      <div style="flex:1">
+        <label>Tags (comma-separated)</label>
+        <input id="postTags" type="text" placeholder="e.g. assignment, exam" />
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeNewPostModal()">Cancel</button>
+      <button class="btn-submit" onclick="submitNewPost()">
+        <i class="material-icons" style="font-size:.9rem;vertical-align:middle">send</i> Post
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Report Modal ── -->
+<div class="modal-overlay" id="reportModal">
+  <div class="modal-box">
+    <h3><i class="material-icons" style="vertical-align:middle;font-size:1.1rem;margin-right:6px;color:var(--red)">flag</i>Report Post</h3>
+    <p style="font-size:.83rem;color:var(--mut);margin-bottom:14px">
+      Post ID: <strong id="reportPostIdLabel">—</strong>
+    </p>
+
+    <div class="form-group">
+      <label>Reason *</label>
+      <div class="reason-chips" id="reasonChips">
+        <button class="reason-chip" onclick="selectReason(this,'Spam')">Spam</button>
+        <button class="reason-chip" onclick="selectReason(this,'Harassment')">Harassment</button>
+        <button class="reason-chip" onclick="selectReason(this,'Misinformation')">Misinformation</button>
+        <button class="reason-chip" onclick="selectReason(this,'Inappropriate content')">Inappropriate content</button>
+        <button class="reason-chip" onclick="selectReason(this,'Other')">Other</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Additional details (optional)</label>
+      <textarea id="reportDetails" placeholder="Help the admin understand the issue…" style="min-height:70px"></textarea>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeReportModal()">Cancel</button>
+      <button class="btn-submit danger" onclick="submitReport()">
+        <i class="material-icons" style="font-size:.9rem;vertical-align:middle">flag</i> Submit Report
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="forum-toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="/js/navbar.js"></script>
+<script>
+  // ── Auth helpers ──
+  const getToken  = () => localStorage.getItem('uc_token');
+  const getUser   = () => JSON.parse(localStorage.getItem('uc_user') || '{}');
+  const authHdr   = () => ({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` });
+
+  // ── Toast ──
+  function toast(msg, ok = true) {
+    const t = document.getElementById('forum-toast');
+    t.textContent = msg;
+    t.className   = ok ? 'ok' : 'err';
+    t.style.display = 'block';
+    clearTimeout(t._t);
+    t._t = setTimeout(() => t.style.display = 'none', 2800);
+  }
+
+  // ── Helpers ──
+  const fmtDate = d => new Date(d).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
+  const initials = n => (n || '').split(/[\s_@]/)[0]?.slice(0,2).toUpperCase() || '??';
+  const AV_COLORS = ['#0D7377','#4F46E5','#10B981','#F59E0B','#EF4444','#8B5CF6'];
+  const avColor = n => { let h = 0; for (const c of (n||'')) h = (h*31+c.charCodeAt(0))%AV_COLORS.length; return AV_COLORS[h]; };
+
+  // ── State ──
+  let _posts = [];
+  let _expandedComments = new Set();
+  let _pendingReport = null;  // { postId, postDisplayId }
+  let _selectedReason = '';
+
+  // ── Load posts ──
+  async function loadPosts() {
+    try {
+      const res = await fetch('/api/forum/posts');
+      _posts = await res.json();
+      renderPosts();
+    } catch {
+      document.getElementById('posts-container').innerHTML =
+        `<div class="empty-state"><div class="ico">⚠️</div><p>Could not load posts. Please check the server.</p></div>`;
+    }
+  }
+
+  function renderPosts() {
+    const wrap = document.getElementById('posts-container');
+    if (!_posts.length) {
+      wrap.innerHTML = `<div class="empty-state"><div class="ico">💬</div><p>No posts yet — be the first to start a conversation!</p></div>`;
+      return;
+    }
+    wrap.innerHTML = _posts.map(renderPostCard).join('');
+  }
+
+  function renderPostCard(p) {
+    const color    = avColor(p.authorName);
+    const expanded = _expandedComments.has(p._id);
+    const tags = [
+      p.unitCode ? `<span class="unit-pill">${p.unitCode}</span>` : '',
+      ...(p.tags || []).map(t => `<span class="tag-pill">#${t}</span>`)
+    ].join('');
+
+    const commentsHtml = expanded ? `
+      <div class="comments-section" id="comments-${p._id}">
+        ${(p.comments || []).map(c => `
+          <div class="comment-item">
+            <span class="comment-author">${escHtml(c.authorName)}</span>
+            <span class="comment-date">${fmtDate(c.createdAt)}</span>
+            <div class="comment-body">${escHtml(c.content)}</div>
+          </div>`).join('') || '<p style="color:var(--mut);font-size:.82rem;padding:4px 0">No comments yet.</p>'}
+        <div class="comment-input-wrap">
+          <textarea class="comment-input" id="ci-${p._id}" rows="2" placeholder="Add a comment…"></textarea>
+          <button class="btn-comment" onclick="submitComment('${p._id}')">Reply</button>
+        </div>
+      </div>` : '';
+
+    return `<div class="post-card" id="pc-${p._id}">
+      <div class="post-meta">
+        <div class="post-avatar" style="background:${color}">${initials(p.authorName)}</div>
+        <div>
+          <div class="post-author">${escHtml(p.authorName)}</div>
+          <div class="post-date">${fmtDate(p.createdAt)}</div>
+        </div>
+        <span class="post-id-badge" title="Post ID"># ${p.postId || p._id.slice(-6).toUpperCase()}</span>
+      </div>
+
+      <div class="post-title" onclick="toggleComments('${p._id}')">${escHtml(p.title)}</div>
+      <div class="post-body">${escHtml(p.content)}</div>
+      ${tags ? `<div class="post-tags">${tags}</div>` : ''}
+
+      <div class="post-actions">
+        <button class="act-btn" onclick="toggleComments('${p._id}')">
+          <i class="material-icons">chat_bubble_outline</i>
+          ${(p.comments||[]).length} comment${(p.comments||[]).length !== 1 ? 's' : ''}
+        </button>
+        <button class="act-btn report-btn" onclick="openReportModal('${p._id}','${p.postId || p._id.slice(-6).toUpperCase()}')">
+          <i class="material-icons">flag</i> Report
+        </button>
+      </div>
+      ${commentsHtml}
+    </div>`;
+  }
+
+  function escHtml(s) {
+    return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Toggle comments ──
+  function toggleComments(postId) {
+    if (_expandedComments.has(postId)) _expandedComments.delete(postId);
+    else _expandedComments.add(postId);
+    renderPosts();
+    // Scroll to expanded card
+    setTimeout(() => { const el = document.getElementById('pc-' + postId); if (el) el.scrollIntoView({ behavior:'smooth', block:'nearest' }); }, 80);
+  }
+
+  // ── Submit comment ──
+  async function submitComment(postId) {
+    const input = document.getElementById('ci-' + postId);
+    const content = (input?.value || '').trim();
+    if (!content) { toast('Please enter a comment', false); return; }
+    if (!getToken()) { toast('Please log in to comment', false); return; }
+
+    const user = getUser();
+    try {
+      const res = await fetch(`/api/forum/posts/${postId}/comments`, {
+        method: 'POST',
+        headers: authHdr(),
+        body: JSON.stringify({ content, authorName: user.username || 'Student' })
+      });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
+      const updated = await res.json();
+      const idx = _posts.findIndex(p => p._id === postId);
+      if (idx >= 0) _posts[idx] = updated;
+      _expandedComments.add(postId);
+      renderPosts();
+      toast('Comment added!');
+    } catch (e) {
+      toast(e.message || 'Failed to add comment', false);
+    }
+  }
+
+  // ── New Post Modal ──
+  function openNewPostModal() {
+    if (!getToken()) { toast('Please log in to post', false); return; }
+    document.getElementById('postTitle').value   = '';
+    document.getElementById('postContent').value = '';
+    document.getElementById('postUnit').value    = '';
+    document.getElementById('postTags').value    = '';
+    document.getElementById('newPostModal').classList.add('open');
+    document.body.classList.add('modal-open');
+    setTimeout(() => document.getElementById('postTitle').focus(), 60);
+  }
+  function closeNewPostModal() {
+    document.getElementById('newPostModal').classList.remove('open');
+    document.body.classList.remove('modal-open');
+  }
+  async function submitNewPost() {
+    const title   = document.getElementById('postTitle').value.trim();
+    const content = document.getElementById('postContent').value.trim();
+    const unit    = document.getElementById('postUnit').value.trim();
+    const tagsRaw = document.getElementById('postTags').value.trim();
+    if (!title)   { toast('Title is required', false); return; }
+    if (!content) { toast('Content is required', false); return; }
+
+    const user = getUser();
+    const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+
+    try {
+      const res = await fetch('/api/forum/posts', {
+        method: 'POST',
+        headers: authHdr(),
+        body: JSON.stringify({ title, content, unitCode: unit, tags, authorName: user.username || 'Student' })
+      });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
+      const post = await res.json();
+      _posts.unshift(post);
+      closeNewPostModal();
+      renderPosts();
+      toast('Post published! 🎉');
+    } catch (e) {
+      toast(e.message || 'Failed to create post', false);
+    }
+  }
+
+  // ── Report Modal ──
+  function openReportModal(postId, displayId) {
+    if (!getToken()) { toast('Please log in to report', false); return; }
+    _pendingReport = { postId, displayId };
+    _selectedReason = '';
+    document.querySelectorAll('.reason-chip').forEach(c => c.classList.remove('selected'));
+    document.getElementById('reportDetails').value = '';
+    document.getElementById('reportPostIdLabel').textContent = displayId;
+    document.getElementById('reportModal').classList.add('open');
+    document.body.classList.add('modal-open');
+  }
+  function closeReportModal() {
+    document.getElementById('reportModal').classList.remove('open');
+    document.body.classList.remove('modal-open');
+    _pendingReport = null;
+    _selectedReason = '';
+  }
+  function selectReason(chip, reason) {
+    document.querySelectorAll('.reason-chip').forEach(c => c.classList.remove('selected'));
+    chip.classList.add('selected');
+    _selectedReason = reason;
+  }
+  async function submitReport() {
+    if (!_pendingReport) return;
+    if (!_selectedReason) { toast('Please select a reason', false); return; }
+    const details = document.getElementById('reportDetails').value.trim();
+    const user    = getUser();
+
+    try {
+      const res = await fetch(`/api/forum/posts/${_pendingReport.postId}/report`, {
+        method: 'POST',
+        headers: authHdr(),
+        body: JSON.stringify({
+          reason: _selectedReason,
+          details,
+          reportedByName: user.username || 'Unknown'
+        })
+      });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
+      closeReportModal();
+      toast('Report submitted. Thank you!');
+    } catch (e) {
+      toast(e.message || 'Failed to submit report', false);
+    }
+  }
+
+  // ── Keyboard & backdrop close ──
+  document.getElementById('newPostModal').addEventListener('click', e => { if (e.target === document.getElementById('newPostModal')) closeNewPostModal(); });
+  document.getElementById('reportModal').addEventListener('click',  e => { if (e.target === document.getElementById('reportModal'))  closeReportModal(); });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    closeNewPostModal(); closeReportModal();
+  });
+
+  loadPosts();
+</script>
+</body>
+</html>
