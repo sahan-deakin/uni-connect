@@ -16,7 +16,9 @@ const eventSchema = new mongoose.Schema({
   tags:      [String],
   unitCodes: [String],
 
-  // ── Admin moderation fields ──────────────────────────────────────────────
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Student', default: null },
+
+  // Admin moderation fields
   status: {
     type:    String,
     enum:    ['pending', 'approved', 'rejected'],

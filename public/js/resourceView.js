@@ -117,7 +117,7 @@ function renderResource(r) {
   localStorage.getItem('studentId');
 
   const isOwner =
-  r.uploadedBy === currentUserId;
+  r.uploader === currentUserId;
 
   // MAIN CONTENT
   document.getElementById('resource-container')

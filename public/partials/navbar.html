@@ -20,7 +20,17 @@
         </a>
       </li>
       <li id="nav-auth-item"></li>
-      <li id="nav-logout-item" style="display:none"></li>
+
+      <li id="nav-profile-card-wrap" style="position:relative;">
+        <div id="nav-profile-card" class="card"
+          style="position:absolute; right:0; top:48px; width:260px; display:none; z-index:1000;">
+          <div class="card-content" id="nav-profile-card-content">
+            <!-- filled by JS -->
+          </div>
+        </div>
+      </li>
+
+     <li id="nav-logout-item" style="display:none"></li>
     </ul>
   </div>
 </nav>
