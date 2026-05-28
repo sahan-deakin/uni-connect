@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  # ── MongoDB ────────────────────────────────────────────────────────────────
+  mongo:
+    image: mongo:7
+    container_name: uni-connect-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: uni-connect
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ── Node.js Application ────────────────────────────────────────────────────
+  app:
+    build: .
+    container_name: uni-connect-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      MONGO_URI: mongodb://mongo:27017/uni-connect
+      JWT_SECRET: ${JWT_SECRET:-uniconnect-dev-secret}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - app-network
+
+volumes:
+  mongo_data:
+
+networks:
+  app-network:
+    driver: bridge

@@ -29,13 +29,11 @@ app.use(express.urlencoded({ extended: false }));
 
 // 3) Socket.io events
 io.on('connection', (socket) => {
-  // Client joins its session room
   socket.on('join', (sessionId) => {
     socket.join(sessionId);
     console.log(`[socket] ${socket.id} joined room "${sessionId}"`);
   });
 
-  // CLI notifyCommand relays through here
   socket.on('admin-notify', ({ sessionId, notification }) => {
     io.to(sessionId).emit('new-notification', notification);
   });
@@ -49,26 +47,34 @@ io.on('connection', (socket) => {
 const authRoute      = require('./routes/authRoute');
 const sampleRoute    = require('./routes/sampleRoute');
 const dashboardRoute = require('./routes/dashboardRoute');
-const reviewRoute = require('./routes/reviewRoute');
-const adminRoute  = require('./routes/adminRoute');
-const eventRoute = require('./routes/eventRoute');
-const resourceRoute = require('./routes/resourceRoute');
-const forumRoute    = require('./routes/forumRoute');
+const reviewRoute    = require('./routes/reviewRoute');
+const adminRoute     = require('./routes/adminRoute');
+const eventRoute     = require('./routes/eventRoute');
+const resourceRoute  = require('./routes/resourceRoute');
+const forumRoute     = require('./routes/forumRoute');
 
 app.use('/api/auth',      authRoute);
 app.use('/api/samples',   sampleRoute);
 app.use('/api/dashboard', dashboardRoute);
-app.use('/api/reviews', reviewRoute);
-app.use('/api/admin',   adminRoute);
-app.use('/api/events', eventRoute);
+app.use('/api/reviews',   reviewRoute);
+app.use('/api/admin',     adminRoute);
+app.use('/api/events',    eventRoute);
 app.use('/api/resources', resourceRoute);
 app.use('/api/forum',     forumRoute);
-app.use('/uploads', express.static('uploads'));
+
+// 5) Student identity endpoint (HD Task 8.2)
+app.get('/api/student', (req, res) => {
+  res.json({
+    name:      'Sahan Thiranjaya Devage Don',
+    studentId: 'S222577043'
+  });
+});
 
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', db: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' });
 });
+
 // Route for navbar partial
 app.get('/partials/navbar.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/partials/navbar.html'));
@@ -79,7 +85,7 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-// 5) Start server
+// 6) Start server
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
