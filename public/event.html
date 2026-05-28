@@ -103,11 +103,13 @@
       <div class="input-field">
         <select required>
           <option value="" disabled selected>Choose category</option>
-          <option value="Academic">Academic</option>
-          <option value="Career">Career</option>
-          <option value="Social">Social</option>
-          <option value="Sport">Sport</option>
-          <option value="Other">Other</option>
+          <option value="academic">Academic</option>
+          <option value="networking">Networking</option>
+          <option value="workshop">Workshop</option>
+          <option value="competition">Competition</option>
+          <option value="career">Career</option>
+          <option value="study">Study</option>
+          <option value="social">Social</option>
         </select>
         <label>Event Category</label>
       </div>
@@ -161,75 +163,8 @@
 <section class="events-grid-section">
   <div class="container">
     <h5 class="results-count">Upcoming events</h5>
-    <div class="events-grid">
-
-      <!-- Card 01 -->
-      <div class="event-card">
-        <div class="event-card-bar academic"></div>
-        <div class="event-card-body">
-          <div class="event-badges">
-            <span class="event-badge academic">Academic</span>
-            <span class="event-badge spots">12 Spots Left</span>
-          </div>
-          <h4 class="event-title">Research Methods Workshop</h4>
-          <p class="event-org">Deakin University - Faculty of Science</p>
-          <ul class="event-details">
-            <li><i class="material-icons">calendar_today</i> Fri 23 May 2026</li>
-            <li><i class="material-icons">schedule</i> 10:00 AM - 1:00 PM</li>
-            <li><i class="material-icons">location_on</i>Burwood Campus</li>
-          </ul>
-          <div class="event-footer">
-            <button class="btn-rsvp">REGISTER</button>
-            <span class="event-capacity">38 / 50 Registered</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 02 -->
-       <div class="event-card">
-        <div class="event-card-bar career"></div>
-        <div class="event-card-body">
-          <div class="event-badges">
-            <span class="event-badge career">Career</span>
-            <span class="event-badge spots">3 Spots Left</span>
-          </div>
-          <h4 class="event-title">Graduate Careers Expo 2026</h4>
-          <p class="event-org">RMIT University - School of Computing</p>
-          <ul class="event-details">
-            <li><i class="material-icons">calendar_today</i>Wed 28 May 2026</li>
-            <li><i class="material-icons">schedule</i>9:00 AM - 4:00 PM</li>
-            <li><i class="material-icons">location_on</i>City Campus</li>
-          </ul>
-          <div class="event-footer">
-            <button class="btn-rsvp">REGISTER</button>
-            <span class="event-capacity">97 / 100 Registered</span>
-          </div>
-        </div>
-       </div>
-
-       <!-- Card 03 -->
-        <div class="event-card">
-        <div class="event-card-bar social"></div>
-        <div class="event-card-body">
-          <div class="event-badges">
-            <span class="event-badge social">Social</span>
-            <span class="event-badge spots">FULL</span>
-          </div>
-          <h4 class="event-title">Inter-University Talent Show</h4>
-          <p class="event-org">Monash University - Student Union</p>
-          <ul class="event-details">
-            <li><i class="material-icons">calendar_today</i>Fri 31 Jul 2026</li>
-            <li><i class="material-icons">schedule</i>6:30 PM - 9:00 PM</li>
-            <li><i class="material-icons">location_on</i>Bunjil Place</li>
-          </ul>
-          <div class="event-footer">
-            <button class="btn-rsvp">EVENT FULL</button>
-            <span class="event-capacity">60 / 60 Registered</span>
-          </div>
-        </div>
-       </div>
-
-    </div>
+    <div class="events-grid" id="events-grid">
+</div>
   </div>
 </section>
 <!-- FOOTER -->
@@ -243,6 +178,8 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+
+    loadEvents();
 
     // Initialize modal
     const modals = document.querySelectorAll('.modal');
@@ -271,30 +208,139 @@
         }, 400);
       }, 5000);
     }
+    
+    // Fetch pending events
+    async function loadEvents() {
+    try {
+
+      const response = await fetch('/api/events/pending');
+      const events = await response.json();
+
+      const eventsGrid = document.getElementById('events-grid');
+
+      eventsGrid.innerHTML = '';
+
+      events.forEach(event => {
+
+      // Event type styling
+      const typeClass = event.type || 'academic';
+
+      // Format date
+      const eventDate = new Date(event.date);
+
+      const formattedDate = eventDate.toLocaleDateString('en-AU', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+
+      // Registration count
+      const registeredCount = event.registeredStudents
+        ? event.registeredStudents.length
+        : 0;
+
+      // Build card
+      const card = `
+        <div class="event-card">
+          // color bar
+          <div class="event-card-bar ${typeClass}"></div>
+
+          <div class="event-card-body">
+
+            // 
+            <div class="event-badges">
+              <span class="event-badge ${typeClass}">
+                ${event.type || 'Event'}
+              </span>
+
+              <span class="event-badge spots">
+                ${registeredCount} Registered
+              </span>
+            </div>
+
+            <h4 class="event-title">
+              ${event.title}
+            </h4>
+
+            <p class="event-org">
+              ${event.organizer || 'Unknown Organizer'}
+            </p>
+
+            <ul class="event-details">
+
+              <li>
+                <i class="material-icons">calendar_today</i>
+                ${formattedDate}
+              </li>
+
+              <li>
+                <i class="material-icons">location_on</i>
+                ${event.location || 'Online'}
+              </li>
+
+            </ul>
+
+            <div class="event-footer">
+
+              <button class="btn-rsvp">
+                REGISTER
+              </button>
+
+              <span class="event-capacity">
+                ${registeredCount} Registered
+              </span>
+
+            </div>
+
+          </div>
+        </div>
+      `;
+
+      eventsGrid.innerHTML += card;
+    });
+
+    initializeRegisterButtons();
+
+    } catch (error) {
+    console.error('Failed to load events:', error);
+    }
+    }
+
+    function initializeRegisterButtons() {
 
     document.querySelectorAll('.btn-rsvp').forEach(button => {
-      button.addEventListener('click', function () {
 
-        // Disable event full button
-        if (this.textContent.trim() === 'EVENT FULL') {
-          showOverlay('Event is Full', 'Registrations are closed. Check back for future events.', '😔');
-        return;
-        }
+      button.addEventListener('click', function () {
 
         const isRegistered = this.classList.contains('registered');
 
-        if (!isRegistered) {
-          showOverlay('Successfully Registered!', "You're all set. See you at the event!", '🎉');
+          if (!isRegistered) {
+
+            showOverlay(
+              'Successfully Registered!',
+              "You're all set. See you at the event!",
+              '🎉'
+            );
+
           this.textContent = 'UN-REGISTER';
           this.classList.add('registered');
-        } else {
-          showOverlay('Unregistered', 'You have been removed from this event.', '👋');
+
+          } else {
+
+            showOverlay(
+              'Unregistered',
+              'You have been removed from this event.',
+              '👋'
+            );
+
           this.textContent = 'REGISTER';
           this.classList.remove('registered');
-        }
+          }
       });
-    });
   });
+}
+});
   
 
 </script>

@@ -129,9 +129,13 @@
 .event-card-bar {
   height: 12px;
 }
-.event-card-bar.academic { background: #3A15CE; }
-.event-card-bar.career   { background: #0F6E56; }
-.event-card-bar.social   { background: #D85A30; }
+.event-card-bar.academic { background: #a391ed; }
+.event-card-bar.networking   { background: #c52ca4; }
+.event-card-bar.workshop   { background: #D85A30; }
+.event-card-bar.competition   { background: #0F6E56; }
+.event-card-bar.career   { background: #d8ca30; }
+.event-card-bar.study   { background: #1417df; }
+.event-card-bar.social   { background: #e06060; }
 .event-card-body { padding: 18px 20px; }
 
 .event-badge {
@@ -140,10 +144,13 @@
   padding: 3px 10px;
   border-radius: 20px;
 }
-.event-badge.academic { background: #EEEDFE; color: #3C3489; }
-.event-badge.career   { background: #E1F5EE; color: #085041; }
-.event-badge.social   { background: #FAECE7; color: #712B13; }
-.event-badge.spots    { background: #F3F4F6; color: #686c71; }
+.event-badge.academic { background: #e7e0ff; color: #a391ed; }
+.event-badge.networking   { background: #fbdff4; color: #c52ca4; }
+.event-badge.workshop   { background: #f6d9cf; color: #D85A30; }
+.event-badge.competition    { background: #d4fff4; color: #0F6E56; }
+.event-badge.career { background: #f9f6d2; color: #bfaf02; }
+.event-badge.study { background: #d3d3fe; color: #1417df; }
+.event-badge.social { background: #f4cdcd; color: #e06060; }
 
 .event-title {
   font-size: 2rem;
