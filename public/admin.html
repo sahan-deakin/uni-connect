@@ -39,7 +39,7 @@
   <!-- ── Sidebar ── -->
   <aside class="sidenav-custom">
     <div class="logo-block">
-      <div class="logo-eye">UniConnect</div>
+      <img src="/Images/Logo_UNICONNECT.jpg" alt="UniConnect" class="admin-logo-img">
       <h1>Admin Console</h1>
     </div>
 
@@ -68,8 +68,8 @@
         <span class="nav-badge ylw" id="navForumBadge" style="display:none">0</span>
       </button>
       <button class="nav-item" onclick="showPanel('resources',this)">
-        <i class="material-icons">menu_book</i> Academic Resources
-        <span class="nav-badge ylw" id="navResourcesBadge" style="display:none">0</span>
+        <i class="material-icons">flag</i> Reported Resources
+        <span class="nav-badge" id="navResourcesBadge" style="display:none">0</span>
       </button>
       <button class="nav-item" onclick="showPanel('events',this)">
         <i class="material-icons">event</i> Events
@@ -85,7 +85,13 @@
       </button>
     </div>
 
-    <div class="side-foot">v1.0.0 · SIT725</div>
+    <div class="side-foot">
+      <button class="admin-logout-btn" onclick="adminLogout()">
+        <i class="material-icons" style="font-size:.9rem;vertical-align:middle;">logout</i>
+        Logout
+      </button>
+      <div style="margin-top:8px;">v1.0.0 · SIT725</div>
+    </div>
   </aside>
 
   <!-- ── Main ── -->
@@ -218,7 +224,7 @@
       <!-- ══ REPORTED RESOURCES ══ -->
       <div class="panel" id="panel-resources">
         <div class="sec-head">
-          <h2>Academic Resources</h2>
+          <h2>Reported Resources</h2>
           <small id="resourcesReportedCount">loading…</small>
         </div>
         <div class="tbl-card">
@@ -418,13 +424,20 @@
   <script>
     const $ = id => document.getElementById(id);
 
+    function adminLogout() {
+      localStorage.removeItem('uc_token');
+      localStorage.removeItem('uc_user');
+      localStorage.removeItem('uc_display_name');
+      window.location.href = '/index.html';
+    }
+
     const META = {
       dashboard:      ['Dashboard',              'Overview & analytics'],
       reported:       ['Reported Reviews',       'User-flagged content awaiting moderation'],
       reportedPosts:  ['Reported Forum Posts',   'Forum posts flagged by students'],
       blocked:        ['Blocked Users',           'Accounts currently suspended'],
       forumPosts:     ['Forum Posts',             'Browse and moderate all community posts'],
-      resources:      ['Academic Resources',     'Manage resource content'],
+      resources:      ['Reported Resources',     'Resources flagged by students'],
       events:         ['Events',                 'Approve or reject submitted events'],
       users:          ['All Users',              'User directory & account management'],
       settings:       ['Settings',              'System configuration'],
@@ -741,7 +754,7 @@
         }
 
         tbody.innerHTML = resources.map(r => {
-          const uploader = r.uploadedBy?.name || r.uploadedBy?.email || '—';
+          const uploader = r.uploader || '—';
           const reported = r.report?.reportedAt ? new Date(r.report.reportedAt).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '—';
           const reason   = (r.report?.reason || '—').slice(0, 80);
           return `
@@ -750,7 +763,7 @@
                 <div style="font-weight:600;font-size:.875rem;color:var(--text);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escAdm(r.title)}">${escAdm(r.title)}</div>
                 <div style="font-size:.75rem;color:var(--mut)">${capitaliseAdm(r.type)}</div>
               </td>
-              <td><span style="background:rgba(13,115,119,.1);color:#0d7377;border-radius:5px;padding:2px 8px;font-size:.72rem;font-weight:700">${escAdm(r.unitCode)}</span></td>
+              <td><span style="background:rgba(13,115,119,.1);color:#0d7377;border-radius:5px;padding:2px 8px;font-size:.72rem;font-weight:700">${escAdm(r.unit)}</span></td>
               <td style="font-size:.8rem;color:var(--mut)">${escAdm(uploader)}</td>
               <td style="font-size:.8rem;color:var(--mut)">${reported}</td>
               <td style="font-size:.8rem;color:var(--mut);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escAdm(r.report?.reason || '')}">${escAdm(reason)}</td>

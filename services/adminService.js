@@ -1,8 +1,6 @@
 const User = require('../models/userModel');
 const reviewService = require('./reviewService');
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
 // Resolve a named duration into a concrete expiry Date (or null = permanent)
 function resolveBlockUntil(duration) {
   const now = new Date();
@@ -14,8 +12,6 @@ function resolveBlockUntil(duration) {
     default: throw new Error(`Unknown duration: ${duration}`);
   }
 }
-
-// ── User management ──────────────────────────────────────────────────────────
 
 // Return every user (for the All Users panel). Excludes password hash.
 const getUsers = () =>

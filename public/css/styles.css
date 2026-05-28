@@ -595,6 +595,62 @@ body {
   font-weight: 600;
 }
 
+.tracker-tab-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px 0 4px;
+  border-bottom: 1px solid #F3F4F6;
+  margin-bottom: 2px;
+}
+
+.tracker-create-btn {
+  font-size: 0.78rem !important;
+  height: auto !important;
+  line-height: normal !important;
+  padding: 4px 10px !important;
+  color: var(--teal) !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+  border-radius: 6px !important;
+  transition: background .15s !important;
+}
+.tracker-create-btn:hover { background: rgba(13,115,119,.08) !important; }
+
+.tracker-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.tracker-action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity .15s, background .15s;
+  line-height: 1;
+}
+.tracker-item:hover .tracker-action-btn { opacity: 1; }
+.tracker-action-btn:hover { background: rgba(0,0,0,0.07); }
+.tracker-action-btn i { font-size: 15px !important; }
+
+.btn-confirm-danger {
+  background: #d32f2f !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+}
+.btn-confirm-danger:hover { background: #b71c1c !important; }
+
 /* ─── RESOURCES PAGE ─────────────────────────────────────────────────────── */
 
 * { box-sizing: border-box; }

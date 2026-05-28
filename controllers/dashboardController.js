@@ -21,17 +21,14 @@ async function resolveStudent(req, res) {
 // Feature 1: Personalized Academic Feed
 const getPersonalizedFeed = async (req, res) => {
   try {
-    const student = await resolveStudent(req, res).catch();
-    if (!student) {
-      return res.status(404).json({ error: 'Demo student not found. Run: npm run seed:dashboard' });
-    }
+    const student = await resolveStudent(req, res);
+    if (!student) return;
 
     const { unitCodes, interests, skills } = student;
     const relevantTags = [...interests, ...skills];
 
     const [resources, events, forums] = await Promise.all([
-      Resource.find({ unitCode: { $in: unitCodes } })
-        .populate('uploadedBy', 'name')
+      Resource.find({ unit: { $in: unitCodes } })
         .sort({ createdAt: -1 })
         .limit(6),
 
@@ -136,11 +133,23 @@ const getTrackerData = async (req, res) => {
     const student = await resolveStudent(req, res);
     if (!student) return;
 
-    const [myResources, myEvents, myPosts] = await Promise.all([
-      Resource.find({ uploadedBy: student._id }).sort({ createdAt: -1 }),
-      Event.find({ registeredStudents: student._id }).sort({ date: 1 }),
+    const [myResources, myEventsRaw, myPosts] = await Promise.all([
+      Resource.find({ uploader: student.name }).sort({ createdAt: -1 }),
+      Event.find({
+        $or: [
+          { registeredStudents: student._id },
+          { createdBy: student._id }
+        ]
+      }).sort({ date: 1 }),
       ForumPost.find({ author: student._id }).sort({ createdAt: -1 })
     ]);
+
+    const studentIdStr = student._id.toString();
+    const myEvents = myEventsRaw.map(e => {
+      const obj = e.toObject();
+      obj.isCreator = !!(e.createdBy && e.createdBy.toString() === studentIdStr);
+      return obj;
+    });
 
     const totalDownloads = myResources.reduce((sum, r) => sum + r.downloadCount, 0);
 

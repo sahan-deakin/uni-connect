@@ -29,22 +29,28 @@ async function fetchResource() {
   }
 }
 
-const downloadButton = r.fileUrl
+
+function renderResource(r) {
+
+    const downloadButton = r.fileUrl
 
   ? `
-      <a
-        href="${r.fileUrl}"
-        target="_blank"
-        download
-        class="btn-large resource-action-btn">
+      <div style="margin-bottom: 2rem;">
 
-        <i class="material-icons left">
-          download
-        </i>
+        <a
+          href="http://localhost:3000${r.fileUrl}"
+          target="_blank"
+          class="btn-large waves-effect waves-light">
 
-        Download Resource
+          <i class="material-icons left">
+            download
+          </i>
 
-      </a>
+          Download Resource
+
+        </a>
+
+      </div>
     `
 
   : `
@@ -57,35 +63,34 @@ const downloadButton = r.fileUrl
       </button>
     `;
 
-function renderResource(r) {
+  const previewSection = r.fileUrl
 
-    const downloadButton = r.fileUrl
+  ? `
+      <div class="resource-preview-section">
 
-    ? `
-        <a
-          href="${r.fileUrl}"
-          target="_blank"
-          download
-          class="btn-large resource-action-btn">
+        <h4>Preview</h4>
 
-          <i class="material-icons left">
-            download
-          </i>
+        <div class="pdf-preview-wrapper">
 
-          Download Resource
+          <embed
+            src="${r.fileUrl}"
+            type="application/pdf"
+            width="100%"
+            height="800px"
+            class="pdf-preview">
 
-        </a>
-      `
+        </div>
 
-    : `
-        <button
-          class="btn-large grey"
-          disabled>
+      </div>
+    `
 
-          No File Available
+  : `
+      <div class="resource-preview-section">
 
-        </button>
-      `;
+        <p>No preview available.</p>
+
+      </div>
+    `;
 
   // HERO CONTENT
   document.getElementById('resource-hero-content')
@@ -108,13 +113,40 @@ function renderResource(r) {
       </p>
     `;
 
+  const currentUserId =
+  localStorage.getItem('studentId');
+
+  const isOwner =
+  r.uploader === currentUserId;
+
   // MAIN CONTENT
   document.getElementById('resource-container')
     .innerHTML = `
 
       <div class="resource-main-card">
 
-      ${downloadButton}
+      ${isOwner
+
+      ? `
+          <div class="owner-actions">
+
+            <button class="btn amber">
+              Edit Resource
+            </button>
+
+            <button class="btn red">
+              Delete Resource
+            </button>
+
+          </div>
+        `
+
+      : ''
+    }
+
+       ${downloadButton}
+
+        ${previewSection}
 
         <div class="resource-content-section">
 
@@ -172,3 +204,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
   fetchResource();
 });
+

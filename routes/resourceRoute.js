@@ -5,9 +5,13 @@ const router = express.Router();
 const resourceController = require('../controllers/resourceController');
 
 const upload = require('../middleware/uploadMiddleware');
+const { requireAuth } = require('../middleware/authMiddleware');
 
 // GET all resources
 router.get('/', resourceController.getAllResources);
+
+// GET reported resources — MUST be before /:id so Express doesn't swallow "reported" as an id
+router.get('/reported', resourceController.getReportedResources);
 
 // GET single resource
 router.get('/:id', resourceController.getResourceById);
@@ -15,6 +19,7 @@ router.get('/:id', resourceController.getResourceById);
 // CREATE resource
 router.post(
   '/',
+  requireAuth,
   upload.single('resourceFile'),
   resourceController.createResource
 );
@@ -24,9 +29,6 @@ router.post(
 
 // UPVOTE resource
 router.patch('/:id/upvote', resourceController.upvoteResource);
-
-// GET  /api/resources/reported          — admin: list reported resources
-router.get('/reported', resourceController.getReportedResources);
 
 // POST /api/resources/:id/report        — student: submit a report
 router.post('/:id/report', resourceController.reportResource);

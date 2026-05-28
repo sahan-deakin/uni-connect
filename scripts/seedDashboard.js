@@ -24,7 +24,13 @@ async function seed() {
     Review.deleteMany({})  // ← ADDED
   ]);
 
-  // ── Students (unchanged — referenced by other team members) ──────────────
+  // Drop stale non-sparse postId index so it is recreated as sparse on next sync
+  try {
+    await ForumPost.collection.dropIndex('postId_1');
+  } catch (_) { /* index may not exist yet — that's fine */ }
+  await ForumPost.syncIndexes();
+
+  // Students
   const studentDocs = await Student.insertMany([
     {
       name: 'Alex Johnson',
@@ -89,46 +95,46 @@ async function seed() {
   const marcus = studentDocs.find(s => s.name === 'Marcus Williams');
   const sahan  = studentDocs.find(s => s.name === 'Sahan Rathnayake');
 
-  // ── Resources (unchanged) ─────────────────────────────────────────────────
+  // Resources
   await Resource.insertMany([
     {
       title: 'SIT123 Week 3 Notes - Agile & Sprints',
-      description: 'My notes from week 3 lectures. Covers sprint planning and reviews. Might have a few gaps but should be useful.',
-      type: 'notes', unitCode: 'SIT123',
-      uploadedBy: sarah._id, tags: ['agile', 'planning'],
+      desc: 'My notes from week 3 lectures. Covers sprint planning and reviews. Might have a few gaps but should be useful.',
+      type: 'Notes', unit: 'SIT123', institution: 'Deakin',
+      uploader: 'Sarah Chen', tags: ['agile', 'planning'],
       downloadCount: 47, createdAt: new Date('2026-05-07')
     },
     {
       title: 'SIT234 Parallel Computing Quick Guide',
-      description: 'Put this together when studying for the mid-sem. Covers OpenMP basics and a bit of MPI.',
-      type: 'guide', unitCode: 'SIT234',
-      uploadedBy: marcus._id, tags: ['parallel', 'OpenMP'],
+      desc: 'Put this together when studying for the mid-sem. Covers OpenMP basics and a bit of MPI.',
+      type: 'Slides', unit: 'SIT234', institution: 'Deakin',
+      uploader: 'Marcus Williams', tags: ['parallel', 'OpenMP'],
       downloadCount: 31, createdAt: new Date('2026-05-05')
     },
     {
       title: 'SIT764 Capstone Requirements 2026',
-      description: 'Official rubric from the unit guide. Pasted it here so its easier to find.',
-      type: 'guide', unitCode: 'SIT764',
-      uploadedBy: alex._id, tags: ['capstone', 'rubric'],
+      desc: 'Official rubric from the unit guide. Pasted it here so its easier to find.',
+      type: 'Slides', unit: 'SIT764', institution: 'Deakin',
+      uploader: 'Alex Johnson', tags: ['capstone', 'rubric'],
       downloadCount: 28, createdAt: new Date('2026-05-03')
     },
     {
       title: 'ML Algorithms Cheat Sheet',
-      description: 'Quick summary of common algorithms - when to use what, pros/cons. Mostly from lecture slides and YouTube.',
-      type: 'notes', unitCode: 'SIT123',
-      uploadedBy: sahan._id, tags: ['ML', 'algorithms'],
+      desc: 'Quick summary of common algorithms - when to use what, pros/cons. Mostly from lecture slides and YouTube.',
+      type: 'Notes', unit: 'SIT123', institution: 'Deakin',
+      uploader: 'Sahan Rathnayake', tags: ['ML', 'algorithms'],
       downloadCount: 62, createdAt: new Date('2026-05-08')
     },
     {
       title: 'SIT123 Past Exam 2025',
-      description: 'Found this on the library portal. Has worked answers for most questions.',
-      type: 'past-exam', unitCode: 'SIT123',
-      uploadedBy: sarah._id, tags: ['exam', 'revision'],
+      desc: 'Found this on the library portal. Has worked answers for most questions.',
+      type: 'Past Exam', unit: 'SIT123', institution: 'Deakin',
+      uploader: 'Sarah Chen', tags: ['exam', 'revision'],
       downloadCount: 89, createdAt: new Date('2026-05-04')
     }
   ]);
 
-  // ── Events (unchanged) ────────────────────────────────────────────────────
+  // Events
   const events = await Event.insertMany([
     {
       title: 'Deakin Tech Networking Night',
@@ -167,7 +173,7 @@ async function seed() {
       status: 'pending'
     },
     {
-      title: 'SIT123 Study Group',
+      title: 'SIT123/SIT712 - Study Group',
       description: 'Weekly meetup to work through assignments. Jump in if you want.',
       type: 'study', organizer: 'Student-led',
       date: new Date('2026-05-11'), location: 'Online', isOnline: true,
@@ -177,7 +183,7 @@ async function seed() {
     }
   ]);
 
-  // ── Forum posts (unchanged) ───────────────────────────────────────────────
+  // Forum posts
   await ForumPost.insertMany([
     {
       title: 'Anyone else struggling with the SIT123 project scope?',
@@ -211,7 +217,7 @@ async function seed() {
     }
   ]);
 
-  // ── Notifications (unchanged) ─────────────────────────────────────────────
+  // Notifications
   await Notification.insertMany([
     {
       studentId: alex._id, type: 'forum_reply', read: false,
@@ -245,7 +251,7 @@ async function seed() {
     }
   ]);
 
-  // ── Users ─────────────────────────────────────────────────────────────────
+  // Users
   // Original 5 student accounts are preserved exactly.
   // Added: role field (defaults to 'user') and rootadmin for the admin panel.
   const hashedPassword = await bcrypt.hash('password123', 10);
@@ -271,7 +277,7 @@ async function seed() {
 
   const byName = Object.fromEntries(userDocs.map(u => [u.username, u._id]));
 
-  // ── Reviews / reported content ────────────────────────────────────────────
+  // Reviews / reported content
   // Covers admin moderation scenarios: spam, abusive language,
   // impersonation — useful for testing the Reported Reviews panel.
   await Review.insertMany([

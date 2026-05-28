@@ -433,7 +433,7 @@ select.dur-sel {
 }
 select.dur-sel:focus { border-color: var(--teal) !important; }
 
-/* ── User cell ── */
+/*  User cell  */
 .ucell { display: flex; align-items: center; gap: 8px; }
 .ucell .uav {
   width: 28px; height: 28px;
@@ -447,7 +447,7 @@ select.dur-sel:focus { border-color: var(--teal) !important; }
 .ucell .uname  { font-size: .84rem; font-weight: 600; color: var(--txt); }
 .ucell .uemail { font-size: .71rem; color: var(--mut); }
 
-/* ── Empty / placeholder ── */
+/*  Empty / placeholder  */
 .empty {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 8px; padding: 48px 20px; color: var(--mut);
@@ -465,7 +465,7 @@ select.dur-sel:focus { border-color: var(--teal) !important; }
 .placeholder h3 { font-size: .95rem; color: var(--txt); font-weight: 600; opacity: .5; }
 .placeholder p  { font-size: .8rem; max-width: 260px; line-height: 1.6; }
 
-/* ── Event cards ── */
+/*  Event cards  */
 .event-list { display: flex; flex-direction: column; gap: 12px; }
 .event-card {
   background: var(--sur);
@@ -537,7 +537,7 @@ select.dur-sel:focus { border-color: var(--teal) !important; }
   font-weight: 500;
 }
 
-/* ── Filter bar ── */
+/*  Filter bar  */
 .filter-bar {
   display: flex;
   align-items: center;
@@ -564,7 +564,7 @@ select.dur-sel:focus { border-color: var(--teal) !important; }
   color: var(--teal);
 }
 
-/* ── Toast ── */
+/*  Toast  */
 #toast {
   position: fixed; bottom: 20px; right: 20px;
   padding: 10px 16px; border-radius: 9px;
@@ -577,7 +577,7 @@ select.dur-sel:focus { border-color: var(--teal) !important; }
 #toast.ok  { background: #D1FAE5; border-color: #6EE7B7; color: #065F46; }
 #toast.err { background: #FEE2E2; border-color: #FCA5A5; color: var(--red-dark); }
 
-/* ── Rejection modal ── */
+/*  Rejection modal  */
 #rejectModal {
   display: none;
   position: fixed;
@@ -624,3 +624,35 @@ select.dur-sel:focus { border-color: var(--teal) !important; }
 }
 .modal-box textarea:focus { border-color: var(--teal); }
 .modal-foot { display: flex; gap: 8px; justify-content: flex-end; }
+/* ── Admin sidebar logo image ── */
+.admin-logo-img {
+  width: 120px;
+  height: auto;
+  display: block;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  object-fit: contain;
+}
+
+/*  Admin sidebar logout button  */
+.admin-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  background: rgba(211,47,47,0.12);
+  border: 1px solid rgba(211,47,47,0.3);
+  border-radius: 8px;
+  color: #ff7070;
+  font-family: 'Inter', sans-serif;
+  font-size: .78rem;
+  font-weight: 600;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  letter-spacing: 0.2px;
+}
+.admin-logout-btn:hover {
+  background: rgba(211,47,47,0.25);
+  color: #ff9090;
+}

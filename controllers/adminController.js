@@ -21,6 +21,8 @@ exports.blockUser = async (req, res, next) => {
     const user = await adminService.blockUser(req.params.userId, { duration, reason, reviewId });
     res.json({ message: 'User blocked successfully', user });
   } catch (err) {
+    if (err.message === 'User not found') return res.status(404).json({ error: 'User not found' });
+    if (err.name === 'CastError') return res.status(400).json({ error: 'Invalid user id format' });
     next(err);
   }
 };

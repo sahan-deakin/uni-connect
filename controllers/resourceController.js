@@ -1,4 +1,5 @@
 const resourceService = require('../services/resourceService');
+const Student = require('../models/studentModel');
 
 // GET all resources
 exports.getAllResources = async (req, res) => {
@@ -47,6 +48,12 @@ exports.createResource = async (req, res) => {
 
   try {
 
+    let uploaderName = 'Anonymous Student';
+    if (req.user?.studentId) {
+      const student = await Student.findById(req.user.studentId).select('name').lean();
+      if (student?.name) uploaderName = student.name;
+    }
+
     const resourceData = {
 
       title: req.body.title,
@@ -59,7 +66,7 @@ exports.createResource = async (req, res) => {
 
   institution: req.body.institution,
 
-  uploader: req.body.uploader,
+  uploader: uploaderName,
 
   upvotes: Number(req.body.upvotes || 0),
 
@@ -160,7 +167,6 @@ exports.getReportedResources = async (req, res, next) => {
       'report': { $ne: null },
       'report.isResolved': false
     })
-      .populate('uploadedBy', 'name email')
       .sort({ 'report.reportedAt': -1 })
       .lean();
     res.json(resources);
@@ -179,22 +185,34 @@ exports.reportResource = async (req, res, next) => {
       return res.status(400).json({ error: 'A reason is required' });
     }
 
-    const resource = await Resource.findById(req.params.id);
-    if (!resource) {
+    // Check for an existing unresolved report without loading the full doc
+    const existing = await Resource.findById(req.params.id).select('report').lean();
+    if (!existing) {
       return res.status(404).json({ error: 'Resource not found' });
     }
-
-    // Only allow one active report at a time
-    if (resource.report && !resource.report.isResolved) {
+    if (existing.report && !existing.report.isResolved) {
       return res.status(409).json({ error: 'This resource has already been reported and is pending review' });
     }
 
-    resource.report = {
-      reason: reason.trim(),
-      reportedAt: new Date(),
-      isResolved: false
-    };
-    await resource.save();
+    // Use findByIdAndUpdate with runValidators:false so Mongoose only touches
+    // the report subdocument and does not re-validate legacy/seeded fields
+    const updated = await Resource.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          report: {
+            reason: reason.trim(),
+            reportedAt: new Date(),
+            isResolved: false,
+            resolvedAt: null
+          }
+        }
+      },
+      { new: true, runValidators: false }
+    );
+    if (!updated) {
+      return res.status(404).json({ error: 'Resource not found' });
+    }
 
     res.json({ message: 'Report submitted successfully' });
   } catch (err) {
