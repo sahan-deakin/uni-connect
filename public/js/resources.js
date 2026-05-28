@@ -132,7 +132,8 @@ function renderCard(r) {
   const ti = TYPE_ICONS[r.type] || TYPE_ICONS.Other;
 
   return `
-    <div class="resource-card">
+    <div class="resource-card"
+    onclick="openResource('${r._id}')">
 
       <div class="resource-icon ${ti.cls}">
         <i class="material-icons">${ti.icon}</i>
@@ -213,6 +214,13 @@ function render() {
   document.getElementById('empty-state').style.display =
     total ? 'none' : 'block';
 }
+
+function openResource(id) {
+
+  window.location.href =
+    `/resourceView.html?id=${id}`;
+}
+
 
 // ========================================
 // FILTER FUNCTIONS

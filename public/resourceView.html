@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+
+  <title>Resource View | UniConnect Victoria</title>
+
+  <!-- Materialize -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+
+  <!-- Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+        rel="stylesheet">
+
+  <!-- Main Styles -->
+  <link rel="stylesheet"
+        href="css/styles.css">
+
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <div id="navbar-placeholder"></div>
+
+    <!-- MOBILE NAV -->
+    <ul class="sidenav" id="mobile-menu">
+    <li><a href="./index.html#features">Features</a></li>
+    <li><a href="./index.html#how">How it works</a></li>
+    <li><a href="./resources.html">Resources</a></li>
+    <li><a href="./index.html#cta">Get Started</a></li>
+    </ul>
+
+    <!-- HERO -->
+    <section class="page-hero resource-view-hero">
+
+    <div class="container hero-inner">
+
+        <a href="/resources.html"
+        class="back-link">
+
+        <i class="material-icons left">
+            arrow_back
+        </i>
+
+        Back to Resources
+
+        </a>
+
+        <div id="resource-hero-content"></div>
+
+    </div>
+
+    </section>
+
+    <!-- MAIN CONTENT -->
+    <section class="resource-view-section-wrap">
+
+    <div class="container">
+
+        <div class="row">
+
+        <!-- MAIN RESOURCE -->
+        <div class="col s12 l8">
+
+            <div id="resource-container"></div>
+
+        </div>
+
+      <!-- SIDEBAR -->
+      <div class="col s12 l4">
+
+        <div class="resource-sidebar-card">
+
+          <h5>Quick Actions</h5>
+
+          <button class="btn-large resource-action-btn">
+            <i class="material-icons left">
+              download
+            </i>
+
+            Download
+          </button>
+
+          <button class="btn-large resource-action-btn secondary-btn">
+            <i class="material-icons left">
+              thumb_up
+            </i>
+
+            Upvote
+          </button>
+
+        </div>
+
+        <div class="resource-sidebar-card">
+
+          <h5>Resource Stats</h5>
+
+          <div id="resource-stats"></div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container center">
+    <p>
+      © 2026 UniConnect Victoria
+      &nbsp;·&nbsp;
+      <a href="#">Privacy</a>
+      &nbsp;·&nbsp;
+      <a href="#">Terms</a>
+    </p>
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+<script src="js/navbar.js"></script>
+
+<script src="js/resourceView.js"></script>
+
+</body>
+</html>

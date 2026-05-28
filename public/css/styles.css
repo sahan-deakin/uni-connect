@@ -1203,3 +1203,72 @@ body {
 .upload-top-btn i {
   font-size: 1.1rem;
 }
+
+.resource-view-hero {
+  padding-bottom: 5rem;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  color: white;
+  font-weight: 600;
+}
+
+.resource-view-section-wrap {
+  margin-top: -60px;
+  position: relative;
+  z-index: 20;
+}
+
+.resource-main-card,
+.resource-sidebar-card {
+
+  background: white;
+
+  border-radius: 24px;
+
+  padding: 2rem;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,.06);
+
+  margin-bottom: 1.5rem;
+}
+
+.resource-content-section + .resource-content-section {
+  margin-top: 2rem;
+}
+
+.resource-content-section h4 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.resource-action-btn {
+
+  width: 100%;
+
+  border-radius: 14px;
+
+  margin-top: 1rem;
+
+  background: linear-gradient(135deg,#14b8a6,#0f766e);
+}
+
+.secondary-btn {
+  background: #f1f5f9 !important;
+  color: #111827 !important;
+}
+
+.stat-row {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  padding: .9rem 0;
+
+  border-bottom: 1px solid #eee;
+}
