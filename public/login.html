@@ -64,7 +64,7 @@
       border-radius: var(--radius);
       padding: 2.5rem;
       width: 100%;
-      max-width: 420px;
+      max-width: 500px;
       box-shadow: 0 24px 64px rgba(0,0,0,0.5);
       animation: slideUp .4s cubic-bezier(.16,1,.3,1) both;
     }
@@ -175,6 +175,67 @@
     }
 
     input::placeholder { color: var(--border); }
+
+    select, textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .7rem 1rem;
+      color: var(--text);
+      font-family: inherit;
+      font-size: .95rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.2);
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b949e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      padding-right: 2.5rem;
+      cursor: pointer;
+    }
+
+    select option { background: var(--surface); }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+      line-height: 1.5;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .8rem;
+    }
+
+    .section-label {
+      font-size: .72rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      margin: 1.4rem 0 .9rem;
+      padding-bottom: .5rem;
+      border-bottom: 1px solid rgba(37,99,235,.15);
+    }
+
+    .opt {
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: .78rem;
+      color: var(--muted);
+    }
 
     .btn {
       width: 100%;
@@ -303,21 +364,64 @@
 
   <!-- Register form -->
   <div id="form-register" style="display:none">
+
+    <div class="section-label" style="margin-top:0">Account Credentials</div>
     <div class="form-group">
-      <label for="reg-username">Username</label>
-      <input id="reg-username" type="text" placeholder="john.smith" autocomplete="username" />
+      <label for="reg-name">Full Name</label>
+      <input id="reg-name" type="text" placeholder="John Smith" autocomplete="name" />
     </div>
     <div class="form-group">
-      <label for="reg-email">Email</label>
-      <input id="reg-email" type="email" placeholder="you@deakin.edu.au" autocomplete="email" />
+      <label for="reg-email">University Email</label>
+      <input id="reg-email" type="email" placeholder="j.smith@deakin.edu.au" autocomplete="email" />
     </div>
     <div class="form-group">
-      <label for="reg-password">Password <span style="font-weight:400;text-transform:none;letter-spacing:0">(min 8 chars)</span></label>
+      <label for="reg-password">Password <span class="opt">(min 8 characters)</span></label>
       <input id="reg-password" type="password" placeholder="••••••••" autocomplete="new-password" />
     </div>
+
+    <div class="section-label">Academic Details</div>
+    <div class="form-group">
+      <label for="reg-university">University</label>
+      <input id="reg-university" type="text" placeholder="Deakin University" value="Deakin University" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="reg-course">Course / Program</label>
+        <input id="reg-course" type="text" placeholder="Bachelor of IT" />
+      </div>
+      <div class="form-group">
+        <label for="reg-year">Study Year</label>
+        <select id="reg-year">
+          <option value="1">Year 1</option>
+          <option value="2">Year 2</option>
+          <option value="3">Year 3</option>
+          <option value="4">Year 4</option>
+          <option value="5">Year 5</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="reg-units">Unit Codes <span class="opt">— optional, comma-separated</span></label>
+      <input id="reg-units" type="text" placeholder="SIT374, SIT302, SIT223" />
+    </div>
+
+    <div class="section-label">Profile <span class="opt">— optional</span></div>
+    <div class="form-group">
+      <label for="reg-skills">Skills <span class="opt">— comma-separated</span></label>
+      <input id="reg-skills" type="text" placeholder="JavaScript, Python, React" />
+    </div>
+    <div class="form-group">
+      <label for="reg-interests">Interests <span class="opt">— comma-separated</span></label>
+      <input id="reg-interests" type="text" placeholder="AI, Web Development, Gaming" />
+    </div>
+    <div class="form-group">
+      <label for="reg-bio">Bio</label>
+      <textarea id="reg-bio" placeholder="Tell other students a bit about yourself..."></textarea>
+    </div>
+
     <button class="btn" id="register-btn" onclick="doRegister()">
       <span class="spinner" id="register-spinner"></span>
-      <span id="register-btn-text">Create Account</span>
+      <span id="register-btn-text">Create Student Account</span>
     </button>
     <div class="alert" id="register-alert"></div>
   </div>
@@ -330,7 +434,8 @@
 <script>
   // Redirect if already logged in
   if (localStorage.getItem('uc_token')) {
-    window.location.href = '/dashboard.html';
+    const storedUser = JSON.parse(localStorage.getItem('uc_user') || '{}');
+    window.location.href = storedUser.role === 'admin' ? '/admin.html' : '/dashboard.html';
   }
 
   function switchTab(tab) {
@@ -391,7 +496,8 @@
 
       localStorage.setItem('uc_token', data.token);
       localStorage.setItem('uc_user',  JSON.stringify(data.user));
-      window.location.href = '/dashboard.html';
+      // Redirect based on role
+      window.location.href = data.user.role === 'admin' ? '/admin.html' : '/dashboard.html';
     } catch (err) {
       showAlert('login', 'Network error. Is the server running?');
     } finally {
@@ -400,13 +506,20 @@
   }
 
   async function doRegister() {
-    const username = document.getElementById('reg-username').value.trim();
-    const email    = document.getElementById('reg-email').value.trim();
-    const password = document.getElementById('reg-password').value;
+    const name       = document.getElementById('reg-name').value.trim();
+    const email      = document.getElementById('reg-email').value.trim();
+    const password   = document.getElementById('reg-password').value;
+    const university = document.getElementById('reg-university').value.trim();
+    const course     = document.getElementById('reg-course').value.trim();
+    const year       = parseInt(document.getElementById('reg-year').value, 10);
+    const unitCodes  = document.getElementById('reg-units').value.split(',').map(s => s.trim()).filter(Boolean);
+    const skills     = document.getElementById('reg-skills').value.split(',').map(s => s.trim()).filter(Boolean);
+    const interests  = document.getElementById('reg-interests').value.split(',').map(s => s.trim()).filter(Boolean);
+    const bio        = document.getElementById('reg-bio').value.trim();
     clearAlert('register');
 
-    if (!username || !email || !password) {
-      showAlert('register', 'All fields are required.');
+    if (!name || !email || !password || !university || !course) {
+      showAlert('register', 'Full name, email, password, university and course are required.');
       return;
     }
     if (password.length < 8) {
@@ -419,7 +532,7 @@
       const res  = await fetch('/api/auth/register', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ username, email, password })
+        body:    JSON.stringify({ name, email, password, university, course, year, unitCodes, skills, interests, bio })
       });
       const data = await res.json();
 
@@ -430,7 +543,7 @@
 
       localStorage.setItem('uc_token', data.token);
       localStorage.setItem('uc_user',  JSON.stringify(data.user));
-      window.location.href = '/dashboard.html';
+      window.location.href = data.user.role === 'admin' ? '/admin.html' : '/dashboard.html';
     } catch (err) {
       showAlert('register', 'Network error. Is the server running?');
     } finally {

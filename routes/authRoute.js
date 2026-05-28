@@ -64,33 +64,51 @@ router.post('/login', async (req, res) => {
 
 // ── POST /api/auth/register ──────────────────────────────────────────────────
 router.post('/register', async (req, res) => {
+  let user = null;
   try {
-    const { username, email, password } = req.body;
+    const { name, email, password, university, course, year, unitCodes, skills, interests, bio } = req.body;
 
-    if (!username || !email || !password) {
-      return res.status(400).json({ error: 'Username, email and password are required' });
+    if (!name || !email || !password || !university || !course) {
+      return res.status(400).json({ error: 'Name, email, password, university and course are required' });
     }
 
     if (password.length < 8) {
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
-    const existing = await User.findOne({ email: email.toLowerCase().trim() });
+    const cleanEmail = email.toLowerCase().trim();
+
+    const existing = await User.findOne({ email: cleanEmail });
     if (existing) {
       return res.status(409).json({ error: 'An account with that email already exists' });
     }
 
-    const user = await User.create({
-      username: username.trim(),
-      email:    email.toLowerCase().trim(),
+    // Auto-generate unique username from email local-part
+    let username = cleanEmail.split('@')[0].replace(/[^a-z0-9._-]/g, '');
+    const taken  = await User.findOne({ username });
+    if (taken) username = username + Math.floor(Math.random() * 9000 + 1000);
+
+    user = await User.create({
+      username,
+      email:    cleanEmail,
       password                        // hashed by pre-save hook in userModel
     });
 
-    const student = await Student.findOne({ email: user.email });
+    const student = await Student.create({
+      name:       name.trim(),
+      email:      cleanEmail,
+      university: university.trim(),
+      course:     course.trim(),
+      year:       year || 1,
+      unitCodes:  Array.isArray(unitCodes)  ? unitCodes  : [],
+      skills:     Array.isArray(skills)     ? skills     : [],
+      interests:  Array.isArray(interests)  ? interests  : [],
+      bio:        bio || ''
+    });
 
     const payload = {
       userId:    user._id,
-      studentId: student ? student._id : null,
+      studentId: student._id,
       email:     user.email,
       role:      user.role
     };
@@ -104,11 +122,15 @@ router.post('/register', async (req, res) => {
         username: user.username,
         email:    user.email,
         role:     user.role,
-        name:     student ? student.name : user.username
+        name:     student.name
       }
     });
   } catch (err) {
     console.error('Register error:', err);
+    // Roll back user creation if student record failed
+    if (user && user._id) {
+      await User.deleteOne({ _id: user._id }).catch(() => {});
+    }
     res.status(500).json({ error: 'Server error during registration' });
   }
 });

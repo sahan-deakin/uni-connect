@@ -61,6 +61,7 @@
       <div class="nav-section-label">Content</div>
       <button class="nav-item" onclick="showPanel('resources',this)">
         <i class="material-icons">menu_book</i> Academic Resources
+        <span class="nav-badge ylw" id="navResourcesBadge" style="display:none">0</span>
       </button>
       <button class="nav-item" onclick="showPanel('events',this)">
         <i class="material-icons">event</i> Events
@@ -202,6 +203,32 @@
             <div class="ico">⏳</div>
             <p>Loading…</p>
           </div>
+        </div>
+      </div>
+
+      <!-- ══ BLOCKED USERS ══ -->
+      <!-- ══ REPORTED RESOURCES ══ -->
+      <div class="panel" id="panel-resources">
+        <div class="sec-head">
+          <h2>Academic Resources</h2>
+          <small id="resourcesReportedCount">loading…</small>
+        </div>
+        <div class="tbl-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Resource</th>
+                <th>Unit</th>
+                <th>Uploaded by</th>
+                <th>Reported</th>
+                <th>Reason</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="reportedResourcesTable">
+              <tr><td colspan="6" style="text-align:center;color:var(--mut);padding:28px">Loading…</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -356,10 +383,11 @@
       const [t, s] = META[name] || [name, ''];
       $('pageTitle').textContent = t;
       $('pageSub').textContent = s;
-      if (name === 'reported') loadReported();
-      if (name === 'blocked')  loadBlocked();
-      if (name === 'events')   loadEvents();
-      if (name === 'users')    loadUsers();
+      if (name === 'reported')  loadReported();
+      if (name === 'blocked')   loadBlocked();
+      if (name === 'events')    loadEvents();
+      if (name === 'users')     loadUsers();
+      if (name === 'resources') loadReportedResources();
     }
 
     function toast(msg, ok = true) {
@@ -427,12 +455,13 @@
     }
 
     async function loadDashboard() {
-      const [reported, blocked, samples, pendingEvents, allUsers] = await Promise.all([
+      const [reported, blocked, samples, pendingEvents, allUsers, reportedResources] = await Promise.all([
         safeFetch('/api/reviews/reported/list'),
         safeFetch('/api/admin/blocked-users'),
         safeFetch('/api/resources'),   // ← update to match your resources route if different
         safeFetch('/api/events/pending'),
         safeFetch('/api/admin/users'),
+        safeFetch('/api/resources/reported'),
       ]);
 
       $('statReported').textContent  = Array.isArray(reported)     ? reported.length      : '—';
@@ -450,6 +479,13 @@
       const evtBadge = $('navEventBadge');
       evtBadge.textContent   = pendingLen;
       evtBadge.style.display = pendingLen ? 'inline' : 'none';
+
+      const resReportedLen = Array.isArray(reportedResources) ? reportedResources.length : 0;
+      const resBadge = $('navResourcesBadge');
+      if (resBadge) {
+        resBadge.textContent   = resReportedLen;
+        resBadge.style.display = resReportedLen ? 'inline' : 'none';
+      }
 
       $('dashCount').textContent      = reportedLen;
       $('dashEventCount').textContent = pendingLen;
@@ -624,6 +660,83 @@
         toast('Failed to unblock', false);
         btn.disabled = false;
         btn.innerHTML = '<i class="material-icons" style="font-size:.9rem">lock_open</i> Unblock';
+      }
+    }
+
+    //  REPORTED RESOURCES 
+    async function loadReportedResources() {
+      const tbody = $('reportedResourcesTable');
+      try {
+        const resources = await fetch('/api/resources/reported').then(r => r.json());
+        $('resourcesReportedCount').textContent = resources.length ? `${resources.length} pending` : 'none pending';
+
+        if (!resources.length) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--mut);padding:32px">✅ No reported resources</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = resources.map(r => {
+          const uploader = r.uploadedBy?.name || r.uploadedBy?.email || '—';
+          const reported = r.report?.reportedAt ? new Date(r.report.reportedAt).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '—';
+          const reason   = (r.report?.reason || '—').slice(0, 80);
+          return `
+            <tr id="rr-${r._id}">
+              <td>
+                <div style="font-weight:600;font-size:.875rem;color:var(--text);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escAdm(r.title)}">${escAdm(r.title)}</div>
+                <div style="font-size:.75rem;color:var(--mut)">${capitaliseAdm(r.type)}</div>
+              </td>
+              <td><span style="background:rgba(13,115,119,.1);color:#0d7377;border-radius:5px;padding:2px 8px;font-size:.72rem;font-weight:700">${escAdm(r.unitCode)}</span></td>
+              <td style="font-size:.8rem;color:var(--mut)">${escAdm(uploader)}</td>
+              <td style="font-size:.8rem;color:var(--mut)">${reported}</td>
+              <td style="font-size:.8rem;color:var(--mut);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escAdm(r.report?.reason || '')}">${escAdm(reason)}</td>
+              <td style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="btn-act btn-success" onclick="resolveResourceReport('${r._id}', this)" title="Dismiss — keep the resource">
+                  <i class="material-icons" style="font-size:.9rem">check_circle</i> Dismiss
+                </button>
+                <button class="btn-act btn-danger" onclick="deleteReportedResource('${r._id}', this)" title="Remove resource entirely">
+                  <i class="material-icons" style="font-size:.9rem">delete</i> Remove
+                </button>
+              </td>
+            </tr>`;
+        }).join('');
+      } catch {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--red);padding:22px">Failed to load reported resources</td></tr>`;
+      }
+    }
+
+    function escAdm(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function capitaliseAdm(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+    async function resolveResourceReport(resourceId, btn) {
+      btn.disabled = true; btn.textContent = '…';
+      try {
+        const res = await fetch(`/api/resources/${resourceId}/resolve-report`, { method: 'PUT' });
+        if (!res.ok) throw new Error();
+        toast('✅ Report dismissed — resource retained');
+        fadeRemove('rr-' + resourceId);
+        setTimeout(loadReportedResources, 400);
+        setTimeout(loadDashboard, 450);
+      } catch {
+        toast('Failed to dismiss report', false);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="material-icons" style="font-size:.9rem">check_circle</i> Dismiss';
+      }
+    }
+
+    async function deleteReportedResource(resourceId, btn) {
+      if (!confirm('Remove this resource permanently? This cannot be undone.')) return;
+      btn.disabled = true; btn.textContent = '…';
+      try {
+        const res = await fetch(`/api/resources/${resourceId}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error();
+        toast('✅ Resource removed');
+        fadeRemove('rr-' + resourceId);
+        setTimeout(loadReportedResources, 400);
+        setTimeout(loadDashboard, 450);
+      } catch {
+        toast('Failed to remove resource', false);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="material-icons" style="font-size:.9rem">delete</i> Remove';
       }
     }
 
@@ -986,7 +1099,7 @@
       return d.toISOString();
     }
 
-    // ── Modal keyboard / backdrop handlers ────────────────────────────────
+    //  Modal keyboard / backdrop handlers 
     $('rejectModal').addEventListener('click', e => { if (e.target === $('rejectModal')) closeRejectModal(); });
     $('blockModal').addEventListener('click',  e => { if (e.target === $('blockModal'))  closeBlockModal(); });
     document.addEventListener('keydown', e => {
@@ -994,6 +1107,15 @@
       closeRejectModal();
       closeBlockModal();
     });
+
+    //  Auth guard: redirect if not logged in or not admin 
+    (function() {
+      const token = localStorage.getItem('uc_token');
+      const user  = JSON.parse(localStorage.getItem('uc_user') || '{}');
+      if (!token || user.role !== 'admin') {
+        window.location.href = '/login.html';
+      }
+    })();
 
     loadDashboard();
   </script>
