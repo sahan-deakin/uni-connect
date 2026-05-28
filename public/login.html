@@ -496,6 +496,8 @@
 
       localStorage.setItem('uc_token', data.token);
       localStorage.setItem('uc_user',  JSON.stringify(data.user));
+      // qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+      localStorage.setItem('uc_display_name', data.user.name || data.user.username);
       // Redirect based on role
       window.location.href = data.user.role === 'admin' ? '/admin.html' : '/dashboard.html';
     } catch (err) {
@@ -543,6 +545,9 @@
 
       localStorage.setItem('uc_token', data.token);
       localStorage.setItem('uc_user',  JSON.stringify(data.user));
+      // qqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+      localStorage.setItem('uc_display_name', data.user.name || data.user.username);
+
       window.location.href = data.user.role === 'admin' ? '/admin.html' : '/dashboard.html';
     } catch (err) {
       showAlert('register', 'Network error. Is the server running?');
