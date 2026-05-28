@@ -1,24 +1,30 @@
 const User = require('../models/userModel');
 const reviewService = require('./reviewService');
 
-// Function to resolve block duration into a date
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+// Resolve a named duration into a concrete expiry Date (or null = permanent)
 function resolveBlockUntil(duration) {
   const now = new Date();
   switch (duration) {
-    case '3months':
-      return new Date(now.setMonth(now.getMonth() + 3));
-    case '6months':
-      return new Date(now.setMonth(now.getMonth() + 6));
-    case '1year':
-      return new Date(now.setFullYear(now.getFullYear() + 1));
-    case 'permanent':
-      return null;
-    default:
-      throw new Error(`Unknown duration: ${duration}`);
+    case '3months':  return new Date(now.setMonth(now.getMonth() + 3));
+    case '6months':  return new Date(now.setMonth(now.getMonth() + 6));
+    case '1year':    return new Date(now.setFullYear(now.getFullYear() + 1));
+    case 'permanent': return null;
+    default: throw new Error(`Unknown duration: ${duration}`);
   }
 }
 
-// Function to block a user by ID with specified duration and reason
+// ── User management ──────────────────────────────────────────────────────────
+
+// Return every user (for the All Users panel). Excludes password hash.
+const getUsers = () =>
+  User.find({})
+    .select('-password')
+    .sort({ createdAt: -1 })
+    .lean();
+
+// Block a user by ID with a specified duration and reason
 const blockUser = async (userId, { duration, reason, reviewId }) => {
   const blockedUntil = resolveBlockUntil(duration);
 
@@ -26,10 +32,10 @@ const blockUser = async (userId, { duration, reason, reviewId }) => {
     userId,
     {
       blocked: {
-        isBlocked: true,
+        isBlocked:    true,
         blockedUntil,
-        blockedAt: new Date(),
-        reason: reason || 'Violation of review policy'
+        blockedAt:    new Date(),
+        reason:       reason || 'Violation of review policy'
       }
     },
     { new: true }
@@ -37,7 +43,7 @@ const blockUser = async (userId, { duration, reason, reviewId }) => {
 
   if (!user) throw new Error('User not found');
 
-  // Mark the reported review as resolved
+  // Mark the associated reported review as resolved (if supplied)
   if (reviewId) await reviewService.resolveReview(reviewId);
 
   return user;
@@ -49,17 +55,19 @@ const unblockUser = (userId) =>
     userId,
     {
       blocked: {
-        isBlocked: false,
+        isBlocked:    false,
         blockedUntil: null,
-        blockedAt: null,
-        reason: null
+        blockedAt:    null,
+        reason:       null
       }
     },
     { new: true }
   );
 
-// Get all blocked users
+// Return only currently blocked users (for the Blocked Users panel)
 const getBlockedUsers = () =>
-  User.find({ 'blocked.isBlocked': true }).lean();
+  User.find({ 'blocked.isBlocked': true })
+    .select('-password')
+    .lean();
 
-module.exports = { blockUser, unblockUser, getBlockedUsers };
+module.exports = { getUsers, blockUser, unblockUser, getBlockedUsers };

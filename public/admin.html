@@ -9,6 +9,29 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="css/admin-styles.css" />
+
+  <style>
+    /* ── Modal overlay — hidden by default, shown via .open ── */
+    #rejectModal,
+    #blockModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 9000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #rejectModal.open,
+    #blockModal.open {
+      display: flex;
+    }
+    /* Prevent body scroll while a modal is open */
+    body.modal-open {
+      overflow: hidden;
+    }
+  </style>
 </head>
 
 <body>
@@ -31,13 +54,22 @@
         <i class="material-icons">flag</i> Reported Reviews
         <span class="nav-badge" id="navBadge">0</span>
       </button>
+      <button class="nav-item" onclick="showPanel('reportedPosts',this)">
+        <i class="material-icons">report_problem</i> Reported Posts
+        <span class="nav-badge" id="navForumReportBadge" style="display:none">0</span>
+      </button>
       <button class="nav-item" onclick="showPanel('blocked',this)">
         <i class="material-icons">block</i> Blocked Users
       </button>
 
       <div class="nav-section-label">Content</div>
+      <button class="nav-item" onclick="showPanel('forumPosts',this)">
+        <i class="material-icons">forum</i> Forum Posts
+        <span class="nav-badge ylw" id="navForumBadge" style="display:none">0</span>
+      </button>
       <button class="nav-item" onclick="showPanel('resources',this)">
         <i class="material-icons">menu_book</i> Academic Resources
+        <span class="nav-badge ylw" id="navResourcesBadge" style="display:none">0</span>
       </button>
       <button class="nav-item" onclick="showPanel('events',this)">
         <i class="material-icons">event</i> Events
@@ -64,8 +96,7 @@
         <div class="page-sub" id="pageSub">Overview &amp; analytics</div>
       </div>
       <div class="admin-chip">
-        <!-- NEED TO REPLACE WITH ACTUAL ADMIN INFO -->
-        <div class="admin-av">A</div> Admin
+        <div class="admin-av">A</div> rootadmin
       </div>
     </div>
 
@@ -184,6 +215,32 @@
       </div>
 
       <!-- ══ BLOCKED USERS ══ -->
+      <!-- ══ REPORTED RESOURCES ══ -->
+      <div class="panel" id="panel-resources">
+        <div class="sec-head">
+          <h2>Academic Resources</h2>
+          <small id="resourcesReportedCount">loading…</small>
+        </div>
+        <div class="tbl-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Resource</th>
+                <th>Unit</th>
+                <th>Uploaded by</th>
+                <th>Reported</th>
+                <th>Reason</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="reportedResourcesTable">
+              <tr><td colspan="6" style="text-align:center;color:var(--mut);padding:28px">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ BLOCKED USERS ══ -->
       <div class="panel" id="panel-blocked">
         <div class="sec-head">
           <h2>Blocked Users</h2>
@@ -229,6 +286,91 @@
         </div>
       </div>
 
+      <!-- ══ ALL USERS ══ -->
+      <div class="panel" id="panel-users">
+        <div class="sec-head">
+          <h2>All Users</h2>
+          <small id="usersCount">loading…</small>
+        </div>
+
+        <!-- Search + filter bar -->
+        <div class="filter-bar" style="gap:10px;flex-wrap:wrap;align-items:center">
+          <input
+            id="userSearch"
+            type="text"
+            placeholder="Search by username or email…"
+            oninput="filterUsers()"
+            style="flex:1;min-width:200px;max-width:320px;padding:6px 12px;border:1px solid var(--bdr);border-radius:6px;font-size:.85rem;background:var(--bg);color:var(--txt)"
+          />
+          <button class="filter-btn active" onclick="setUserFilter('all',   this)">All</button>
+          <button class="filter-btn"        onclick="setUserFilter('user',  this)">Users</button>
+          <button class="filter-btn"        onclick="setUserFilter('admin', this)">Admins</button>
+          <button class="filter-btn"        onclick="setUserFilter('blocked',this)">Blocked</button>
+        </div>
+
+        <div class="tbl-card" style="margin-top:14px">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Joined</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTable">
+              <tr><td colspan="5" style="text-align:center;color:var(--mut);padding:28px">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ REPORTED FORUM POSTS ══ -->
+      <div class="panel" id="panel-reportedPosts">
+        <div class="sec-head">
+          <h2>Reported Forum Posts</h2>
+          <small id="reportedPostsCount">loading…</small>
+        </div>
+        <div id="reportedPostsList">
+          <div class="empty"><div class="ico">⏳</div><p>Loading…</p></div>
+        </div>
+      </div>
+
+      <!-- ══ ALL FORUM POSTS ══ -->
+      <div class="panel" id="panel-forumPosts">
+        <div class="sec-head">
+          <h2>Forum Posts</h2>
+          <small id="forumPostsCount">loading…</small>
+        </div>
+        <div class="filter-bar" style="gap:10px;flex-wrap:wrap;align-items:center">
+          <input id="forumSearch" type="text" placeholder="Search posts…"
+            oninput="renderForumPosts()"
+            style="flex:1;min-width:200px;max-width:320px;padding:6px 12px;border:1px solid var(--bdr);border-radius:6px;font-size:.85rem;background:var(--bg);color:var(--txt)" />
+          <button class="filter-btn active" onclick="setForumFilter('all',this)">All</button>
+          <button class="filter-btn"        onclick="setForumFilter('active',this)">Active</button>
+          <button class="filter-btn"        onclick="setForumFilter('deleted',this)">Deleted</button>
+          <button class="filter-btn"        onclick="setForumFilter('reported',this)">Has Reports</button>
+        </div>
+        <div class="tbl-card" style="margin-top:14px">
+          <table>
+            <thead>
+              <tr>
+                <th>Post ID</th>
+                <th>Title / Author</th>
+                <th>Comments</th>
+                <th>Reports</th>
+                <th>Posted</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="forumPostsTable">
+              <tr><td colspan="6" style="text-align:center;color:var(--mut);padding:28px">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div><!-- /content -->
   </main>
 
@@ -249,18 +391,43 @@
     </div>
   </div>
 
+  <!-- ── Block-user modal ── -->
+  <div id="blockModal">
+    <div class="modal-box">
+      <h3>Block User</h3>
+      <p id="blockModalTarget" style="color:var(--mut);font-size:.85rem;margin-bottom:12px"></p>
+      <label style="font-size:.8rem;color:var(--mut);display:block;margin-bottom:4px">Duration</label>
+      <select id="blockDurationModal" style="width:100%;padding:8px 10px;border:1px solid var(--bdr);border-radius:6px;background:var(--bg);color:var(--txt);font-size:.85rem;margin-bottom:12px">
+        <option value="3months">3 Months</option>
+        <option value="6months">6 Months</option>
+        <option value="1year">1 Year</option>
+        <option value="permanent">Permanent</option>
+      </select>
+      <label style="font-size:.8rem;color:var(--mut);display:block;margin-bottom:4px">Reason (optional)</label>
+      <textarea id="blockReasonModal" placeholder="e.g. Repeated spam, policy violation…" style="margin-bottom:0"></textarea>
+      <div class="modal-foot">
+        <button class="btn-act btn-ghost" onclick="closeBlockModal()">Cancel</button>
+        <button class="btn-act btn-danger" onclick="confirmBlockFromModal()">
+          <i class="material-icons" style="font-size:.9rem">block</i> Block
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   <script>
     const $ = id => document.getElementById(id);
 
     const META = {
-      dashboard:  ['Dashboard',           'Overview & analytics'],
-      reported:   ['Reported Reviews',    'User-flagged content awaiting moderation'],
-      blocked:    ['Blocked Users',        'Accounts currently suspended'],
-      resources:  ['Academic Resources',  'Manage resource content'],
-      events:     ['Events',              'Approve or reject submitted events'],
-      users:      ['All Users',           'User directory'],
-      settings:   ['Settings',            'System configuration'],
+      dashboard:      ['Dashboard',              'Overview & analytics'],
+      reported:       ['Reported Reviews',       'User-flagged content awaiting moderation'],
+      reportedPosts:  ['Reported Forum Posts',   'Forum posts flagged by students'],
+      blocked:        ['Blocked Users',           'Accounts currently suspended'],
+      forumPosts:     ['Forum Posts',             'Browse and moderate all community posts'],
+      resources:      ['Academic Resources',     'Manage resource content'],
+      events:         ['Events',                 'Approve or reject submitted events'],
+      users:          ['All Users',              'User directory & account management'],
+      settings:       ['Settings',              'System configuration'],
     };
 
     function showPanel(name, btn) {
@@ -271,9 +438,13 @@
       const [t, s] = META[name] || [name, ''];
       $('pageTitle').textContent = t;
       $('pageSub').textContent = s;
-      if (name === 'reported') loadReported();
-      if (name === 'blocked')  loadBlocked();
-      if (name === 'events')   loadEvents();
+      if (name === 'reported')       loadReported();
+      if (name === 'blocked')        loadBlocked();
+      if (name === 'events')         loadEvents();
+      if (name === 'users')          loadUsers();
+      if (name === 'resources')      loadReportedResources();
+      if (name === 'reportedPosts')  loadReportedForumPosts();
+      if (name === 'forumPosts')     loadForumPosts();
     }
 
     function toast(msg, ok = true) {
@@ -327,41 +498,66 @@
       }
     }
 
-    // ── DASHBOARD ──
-    async function loadDashboard() {
+    // ── DASHBOARD ──────────────────────────────────────────────────────────
+    // Each endpoint is fetched independently — one failure won't blank all stat cards
+    async function safeFetch(url) {
       try {
-        const [rR, bR, sR, eR] = await Promise.all([
-          fetch('/api/reviews/reported/list'),
-          fetch('/api/admin/blocked-users'),
-          fetch('/api/samples'),
-          fetch('/api/events/pending'),
-        ]);
-        const reported      = await rR.json();
-        const blocked       = await bR.json();
-        const samples       = await sR.json();
-        const pendingEvents = await eR.json();
+        const r = await fetch(url);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return await r.json();
+      } catch (e) {
+        console.warn(`[dashboard] ${url} →`, e.message);
+        return null;
+      }
+    }
 
-        $('statReported').textContent  = reported.length;
-        $('statBlocked').textContent   = blocked.length;
-        $('statResources').textContent = Array.isArray(samples) ? samples.length : '—';
-        $('statUsers').textContent     = '6';
-        $('statEvents').textContent    = pendingEvents.length;
+    async function loadDashboard() {
+      const [reported, blocked, samples, pendingEvents, allUsers, reportedResources, reportedForumPosts] = await Promise.all([
+        safeFetch('/api/reviews/reported/list'),
+        safeFetch('/api/admin/blocked-users'),
+        safeFetch('/api/resources'),   // ← update to match your resources route if different
+        safeFetch('/api/events/pending'),
+        safeFetch('/api/admin/users'),
+        safeFetch('/api/resources/reported'),
+        safeFetch('/api/forum/admin/reported'),
+      ]);
 
-        const badge = $('navBadge');
-        badge.textContent   = reported.length;
-        badge.style.display = reported.length ? 'inline' : 'none';
+      $('statReported').textContent  = Array.isArray(reported)     ? reported.length      : '—';
+      $('statBlocked').textContent   = Array.isArray(blocked)       ? blocked.length       : '—';
+      $('statResources').textContent = Array.isArray(samples)       ? samples.length       : '—';
+      $('statUsers').textContent     = Array.isArray(allUsers)      ? allUsers.length      : '—';
+      $('statEvents').textContent    = Array.isArray(pendingEvents) ? pendingEvents.length : '—';
 
-        const evtBadge = $('navEventBadge');
-        evtBadge.textContent   = pendingEvents.length;
-        evtBadge.style.display = pendingEvents.length ? 'inline' : 'none';
+      const reportedLen = Array.isArray(reported) ? reported.length : 0;
+      const badge = $('navBadge');
+      badge.textContent   = reportedLen;
+      badge.style.display = reportedLen ? 'inline' : 'none';
 
-        $('dashCount').textContent      = reported.length;
-        $('dashEventCount').textContent = pendingEvents.length;
+      const pendingLen = Array.isArray(pendingEvents) ? pendingEvents.length : 0;
+      const evtBadge = $('navEventBadge');
+      evtBadge.textContent   = pendingLen;
+      evtBadge.style.display = pendingLen ? 'inline' : 'none';
 
-        renderBreakdown(reported);
-        renderDashReviews(reported);
-        renderDashEvents(pendingEvents);
-      } catch (e) { console.error(e); }
+      const resReportedLen = Array.isArray(reportedResources) ? reportedResources.length : 0;
+      const resBadge = $('navResourcesBadge');
+      if (resBadge) {
+        resBadge.textContent   = resReportedLen;
+        resBadge.style.display = resReportedLen ? 'inline' : 'none';
+      }
+
+      const forumReportedLen = Array.isArray(reportedForumPosts) ? reportedForumPosts.length : 0;
+      const forumRepBadge = $('navForumReportBadge');
+      if (forumRepBadge) {
+        forumRepBadge.textContent   = forumReportedLen;
+        forumRepBadge.style.display = forumReportedLen ? 'inline' : 'none';
+      }
+
+      $('dashCount').textContent      = reportedLen;
+      $('dashEventCount').textContent = pendingLen;
+
+      renderBreakdown(reported      || []);
+      renderDashReviews(reported    || []);
+      renderDashEvents(pendingEvents || []);
     }
 
     function renderBreakdown(reported) {
@@ -409,7 +605,7 @@
             </tr>`).join('');
     }
 
-    // ── REPORTED REVIEWS ──
+    // ── REPORTED REVIEWS ───────────────────────────────────────────────────
     async function loadReported() {
       const list = $('reviewList');
       try {
@@ -479,12 +675,21 @@
       }
     }
 
-    function dismiss(reviewId, btn) {
-      btn.disabled = true; fadeRemove('rc-' + reviewId); toast('Review dismissed');
-      setTimeout(loadReported, 400);
+    async function dismiss(reviewId, btn) {
+      btn.disabled = true;
+      try {
+        const res = await fetch(`/api/reviews/${reviewId}/resolve`, { method: 'PUT' });
+        if (!res.ok) throw new Error();
+        fadeRemove('rc-' + reviewId);
+        toast('Review dismissed');
+        setTimeout(() => { loadReported(); loadDashboard(); }, 400);
+      } catch {
+        toast('Failed to dismiss review', false);
+        btn.disabled = false;
+      }
     }
 
-    // ── BLOCKED USERS ──
+    // ── BLOCKED USERS ──────────────────────────────────────────────────────
     async function loadBlocked() {
       const tbody = $('blockedTable');
       try {
@@ -523,7 +728,84 @@
       }
     }
 
-    // ── EVENTS ──
+    //  REPORTED RESOURCES 
+    async function loadReportedResources() {
+      const tbody = $('reportedResourcesTable');
+      try {
+        const resources = await fetch('/api/resources/reported').then(r => r.json());
+        $('resourcesReportedCount').textContent = resources.length ? `${resources.length} pending` : 'none pending';
+
+        if (!resources.length) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--mut);padding:32px">✅ No reported resources</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = resources.map(r => {
+          const uploader = r.uploadedBy?.name || r.uploadedBy?.email || '—';
+          const reported = r.report?.reportedAt ? new Date(r.report.reportedAt).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '—';
+          const reason   = (r.report?.reason || '—').slice(0, 80);
+          return `
+            <tr id="rr-${r._id}">
+              <td>
+                <div style="font-weight:600;font-size:.875rem;color:var(--text);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escAdm(r.title)}">${escAdm(r.title)}</div>
+                <div style="font-size:.75rem;color:var(--mut)">${capitaliseAdm(r.type)}</div>
+              </td>
+              <td><span style="background:rgba(13,115,119,.1);color:#0d7377;border-radius:5px;padding:2px 8px;font-size:.72rem;font-weight:700">${escAdm(r.unitCode)}</span></td>
+              <td style="font-size:.8rem;color:var(--mut)">${escAdm(uploader)}</td>
+              <td style="font-size:.8rem;color:var(--mut)">${reported}</td>
+              <td style="font-size:.8rem;color:var(--mut);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escAdm(r.report?.reason || '')}">${escAdm(reason)}</td>
+              <td style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="btn-act btn-success" onclick="resolveResourceReport('${r._id}', this)" title="Dismiss — keep the resource">
+                  <i class="material-icons" style="font-size:.9rem">check_circle</i> Dismiss
+                </button>
+                <button class="btn-act btn-danger" onclick="deleteReportedResource('${r._id}', this)" title="Remove resource entirely">
+                  <i class="material-icons" style="font-size:.9rem">delete</i> Remove
+                </button>
+              </td>
+            </tr>`;
+        }).join('');
+      } catch {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--red);padding:22px">Failed to load reported resources</td></tr>`;
+      }
+    }
+
+    function escAdm(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function capitaliseAdm(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+    async function resolveResourceReport(resourceId, btn) {
+      btn.disabled = true; btn.textContent = '…';
+      try {
+        const res = await fetch(`/api/resources/${resourceId}/resolve-report`, { method: 'PUT' });
+        if (!res.ok) throw new Error();
+        toast('✅ Report dismissed — resource retained');
+        fadeRemove('rr-' + resourceId);
+        setTimeout(loadReportedResources, 400);
+        setTimeout(loadDashboard, 450);
+      } catch {
+        toast('Failed to dismiss report', false);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="material-icons" style="font-size:.9rem">check_circle</i> Dismiss';
+      }
+    }
+
+    async function deleteReportedResource(resourceId, btn) {
+      if (!confirm('Remove this resource permanently? This cannot be undone.')) return;
+      btn.disabled = true; btn.textContent = '…';
+      try {
+        const res = await fetch(`/api/resources/${resourceId}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error();
+        toast('✅ Resource removed');
+        fadeRemove('rr-' + resourceId);
+        setTimeout(loadReportedResources, 400);
+        setTimeout(loadDashboard, 450);
+      } catch {
+        toast('Failed to remove resource', false);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="material-icons" style="font-size:.9rem">delete</i> Remove';
+      }
+    }
+
+    // ── EVENTS ─────────────────────────────────────────────────────────────
     let _allEvents     = [];
     let _activeFilter  = 'pending';
     let _pendingReject = null;
@@ -553,7 +835,7 @@
 
     function filterEvents(filter, btn) {
       _activeFilter = filter;
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#panel-events .filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       renderEvents();
     }
@@ -647,19 +929,21 @@
       _pendingReject = { eventId, btn };
       $('rejectReason').value = '';
       $('rejectModal').classList.add('open');
+      document.body.classList.add('modal-open');
       setTimeout(() => $('rejectReason').focus(), 50);
     }
 
     function closeRejectModal() {
       $('rejectModal').classList.remove('open');
+      document.body.classList.remove('modal-open');
       _pendingReject = null;
     }
 
     async function confirmReject() {
       if (!_pendingReject) return;
-      const { eventId, btn } = _pendingReject;
+      const { eventId, btn } = _pendingReject;   // capture before closeRejectModal() nulls _pendingReject
       const reason = $('rejectReason').value.trim();
-      closeRejectModal();
+      closeRejectModal();                         // safe to close now — btn ref is captured above
       btn.disabled = true; btn.textContent = 'Rejecting…';
       try {
         const res = await fetch(`/api/events/admin/${eventId}/reject`, {
@@ -675,6 +959,7 @@
         renderDashEvents(_allEvents.filter(e => !e.status || e.status === 'pending'));
       } catch {
         toast('Failed to reject event', false);
+        // btn ref is still valid even though modal is closed
         btn.disabled = false;
         btn.innerHTML = '<i class="material-icons" style="font-size:.9rem">cancel</i> Reject';
       }
@@ -696,8 +981,392 @@
       }
     }
 
+    // ── ALL USERS ──────────────────────────────────────────────────────────
+    let _allUsers       = [];
+    let _userFilter     = 'all';
+    let _pendingBlock   = null;   // { userId, username }
+
+    async function loadUsers() {
+      const tbody = $('usersTable');
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--mut);padding:28px">Loading…</td></tr>`;
+      try {
+        const users = await fetch('/api/admin/users').then(r => r.json());
+        _allUsers = users;
+        renderUsers();
+      } catch {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--red);padding:22px">Failed to load users</td></tr>`;
+        toast('Error loading users', false);
+      }
+    }
+
+    function setUserFilter(filter, btn) {
+      _userFilter = filter;
+      document.querySelectorAll('#panel-users .filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderUsers();
+    }
+
+    function filterUsers() {
+      renderUsers();
+    }
+
+    function renderUsers() {
+      const tbody   = $('usersTable');
+      const query   = ($('userSearch').value || '').toLowerCase().trim();
+
+      let filtered = _allUsers;
+
+      // Role / status filter
+      if (_userFilter === 'admin')   filtered = filtered.filter(u => u.role === 'admin');
+      if (_userFilter === 'user')    filtered = filtered.filter(u => u.role !== 'admin');
+      if (_userFilter === 'blocked') filtered = filtered.filter(u => u.blocked?.isBlocked);
+
+      // Search filter
+      if (query) {
+        filtered = filtered.filter(u =>
+          (u.username || '').toLowerCase().includes(query) ||
+          (u.email    || '').toLowerCase().includes(query)
+        );
+      }
+
+      $('usersCount').textContent = `${filtered.length} of ${_allUsers.length}`;
+
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--mut);padding:32px">No users match.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(u => {
+        const bg        = avatarBg(u.username);
+        const isBlocked = u.blocked?.isBlocked;
+        const isAdmin   = u.role === 'admin';
+
+        // Status pill
+        const statusHtml = isBlocked
+          ? `<span class="pill p-red">Blocked</span>`
+          : isAdmin
+            ? `<span class="pill p-grn">Active</span>`
+            : `<span class="pill p-grn">Active</span>`;
+
+        // Role pill
+        const rolePill = isAdmin
+          ? `<span class="pill p-blue">Admin</span>`
+          : `<span class="pill p-gray">User</span>`;
+
+        // Actions — admins cannot be blocked
+        let actions = '';
+        if (isAdmin) {
+          actions = `<span style="color:var(--mut);font-size:.78rem">Protected</span>`;
+        } else if (isBlocked) {
+          actions = `
+            <button class="btn-act btn-success" onclick="unblockFromUsers('${u._id}', this)">
+              <i class="material-icons" style="font-size:.9rem">lock_open</i> Unblock
+            </button>`;
+        } else {
+          actions = `
+            <button class="btn-act btn-danger" onclick="openBlockModal('${u._id}', '${u.username}')">
+              <i class="material-icons" style="font-size:.9rem">block</i> Block
+            </button>`;
+        }
+
+        return `
+          <tr id="ur-${u._id}">
+            <td>
+              <div class="ucell">
+                <div class="uav" style="background:${bg}20;color:${bg}">${initials(u.username)}</div>
+                <div>
+                  <div class="uname">${u.username}</div>
+                  <div class="uemail">${u.email}</div>
+                </div>
+              </div>
+            </td>
+            <td>${rolePill}</td>
+            <td>${statusHtml}
+              ${isBlocked && u.blocked?.blockedUntil
+                ? `<span style="font-size:.72rem;color:var(--mut);display:block;margin-top:2px">until ${fmtDate(u.blocked.blockedUntil)}</span>`
+                : ''}
+            </td>
+            <td style="color:var(--mut);font-size:.8rem">${fmtDate(u.createdAt)}</td>
+            <td style="text-align:right">${actions}</td>
+          </tr>`;
+      }).join('');
+    }
+
+    function openBlockModal(userId, username) {
+      _pendingBlock = { userId, username };
+      $('blockModalTarget').textContent = `Blocking: ${username}`;
+      $('blockDurationModal').value  = '3months';
+      $('blockReasonModal').value    = '';
+      $('blockModal').classList.add('open');
+      document.body.classList.add('modal-open');
+      setTimeout(() => $('blockDurationModal').focus(), 50);
+    }
+
+    function closeBlockModal() {
+      $('blockModal').classList.remove('open');
+      document.body.classList.remove('modal-open');
+      _pendingBlock = null;
+    }
+
+    async function confirmBlockFromModal() {
+      if (!_pendingBlock) return;
+      const { userId, username } = _pendingBlock;
+      const duration = $('blockDurationModal').value;
+      const reason   = $('blockReasonModal').value.trim() || 'Blocked by admin';
+      closeBlockModal();
+
+      const row = $('ur-' + userId);
+      if (row) { row.style.opacity = '0.4'; row.style.pointerEvents = 'none'; }
+
+      try {
+        const res = await fetch(`/api/admin/block-user/${userId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ duration, reason })
+        });
+        if (!res.ok) throw new Error();
+        toast(`✅ ${username} blocked`);
+        // Update local state and re-render
+        const u = _allUsers.find(u => u._id === userId);
+        if (u) {
+          u.blocked = { isBlocked: true, reason, blockedAt: new Date().toISOString(),
+            blockedUntil: duration === 'permanent' ? null : calcExpiry(duration) };
+        }
+        renderUsers();
+        loadDashboard();
+      } catch {
+        toast('Failed to block user', false);
+        if (row) { row.style.opacity = ''; row.style.pointerEvents = ''; }
+      }
+    }
+
+    async function unblockFromUsers(userId, btn) {
+      btn.disabled = true; btn.textContent = '…';
+      try {
+        if (!(await fetch(`/api/admin/unblock-user/${userId}`, { method: 'PUT' })).ok) throw new Error();
+        toast('✅ User unblocked');
+        const u = _allUsers.find(u => u._id === userId);
+        if (u) u.blocked = { isBlocked: false };
+        renderUsers();
+        loadDashboard();
+      } catch {
+        toast('Failed to unblock', false);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="material-icons" style="font-size:.9rem">lock_open</i> Unblock';
+      }
+    }
+
+    function calcExpiry(duration) {
+      const d = new Date();
+      if (duration === '3months') d.setMonth(d.getMonth() + 3);
+      else if (duration === '6months') d.setMonth(d.getMonth() + 6);
+      else if (duration === '1year') d.setFullYear(d.getFullYear() + 1);
+      return d.toISOString();
+    }
+
+    //  Modal keyboard / backdrop handlers 
     $('rejectModal').addEventListener('click', e => { if (e.target === $('rejectModal')) closeRejectModal(); });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRejectModal(); });
+    $('blockModal').addEventListener('click',  e => { if (e.target === $('blockModal'))  closeBlockModal(); });
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return;
+      closeRejectModal();
+      closeBlockModal();
+    });
+
+    //  Auth guard: redirect if not logged in or not admin 
+    (function() {
+      const token = localStorage.getItem('uc_token');
+      const user  = JSON.parse(localStorage.getItem('uc_user') || '{}');
+      if (!token || user.role !== 'admin') {
+        window.location.href = '/login.html';
+      }
+    })();
+
+    // ══ REPORTED FORUM POSTS ══════════════════════════════════════════════
+    let _reportedForumPosts = [];
+
+    async function loadReportedForumPosts() {
+      const wrap = $('reportedPostsList');
+      wrap.innerHTML = `<div class="empty"><div class="ico">⏳</div><p>Loading…</p></div>`;
+      try {
+        _reportedForumPosts = await fetch('/api/forum/admin/reported').then(r => r.json());
+        renderReportedForumPosts();
+      } catch {
+        wrap.innerHTML = `<div class="empty"><div class="ico">⚠️</div><p>Failed to load reported posts.</p></div>`;
+        toast('Error loading forum reports', false);
+      }
+    }
+
+    function renderReportedForumPosts() {
+      const wrap = $('reportedPostsList');
+      $('reportedPostsCount').textContent = `${_reportedForumPosts.length} reported`;
+      const forumRepBadge = $('navForumReportBadge');
+      if (forumRepBadge) {
+        forumRepBadge.textContent   = _reportedForumPosts.length;
+        forumRepBadge.style.display = _reportedForumPosts.length ? 'inline' : 'none';
+      }
+
+      if (!_reportedForumPosts.length) {
+        wrap.innerHTML = `<div class="empty"><div class="ico">✅</div><p>No reported posts.</p></div>`;
+        return;
+      }
+
+      wrap.innerHTML = _reportedForumPosts.map(p => {
+        const reports = p.reports || [];
+        const unresolvedReports = reports.filter(r => !r.isResolved);
+        const reportRows = unresolvedReports.map(r => `
+          <div style="background:#FEF2F2;border-left:3px solid var(--red);border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:6px">
+            <span style="font-size:.78rem;font-weight:600;color:var(--red)">${r.reason}</span>
+            <span style="font-size:.75rem;color:var(--mut);margin-left:8px">by ${r.reportedByName} · ${fmtDate(r.createdAt)}</span>
+            ${r.details ? `<div style="font-size:.8rem;color:var(--txt);margin-top:3px">${r.details}</div>` : ''}
+          </div>`).join('');
+
+        return `<div class="rev-card" id="rp-${p._id}" style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+            <div>
+              <span style="font-size:.68rem;color:var(--mut);background:var(--bg);border:1px solid var(--bdr);border-radius:4px;padding:2px 7px"># ${p.postId}</span>
+              <span style="font-weight:700;font-size:.95rem;color:var(--navy);margin-left:8px">${p.title}</span>
+              <span style="font-size:.78rem;color:var(--mut);margin-left:8px">by ${p.authorName}</span>
+            </div>
+            <span class="pill p-red">${unresolvedReports.length} report${unresolvedReports.length !== 1 ? 's' : ''}</span>
+          </div>
+          <div style="font-size:.84rem;color:var(--txt);margin-bottom:10px;background:var(--bg);padding:10px 12px;border-radius:8px">${p.content}</div>
+          ${reportRows}
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+            <button class="btn-act btn-danger"  onclick="adminDeleteForumPost('${p._id}', this, 'reported')">
+              <i class="material-icons" style="font-size:.9rem">delete</i> Delete Post
+            </button>
+            <button class="btn-act btn-success" onclick="adminResolveForumReports('${p._id}', this)">
+              <i class="material-icons" style="font-size:.9rem">check_circle</i> Resolve Reports
+            </button>
+            <button class="btn-act btn-ghost" onclick="openBlockModalFromForum('${p.author}', '${p.authorName}', '${p._id}')">
+              <i class="material-icons" style="font-size:.9rem">block</i> Block Author
+            </button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    async function adminDeleteForumPost(mongoId, btn, source) {
+      btn.disabled = true; btn.textContent = 'Deleting…';
+      try {
+        const res = await fetch(`/api/forum/admin/posts/${mongoId}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error();
+        toast('✅ Post deleted');
+        if (source === 'reported') {
+          _reportedForumPosts = _reportedForumPosts.filter(p => p._id !== mongoId);
+          renderReportedForumPosts();
+        } else {
+          const p = _allForumPosts.find(p => p._id === mongoId);
+          if (p) { p.isDeleted = true; p.deletedAt = new Date().toISOString(); }
+          renderForumPosts();
+        }
+        loadDashboard();
+      } catch {
+        toast('Failed to delete post', false);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="material-icons" style="font-size:.9rem">delete</i> Delete Post';
+      }
+    }
+
+    async function adminResolveForumReports(mongoId, btn) {
+      btn.disabled = true; btn.textContent = 'Resolving…';
+      try {
+        const res = await fetch(`/api/forum/admin/reports/${mongoId}/resolve`, { method: 'PUT' });
+        if (!res.ok) throw new Error();
+        toast('✅ Reports resolved');
+        _reportedForumPosts = _reportedForumPosts.filter(p => p._id !== mongoId);
+        renderReportedForumPosts();
+      } catch {
+        toast('Failed to resolve reports', false);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="material-icons" style="font-size:.9rem">check_circle</i> Resolve Reports';
+      }
+    }
+
+    function openBlockModalFromForum(userId, username, postId) {
+      _pendingBlock = { userId, username };
+      $('blockModalTarget').textContent = `Blocking: ${username}`;
+      $('blockDurationModal').value = '3months';
+      $('blockReasonModal').value   = '';
+      $('blockModal').classList.add('open');
+      document.body.classList.add('modal-open');
+      setTimeout(() => $('blockDurationModal').focus(), 50);
+    }
+
+    // ══ ALL FORUM POSTS ═══════════════════════════════════════════════════
+    let _allForumPosts = [];
+    let _forumFilter   = 'all';
+
+    async function loadForumPosts() {
+      $('forumPostsTable').innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--mut);padding:28px">Loading…</td></tr>`;
+      try {
+        _allForumPosts = await fetch('/api/forum/admin/posts').then(r => r.json());
+        renderForumPosts();
+      } catch {
+        $('forumPostsTable').innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--red);padding:22px">Failed to load posts</td></tr>`;
+        toast('Error loading forum posts', false);
+      }
+    }
+
+    function setForumFilter(filter, btn) {
+      _forumFilter = filter;
+      document.querySelectorAll('#panel-forumPosts .filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderForumPosts();
+    }
+
+    function renderForumPosts() {
+      const tbody = $('forumPostsTable');
+      const query = ($('forumSearch')?.value || '').toLowerCase().trim();
+      let filtered = _allForumPosts;
+
+      if (_forumFilter === 'active')   filtered = filtered.filter(p => !p.isDeleted);
+      if (_forumFilter === 'deleted')  filtered = filtered.filter(p =>  p.isDeleted);
+      if (_forumFilter === 'reported') filtered = filtered.filter(p => (p.reports||[]).length > 0);
+
+      if (query) {
+        filtered = filtered.filter(p =>
+          (p.title||'').toLowerCase().includes(query) ||
+          (p.authorName||'').toLowerCase().includes(query) ||
+          (p.postId||'').toLowerCase().includes(query)
+        );
+      }
+
+      $('forumPostsCount').textContent = `${filtered.length} of ${_allForumPosts.length}`;
+
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--mut);padding:32px">No posts match.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(p => {
+        const reportCount = (p.reports||[]).filter(r => !r.isResolved).length;
+        const statusPillHtml = p.isDeleted
+          ? `<span class="pill p-gray">Deleted</span>`
+          : reportCount > 0
+            ? `<span class="pill p-red">${reportCount} report${reportCount !== 1 ? 's' : ''}</span>`
+            : `<span class="pill p-grn">Active</span>`;
+
+        const actions = p.isDeleted
+          ? `<span style="color:var(--mut);font-size:.78rem">Deleted ${fmtDateSh(p.deletedAt)}</span>`
+          : `<button class="btn-act btn-danger" onclick="adminDeleteForumPost('${p._id}', this, 'all')">
+               <i class="material-icons" style="font-size:.9rem">delete</i> Delete
+             </button>`;
+
+        return `<tr id="fp-${p._id}">
+          <td style="font-family:monospace;font-size:.75rem;color:var(--mut)">${p.postId || '—'}</td>
+          <td>
+            <div style="font-weight:600;font-size:.85rem;color:var(--navy)">${p.title}</div>
+            <div style="font-size:.75rem;color:var(--mut)">by ${p.authorName} · ${fmtDate(p.createdAt)}</div>
+          </td>
+          <td style="color:var(--mut);font-size:.82rem">${(p.comments||[]).length}</td>
+          <td>${statusPillHtml}</td>
+          <td style="color:var(--mut);font-size:.8rem">${fmtDate(p.createdAt)}</td>
+          <td style="text-align:right">${actions}</td>
+        </tr>`;
+      }).join('');
+    }
 
     loadDashboard();
   </script>

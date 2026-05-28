@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
-
-// User schema to store user profiles and block status
-// Subjected to remove incase alternative profile management is implemented - NEED TO DISCUSS WITH THE TEAM
+const bcrypt = require('bcryptjs');
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -16,6 +14,10 @@ const userSchema = new mongoose.Schema({
     trim: true,
     lowercase: true
   },
+  password: {
+    type: String,
+    required: true
+  },
   role: {
     type: String,
     enum: ['user', 'admin'],
@@ -23,16 +25,25 @@ const userSchema = new mongoose.Schema({
   },
   blocked: {
     isBlocked: { type: Boolean, default: false },
-    blockedUntil: { type: Date, default: null }, // null = permanent
+    blockedUntil: { type: Date, default: null },
     blockedAt: { type: Date, default: null },
     reason: { type: String, default: null }
   }
 }, { timestamps: true });
 
-// Helper: is the user currently blocked?
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return;
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
+
+userSchema.methods.comparePassword = function (plain) {
+  return bcrypt.compare(plain, this.password);
+};
+
 userSchema.virtual('isCurrentlyBlocked').get(function () {
   if (!this.blocked.isBlocked) return false;
-  if (!this.blocked.blockedUntil) return true; // permanent
+  if (!this.blocked.blockedUntil) return true;
   return this.blocked.blockedUntil > new Date();
 });
 

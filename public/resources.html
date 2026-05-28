@@ -20,22 +20,8 @@
 
 <body>
 
-<!-- ── NAVBAR ────────────────────────────────────────────────────────────── -->
-<nav class="nav-custom">
-  <div class="container nav-wrapper">
-    <a href="./index.html" class="brand-logo">UniConnect</a>
-    <a href="#" data-target="mobile-menu" class="sidenav-trigger">
-      <i class="material-icons">menu</i>
-    </a>
-    <ul class="right hide-on-med-and-down">
-      <li><a href="./index.html#features">Features</a></li>
-      <li><a href="./index.html#how">How it works</a></li>
-      <li class="active"><a href="./resources.html">Resources</a></li>
-      <li><a href="./index.html#cta">Get Started</a></li>
-      <li><a class="btn btn-primary modal-trigger" href="#upload-modal">Upload</a></li>
-    </ul>
-  </div>
-</nav>
+<!-- NAVBAR PLACEHOLDER -->
+<div id="navbar-placeholder"></div>
 
 <ul class="sidenav" id="mobile-menu">
   <li><a href="./index.html#features">Features</a></li>
@@ -44,7 +30,7 @@
   <li><a href="./index.html#cta">Get Started</a></li>
 </ul>
 
-<!-- ── PAGE HERO ─────────────────────────────────────────────────────────── -->
+<!-- PAGE HERO -->
 <section class="page-hero">
   <div class="container hero-inner">
     <div class="row" style="margin-bottom:0;">
@@ -91,6 +77,14 @@
       <i class="material-icons" style="font-size:1.1rem;">search</i>
       Search
     </button>
+    <a href="#upload-modal"
+   class="upload-top-btn modal-trigger">
+
+  <i class="material-icons">cloud_upload</i>
+
+  Upload Resource
+
+</a>
   </div>
 </div>
 
@@ -208,6 +202,20 @@
       </div>
 
       <div class="input-field col s12 m6">
+        <select id="m-institution">
+          <option value="" disabled selected>Select university</option>
+          <option value="Deakin">Deakin</option>
+          <option value="Monash">Monash</option>
+          <option value="RMIT">RMIT</option>
+          <option value="Melbourne">Melbourne</option>
+          <option value="Swinburne">Swinburne</option>
+          <option value="La Trobe">La Trobe</option>
+        </select>
+
+        <label>University *</label>
+      </div>
+
+      <div class="input-field col s12 m6">
         <select id="m-type">
           <option value="" disabled selected>Choose type</option>
           <option>Notes</option>
@@ -225,11 +233,23 @@
         <label for="m-desc">Description (min 20 characters) *</label>
       </div>
 
+      <div class="input-field col s12">
+        <input
+          id="m-tags"
+          type="text"
+          placeholder="e.g. algorithms, graphs, week1"
+        >
+
+        <label for="m-tags" class="active">
+          Tags (comma separated)
+        </label>
+      </div>
+
       <div class="input-field col s12" id="panel-file">
         <div class="file-field">
           <div class="btn" style="background:var(--teal);">
             <span>Browse</span>
-            <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.zip">
+            <input type="file"   id="resource-file" accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.zip">
           </div>
           <div class="file-path-wrapper">
             <input class="file-path" type="text" placeholder="PDF, DOCX, PPTX, ZIP — max 10 MB">
@@ -252,6 +272,30 @@
   </div>
 </div>
 
+<!-- ── REPORT POPUP ──────────────────────────────────────────────────────── -->
+<div id="report-popup" style="
+  display:none; position:fixed; inset:0; z-index:9100;
+  background:rgba(0,0,0,.45); align-items:center; justify-content:center; padding:20px;">
+  <div style="background:#fff;border-radius:16px;padding:28px;width:100%;max-width:420px;box-shadow:0 16px 48px rgba(0,0,0,.2);">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+      <i class="material-icons" style="color:#d32f2f;">flag</i>
+      <h5 style="margin:0;font-size:1rem;font-weight:700;color:#1a3557;">Report Resource</h5>
+    </div>
+    <p id="rp-title" style="font-size:.82rem;color:#6b7280;margin:0 0 16px;padding-left:32px;"></p>
+    <textarea id="rp-msg" rows="3" placeholder="Briefly describe the issue…"
+      style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;
+             font-family:inherit;font-size:.9rem;resize:vertical;outline:none;"
+      onfocus="this.style.borderColor='#0d7377'" onblur="this.style.borderColor='#e5e7eb'"></textarea>
+    <p id="rp-err" style="color:#d32f2f;font-size:.8rem;margin:4px 0 0;display:none;"></p>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+      <button onclick="closeReport()" style="background:transparent;border:1.5px solid #e5e7eb;border-radius:8px;padding:8px 18px;font-family:inherit;font-size:.875rem;font-weight:600;color:#6b7280;cursor:pointer;">Cancel</button>
+      <button onclick="submitReport()" style="background:#d32f2f;border:none;border-radius:8px;padding:8px 18px;font-family:inherit;font-size:.875rem;font-weight:600;color:#fff;cursor:pointer;">
+        <i class="material-icons" style="font-size:.9rem;vertical-align:middle;">flag</i> Submit
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- FOOTER -->
 <footer class="footer">
   <div class="container center">
@@ -261,12 +305,9 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="js/navbar.js"></script>
+<script src="js/resources.js"></script>
 
-<script>
-//applyfilters()
-//submitResource()
-
-</script>
 
 </body>
 </html>

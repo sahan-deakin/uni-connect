@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UniConnect — Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --border:    #30363d;
+      --accent:    #2563eb;
+      --accent-h:  #1d4ed8;
+      --text:      #e6edf3;
+      --muted:     #8b949e;
+      --error:     #f85149;
+      --success:   #3fb950;
+      --radius:    12px;
+    }
+
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      padding: 1.5rem;
+    }
+
+    /* Subtle grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.25;
+      pointer-events: none;
+    }
+
+    /* Glow blob */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -20%;
+      left: 50%;
+      translate: -50% 0;
+      width: 600px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(37,99,235,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .card {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+      animation: slideUp .4s cubic-bezier(.16,1,.3,1) both;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      margin-bottom: 2rem;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 1.1rem;
+    }
+
+    .brand-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      letter-spacing: -.02em;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.8rem;
+      font-weight: 400;
+      letter-spacing: -.03em;
+      margin-bottom: .4rem;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: .9rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 1.8rem;
+    }
+
+    .tab-btn {
+      padding: .5rem;
+      background: none;
+      border: none;
+      border-radius: 6px;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: .875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .tab-btn.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 1.1rem;
+    }
+
+    label {
+      display: block;
+      font-size: .8rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: .45rem;
+    }
+
+    input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .7rem 1rem;
+      color: var(--text);
+      font-family: inherit;
+      font-size: .95rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.2);
+    }
+
+    input::placeholder { color: var(--border); }
+
+    select, textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .7rem 1rem;
+      color: var(--text);
+      font-family: inherit;
+      font-size: .95rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.2);
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b949e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      padding-right: 2.5rem;
+      cursor: pointer;
+    }
+
+    select option { background: var(--surface); }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+      line-height: 1.5;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .8rem;
+    }
+
+    .section-label {
+      font-size: .72rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      margin: 1.4rem 0 .9rem;
+      padding-bottom: .5rem;
+      border-bottom: 1px solid rgba(37,99,235,.15);
+    }
+
+    .opt {
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: .78rem;
+      color: var(--muted);
+    }
+
+    .btn {
+      width: 100%;
+      padding: .8rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-family: inherit;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1.4rem;
+      transition: background .2s, transform .1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      min-height: 46px;
+    }
+
+    .btn:hover  { background: var(--accent-h); }
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+    /* Spinner */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Alert */
+    .alert {
+      padding: .7rem 1rem;
+      border-radius: 8px;
+      font-size: .875rem;
+      margin-top: 1rem;
+      display: none;
+    }
+
+    .alert.error   { background: rgba(248,81,73,.12); border: 1px solid rgba(248,81,73,.3); color: var(--error); }
+    .alert.success { background: rgba(63,185,80,.12);  border: 1px solid rgba(63,185,80,.3);  color: var(--success); }
+
+    .footer-text {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: .8rem;
+      color: var(--muted);
+    }
+
+    .demo-box {
+      margin-top: 1.5rem;
+      padding: .8rem 1rem;
+      background: rgba(37,99,235,.08);
+      border: 1px solid rgba(37,99,235,.2);
+      border-radius: 8px;
+      font-size: .8rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .demo-box strong { color: var(--text); }
+
+    .demo-creds {
+      display: flex;
+      flex-direction: column;
+      gap: .2rem;
+      margin-top: .4rem;
+    }
+
+    .demo-creds button {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-family: inherit;
+      font-size: .8rem;
+      cursor: pointer;
+      text-align: left;
+      padding: 0;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .demo-creds button:hover { color: var(--accent-h); }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="brand">
+    <div class="brand-icon">🎓</div>
+    <span class="brand-name">UniConnect</span>
+  </div>
+
+  <h1>Welcome back</h1>
+  <p class="subtitle">Sign in to your student portal</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-login"    onclick="switchTab('login')">Sign In</button>
+    <button class="tab-btn"        id="tab-register" onclick="switchTab('register')">Register</button>
+  </div>
+
+  <!-- Login form -->
+  <div id="form-login">
+    <div class="form-group">
+      <label for="login-email">Email</label>
+      <input id="login-email" type="email" placeholder="you@deakin.edu.au" autocomplete="email" />
+    </div>
+    <div class="form-group">
+      <label for="login-password">Password</label>
+      <input id="login-password" type="password" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+    <button class="btn" id="login-btn" onclick="doLogin()">
+      <span class="spinner" id="login-spinner"></span>
+      <span id="login-btn-text">Sign In</span>
+    </button>
+    <div class="alert" id="login-alert"></div>
+  </div>
+
+  <!-- Register form -->
+  <div id="form-register" style="display:none">
+
+    <div class="section-label" style="margin-top:0">Account Credentials</div>
+    <div class="form-group">
+      <label for="reg-name">Full Name</label>
+      <input id="reg-name" type="text" placeholder="John Smith" autocomplete="name" />
+    </div>
+    <div class="form-group">
+      <label for="reg-email">University Email</label>
+      <input id="reg-email" type="email" placeholder="j.smith@deakin.edu.au" autocomplete="email" />
+    </div>
+    <div class="form-group">
+      <label for="reg-password">Password <span class="opt">(min 8 characters)</span></label>
+      <input id="reg-password" type="password" placeholder="••••••••" autocomplete="new-password" />
+    </div>
+
+    <div class="section-label">Academic Details</div>
+    <div class="form-group">
+      <label for="reg-university">University</label>
+      <input id="reg-university" type="text" placeholder="Deakin University" value="Deakin University" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="reg-course">Course / Program</label>
+        <input id="reg-course" type="text" placeholder="Bachelor of IT" />
+      </div>
+      <div class="form-group">
+        <label for="reg-year">Study Year</label>
+        <select id="reg-year">
+          <option value="1">Year 1</option>
+          <option value="2">Year 2</option>
+          <option value="3">Year 3</option>
+          <option value="4">Year 4</option>
+          <option value="5">Year 5</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="reg-units">Unit Codes <span class="opt">— optional, comma-separated</span></label>
+      <input id="reg-units" type="text" placeholder="SIT374, SIT302, SIT223" />
+    </div>
+
+    <div class="section-label">Profile <span class="opt">— optional</span></div>
+    <div class="form-group">
+      <label for="reg-skills">Skills <span class="opt">— comma-separated</span></label>
+      <input id="reg-skills" type="text" placeholder="JavaScript, Python, React" />
+    </div>
+    <div class="form-group">
+      <label for="reg-interests">Interests <span class="opt">— comma-separated</span></label>
+      <input id="reg-interests" type="text" placeholder="AI, Web Development, Gaming" />
+    </div>
+    <div class="form-group">
+      <label for="reg-bio">Bio</label>
+      <textarea id="reg-bio" placeholder="Tell other students a bit about yourself..."></textarea>
+    </div>
+
+    <button class="btn" id="register-btn" onclick="doRegister()">
+      <span class="spinner" id="register-spinner"></span>
+      <span id="register-btn-text">Create Student Account</span>
+    </button>
+    <div class="alert" id="register-alert"></div>
+  </div>
+
+ 
+
+  <p class="footer-text">Deakin University Student Portal</p>
+</div>
+
+<script>
+  // Redirect if already logged in
+  if (localStorage.getItem('uc_token')) {
+    const storedUser = JSON.parse(localStorage.getItem('uc_user') || '{}');
+    window.location.href = storedUser.role === 'admin' ? '/admin.html' : '/dashboard.html';
+  }
+
+  function switchTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('tab-login').classList.toggle('active', isLogin);
+    document.getElementById('tab-register').classList.toggle('active', !isLogin);
+    document.getElementById('form-login').style.display    = isLogin ? '' : 'none';
+    document.getElementById('form-register').style.display = isLogin ? 'none' : '';
+  }
+
+  function setLoading(prefix, loading) {
+    document.getElementById(`${prefix}-btn`).disabled        = loading;
+    document.getElementById(`${prefix}-spinner`).style.display = loading ? 'block' : 'none';
+    document.getElementById(`${prefix}-btn-text`).style.display = loading ? 'none' : '';
+  }
+
+  function showAlert(prefix, message, type = 'error') {
+    const el = document.getElementById(`${prefix}-alert`);
+    el.textContent = message;
+    el.className   = `alert ${type}`;
+    el.style.display = 'block';
+  }
+
+  function clearAlert(prefix) {
+    document.getElementById(`${prefix}-alert`).style.display = 'none';
+  }
+
+  function fillLogin(email) {
+    switchTab('login');
+    document.getElementById('login-email').value    = email;
+    document.getElementById('login-password').value = 'password123';
+    document.getElementById('login-email').focus();
+  }
+
+  async function doLogin() {
+    const email    = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    clearAlert('login');
+
+    if (!email || !password) {
+      showAlert('login', 'Please enter your email and password.');
+      return;
+    }
+
+    setLoading('login', true);
+    try {
+      const res  = await fetch('/api/auth/login', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showAlert('login', data.error || 'Login failed. Please try again.');
+        return;
+      }
+
+      localStorage.setItem('uc_token', data.token);
+      localStorage.setItem('uc_user',  JSON.stringify(data.user));
+      // qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+      localStorage.setItem('uc_display_name', data.user.name || data.user.username);
+      // Redirect based on role
+      window.location.href = data.user.role === 'admin' ? '/admin.html' : '/dashboard.html';
+    } catch (err) {
+      showAlert('login', 'Network error. Is the server running?');
+    } finally {
+      setLoading('login', false);
+    }
+  }
+
+  async function doRegister() {
+    const name       = document.getElementById('reg-name').value.trim();
+    const email      = document.getElementById('reg-email').value.trim();
+    const password   = document.getElementById('reg-password').value;
+    const university = document.getElementById('reg-university').value.trim();
+    const course     = document.getElementById('reg-course').value.trim();
+    const year       = parseInt(document.getElementById('reg-year').value, 10);
+    const unitCodes  = document.getElementById('reg-units').value.split(',').map(s => s.trim()).filter(Boolean);
+    const skills     = document.getElementById('reg-skills').value.split(',').map(s => s.trim()).filter(Boolean);
+    const interests  = document.getElementById('reg-interests').value.split(',').map(s => s.trim()).filter(Boolean);
+    const bio        = document.getElementById('reg-bio').value.trim();
+    clearAlert('register');
+
+    if (!name || !email || !password || !university || !course) {
+      showAlert('register', 'Full name, email, password, university and course are required.');
+      return;
+    }
+    if (password.length < 8) {
+      showAlert('register', 'Password must be at least 8 characters.');
+      return;
+    }
+
+    setLoading('register', true);
+    try {
+      const res  = await fetch('/api/auth/register', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ name, email, password, university, course, year, unitCodes, skills, interests, bio })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showAlert('register', data.error || 'Registration failed. Please try again.');
+        return;
+      }
+
+      localStorage.setItem('uc_token', data.token);
+      localStorage.setItem('uc_user',  JSON.stringify(data.user));
+      // qqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+      localStorage.setItem('uc_display_name', data.user.name || data.user.username);
+
+      window.location.href = data.user.role === 'admin' ? '/admin.html' : '/dashboard.html';
+    } catch (err) {
+      showAlert('register', 'Network error. Is the server running?');
+    } finally {
+      setLoading('register', false);
+    }
+  }
+
+  // Allow Enter key to submit
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const loginVisible = document.getElementById('form-login').style.display !== 'none';
+    if (loginVisible) doLogin();
+    else doRegister();
+  });
+</script>
+</body>
+</html>
