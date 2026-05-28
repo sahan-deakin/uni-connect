@@ -53,6 +53,7 @@ const reviewRoute = require('./routes/reviewRoute');
 const adminRoute  = require('./routes/adminRoute');
 const eventRoute    = require('./routes/eventRoute');
 const resourceRoute = require('./routes/resourceRoute');
+const forumRoute    = require('./routes/forumRoute');
 
 app.use('/api/auth',      authRoute);
 app.use('/api/samples',   sampleRoute);
@@ -61,6 +62,7 @@ app.use('/api/reviews',   reviewRoute);
 app.use('/api/admin',     adminRoute);
 app.use('/api/events',    eventRoute);
 app.use('/api/resources', resourceRoute);
+app.use('/api/forum',     forumRoute);
 
 // Health check
 app.get('/health', (req, res) => {
