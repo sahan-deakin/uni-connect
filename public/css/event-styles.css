@@ -1,4 +1,48 @@
 /* EVENTS PAGE */
+  /* REGISTRATION OVERLAY */
+    .reg-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 1;
+      transition: opacity 0.4s ease;
+    }
+
+    .reg-overlay.hidden {
+      display: none;
+    }
+
+    .reg-overlay.fade-out {
+      opacity: 0;
+    }
+
+    .reg-overlay-box {
+      background: white;
+      border-radius: 20px;
+      padding: 40px 50px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    }
+
+    .reg-overlay-icon {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    .reg-overlay-box h5 {
+      font-weight: 700;
+      color: #3C3489;
+      margin-bottom: 8px;
+    }
+
+    .reg-overlay-box p {
+      color: #6B7280;
+    }
+
 .events-hero {
   padding: 0px 0 20px;
   text-align: center;
@@ -41,12 +85,14 @@
 /* MODAL STYLING */
 .modal {
   border-radius: 20px;
-  max-width: 650px;
+  max-width: 850px;
+  max-height: 1000px;
 }
 
 .modal-content h4 {
   font-weight: 700;
   margin-bottom: 30px;
+  text-align: center;
 }
 
 .modal .input-field input:focus,
@@ -151,6 +197,17 @@
 }
 
 .btn-rsvp:hover { background: #b3f1c3; }
+
+/* Register / Unregister */
+.btn-rsvp.registered {
+  background: #fee2e2;
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.btn-rsvp.registered:hover {
+  background: #fecaca;
+}
 
 .event-capacity {
   font-size: 12px;
