@@ -595,6 +595,41 @@ body {
   font-weight: 600;
 }
 
+.tracker-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.tracker-action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.5;
+  transition: opacity .15s, background .15s;
+  line-height: 1;
+}
+.tracker-action-btn:hover {
+  opacity: 1;
+  background: rgba(0,0,0,0.06);
+}
+.tracker-action-btn i { font-size: 14px !important; }
+
+.edit-event-notice {
+  font-size: 0.78rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
 /* ─── RESOURCES PAGE ─────────────────────────────────────────────────────── */
 
 * { box-sizing: border-box; }

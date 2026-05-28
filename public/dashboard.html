@@ -190,6 +190,50 @@
   </div>
 </footer>
 
+<!-- Edit Event Modal -->
+<div id="edit-event-modal" class="modal">
+  <div class="modal-content">
+    <h5>Edit Event</h5>
+    <input type="hidden" id="edit-event-id">
+    <div class="row" style="margin-bottom:0">
+      <div class="input-field col s12">
+        <input id="edit-event-title" type="text">
+        <label for="edit-event-title">Title *</label>
+      </div>
+      <div class="input-field col s12">
+        <textarea id="edit-event-desc" class="materialize-textarea"></textarea>
+        <label for="edit-event-desc">Description</label>
+      </div>
+      <div class="input-field col s12 m6">
+        <input id="edit-event-date" type="datetime-local">
+        <label for="edit-event-date" class="active">Date &amp; Time *</label>
+      </div>
+      <div class="input-field col s12 m6">
+        <input id="edit-event-location" type="text">
+        <label for="edit-event-location">Location</label>
+      </div>
+      <div class="input-field col s12 m6">
+        <select id="edit-event-type">
+          <option value="">Select type</option>
+          <option value="academic">Academic</option>
+          <option value="networking">Networking</option>
+          <option value="workshop">Workshop</option>
+          <option value="competition">Competition</option>
+          <option value="career">Career</option>
+          <option value="study">Study</option>
+          <option value="social">Social</option>
+        </select>
+        <label>Event Type</label>
+      </div>
+    </div>
+    <p class="edit-event-notice"><i class="material-icons tiny">info</i> Saving will reset the event to pending approval.</p>
+  </div>
+  <div class="modal-footer">
+    <button class="modal-close btn-flat waves-effect">Cancel</button>
+    <button class="btn waves-effect blue darken-1" onclick="submitEditEvent()">Save Changes</button>
+  </div>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
